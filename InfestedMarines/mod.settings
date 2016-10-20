@@ -1,0 +1,8 @@
+name        = "test mod 1"
+source_dir  = "source"
+output_dir  = "output"
+description = [=[test mod 1]=]
+image       = "preview.jpg"
+tag_modtype = ""
+tag_support = ""
+publish_id = "2e813610"

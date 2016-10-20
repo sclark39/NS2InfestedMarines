@@ -1,0 +1,33 @@
+<shader>
+	
+	<inputs>
+		<input name="baseTexture"   type="texture" address="wrap" />
+        <input name="startTime"     type="float">0</input>
+        <input name="endTime"       type="float">1</input>
+        <input name="pulseInfluence"type="float">1</input>
+	</inputs> 
+	
+	<code>
+
+		void MaterialShader(bool textured, float2 texCoord, float4 color, inout Material material)
+		{
+            const float pi = 3.14159265359f;
+            const float startFreq = 1.0f;
+            const float endFreq = 4.0f;
+            
+            float adjustedTime = time - startTime;
+            float interp = (adjustedTime / (endTime - startTime));
+            interp = interp * interp * interp * interp;
+            float freq = interp * (endFreq - startFreq) + startFreq;
+            float intensity = (sin(adjustedTime * freq * pi * 2 - (pi/2)) * 0.5f + 0.5f) * pulseInfluence;
+            
+            float4 icon = tex2D(baseTexture, texCoord);
+            float4 result = icon * (1.0f - intensity) + color * intensity;
+            result.a = icon.a;
+            
+            material.resultColor = result;
+		}
+	
+	</code>
+
+</shader>

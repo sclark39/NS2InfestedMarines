@@ -1,0 +1,8 @@
+modEntry =
+{
+    Client = "lua/IMClient.lua",
+    Server = "lua/IMServer.lua",
+    Shared = "lua/IMShared.lua",
+    FileHooks = "lua/IMHooks.lua",
+    Priority = 5
+}

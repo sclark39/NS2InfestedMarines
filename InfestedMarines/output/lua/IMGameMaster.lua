@@ -62,16 +62,16 @@ IMGameMaster.kPhase = enum({ "Scatter", "Regroup" })
 IMGameMaster.kScatterCystBoost = 10 -- number of additional cysts to spawn quickly, per node
                                     -- in addition to the few that are spawned directly on the node.
 IMGameMaster.kRegroupCystBoost = 30 -- cysts per node for regroup phase.
-IMGameMaster.kRegularCystPropagationPeriod = 3 -- one cyst every 2 seconds.
-IMGameMaster.kFasterCystPropagationPeriod = 1 -- one cyst every 1 second.
+IMGameMaster.kRegularCystPropagationPeriod = 5 -- one cyst every 5 seconds.
+IMGameMaster.kFasterCystPropagationPeriod = 3 -- one cyst every 3 second.
 
 IMGameMaster.kDefaultDillyDallyTime = 5 -- time added for organization, etc.
 IMGameMaster.kScatterInfestationClearTime = 10 -- time added to allow for clearing cysts during scatter.
 IMGameMaster.kRegroupInfestationClearTime = 30 -- more time here b/c there's a lot more infestation.
-IMGameMaster.kCystToPurifierRatio = 7 -- 7 cysts balances to 1 extractor.
+IMGameMaster.kCystToPurifierRatio = 3 -- 3 was 7 then was 5 cysts balances to 1 extractor.
 IMGameMaster.kAirQualityChangePerSecondMax = 1/90 -- 90 seconds minimum to drain the bar from full
 IMGameMaster.kRatioChangeMax = 10 -- what the ratio has to be to have a positive max change
-IMGameMaster.kRatioChangeMin = 0.3333 -- if the ratio is lower than this, air quality change is maximized.
+IMGameMaster.kRatioChangeMin = 0.1 -- if the ratio is lower than this, air quality change is maximized.
 
 function IMGameMaster:OnCreate()
     
@@ -287,13 +287,21 @@ end
 local function PickInfected(self)
     
     -- TODO pick X players, X scales with player count.
-    local numPlayers = GetGamerules().team1:GetNumPlayers()
+    local players = GetGamerules().team1:GetPlayers()
+    local infectedPlayer = nil
     
-    local infectedIndex = math.random(1, numPlayers)
-    local infectedPlayer = GetGamerules().team1:GetPlayer(infectedIndex)
-    infectedPlayer:SetIsInfected(true)
+    while (not infectedPlayer) and #players > 0 do
+        local index = math.random(#players)
+        if players[index] and players[index].SetIsInfected then
+            infectedPlayer = players[index]
+        else
+            table.remove(players, index)
+        end
+    end
     
     assert(infectedPlayer)
+    
+    infectedPlayer:SetIsInfected(true)
     
     Log("infectedPlayer = %s (name is '%s')", infectedPlayer, infectedPlayer.name)
     for i=1, numPlayers do

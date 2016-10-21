@@ -22,7 +22,7 @@ end
 Client.HookNetworkMessage("InfectedStatusMessage", OnInfectedStatusMessage)
 
 local function OnInfectedProcessMessage(msg)
-    ChatUI_AddSystemMessage("You have just been INFECTED!!!  Rifle-butt the uninfected to infect them too.  Don't let them power up the phase gate and escape!")
+    ChatUI_AddSystemMessage("YOU ARE INFECTED!!!  Right click marines when close enough (outline = red) to infect them!")
 end
 Client.HookNetworkMessage("InfectedProcessMessage", OnInfectedProcessMessage)
 

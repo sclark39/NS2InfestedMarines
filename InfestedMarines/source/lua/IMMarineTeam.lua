@@ -43,10 +43,6 @@ function MarineTeam:SpawnInitialStructures(techPoint)
         end
     end
     
-    -- debug for game molding
-    local cc = CreateEntityForTeam(kTechId.CommandStation, techPoint:GetOrigin(), kMarineTeamType)
-    cc:SetConstructionComplete()
-    
 end
 
 -- local used in Update()
@@ -54,7 +50,7 @@ local function GetArmorLevel(self)
 
     local armorLevels = 0
     
-    local techTree = self:GetTechTree()
+    local techTree = self:GetTechTree() 
     if techTree then
     
         if techTree:GetHasTech(kTechId.Armor3) then

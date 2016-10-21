@@ -6,5 +6,5 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-kExtractorHealth = 240
-kExtractorArmor = 105
+kExtractorHealth = 2400
+kExtractorArmor = 1050

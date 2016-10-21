@@ -18,9 +18,6 @@ function Cyst:OnCreate()
     
     old_Cyst_OnCreate(self)
     
-    self.nearCysts = {}
-    self.nearCysts.num = 0
-    
 end
 
 function Cyst:GetCanAutoBuild()

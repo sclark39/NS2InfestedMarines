@@ -30,7 +30,7 @@ ModLoader.SetupFileHook("lua/Weapons/Marine/Flamethrower.lua", "lua/IMFlamethrow
 ModLoader.SetupFileHook("lua/Cyst.lua", "lua/IMCyst.lua", "post")
 ModLoader.SetupFileHook("lua/Cyst_Server.lua", "lua/IMCyst_Server.lua", "post")
 ModLoader.SetupFileHook("lua/NS2Utility.lua", "lua/IMNS2Utility.lua", "post")
---ModLoader.SetupFileHook("lua/LOSMixin.lua", "lua/IMLOSMixin.lua", "post")
+ModLoader.SetupFileHook("lua/CorrodeMixin.lua", "lua/IMCorrodeMixin.lua", "post")
 
 -- New GUI elements
 ModLoader.SetupFileHook("lua/ClientUI.lua", "lua/IMClientUI.lua", "post")

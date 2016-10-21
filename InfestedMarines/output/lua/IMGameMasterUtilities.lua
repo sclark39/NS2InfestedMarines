@@ -385,10 +385,16 @@ local function GetPointOnNavMesh(pos)
     
     local pt = Pathing.GetClosestPoint(pos)
     
-    -- it doesn't fail, it returns the parameter if it cannot find a point on the nav mesh
-    local diff = pt - pos
-    if math.abs(diff.x) <= 0.001 and math.abs(diff.y) <= 0.001 and math.abs(diff.z) <= 0.001 then
-        return nil 
+    local diff = pt-pos
+    diff.y = 0
+    local distSq = diff:GetLengthSquared()
+    if distSq <= 0.00001 then
+        return nil
+    end
+    
+    if distSq > 25 then
+        -- if snapping to the nav mesh results in a difference of > 5 meters, discard it.
+        return nil
     end
     
     return pt

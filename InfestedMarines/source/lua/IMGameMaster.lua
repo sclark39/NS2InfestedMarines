@@ -14,7 +14,7 @@ Script.Load("lua/IMGameMasterUtilities.lua")
 Script.Load("lua/IMGameMasterData.lua")
 
 local gameMaster = nil
-local useAutomatedGameMaster = true
+local useAutomatedGameMaster = false
 
 function GetGameMaster()
     

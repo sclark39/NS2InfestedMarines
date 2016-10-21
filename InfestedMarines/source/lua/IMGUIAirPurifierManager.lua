@@ -54,7 +54,6 @@ local function VerifyNodes(self)
             end
             self.nodes[i]:SetIconState(blip.state)
             self.nodes[i]:SetRoomName(Shared.GetString(blip.locationId))
-            self.nodes[i]:SetPulseRampupTime(blip.rampTime)
         end
     end
     
@@ -86,6 +85,7 @@ local function SharedUpdate(self, deltaTime)
     
     for i=1, #self.nodes do
         self.nodes[i]:SetPosition(Vector(x, IMGUIAirPurifierManager.kTopMargin, 0))
+        self.nodes[i]:SetFrequency(GetAssociatedBlip(self.nodes[i]).frequency)
         x = x + offset
     end
     

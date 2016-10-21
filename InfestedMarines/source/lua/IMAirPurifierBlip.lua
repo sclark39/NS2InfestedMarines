@@ -19,7 +19,7 @@ local networkVars =
 {
     entId = "entityid",
     state = "enum IMAirPurifierBlip.kPurifierState",
-    rampTime = "float",
+    frequency = "float",
     locationId = "integer",
 }
 
@@ -27,7 +27,7 @@ function IMAirPurifierBlip:OnCreate()
     
     self.entId = Entity.invalidId
     self.state = IMAirPurifierBlip.kPurifierState.Normal
-    self.rampTime = 20.0
+    self.frequency = 0.25
     self:UpdateRelevancy()
     
 end
@@ -56,9 +56,9 @@ if Server then
         
     end
     
-    function IMAirPurifierBlip:SetRampTime(rampTime)
+    function IMAirPurifierBlip:SetFrequency(frequency)
         
-        self.rampTime = rampTime
+        self.frequency = frequency
         
     end
 

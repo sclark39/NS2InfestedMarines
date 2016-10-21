@@ -12,6 +12,8 @@
 local kUpdateRate = 0.5
 local kTTKAtOne = 150 -- takes 150 seconds for corrosion to kill an extractor at mult=1
 
+local kKeepBlipAfterRepairTime = 5
+
 local function CalculateTimeRemaining(self)
     
     local ehp = self:GetArmor() * 2 + self:GetHealth()
@@ -25,8 +27,10 @@ local function GetFrequencyByHealthAndArmorStatus(self)
     
     local timeLeft = CalculateTimeRemaining(self)
     
-    if timeLeft < 10 then
-        return 4.0 -- flashes/sec
+    if timeLeft < 5 then
+        return 8.0 -- flashes/sec
+    elseif timeLeft < 10 then
+        return 4.0
     elseif timeLeft < 20 then
         return 2.0
     elseif timeLeft < 40 then
@@ -51,6 +55,7 @@ function Extractor:ExtractorBlipUpdate(deltaTime)
         local blip = Shared.GetEntity(self.purifierBlipId)
         if blip then
             if damaged then
+                self.elapsedTimeRepaired = 0.0
                 if self:GetIsAlive() then
                     blip:SetFrequency(GetFrequencyByHealthAndArmorStatus(self))
                     blip:SetState(IMAirPurifierBlip.kPurifierState.Damaged)
@@ -58,12 +63,17 @@ function Extractor:ExtractorBlipUpdate(deltaTime)
                     blip:SetState(IMAirPurifierBlip.kPurifierState.Destroyed)
                 end
             else
+                self.elapsedTimeRepaired = self.elapsedTimeRepaired + deltaTime
                 blip:SetState(IMAirPurifierBlip.kPurifierState.Fixed)
+                if self.elapsedTimeRepaired >= kKeepBlipAfterRepairTime then
+                    GetGameMaster():ReportRepairedExtractor(self)
+                end
             end
         end
     end
     
     if not self:GetIsAlive() then
+        GetGameMaster():ReportDestroyedExtractor(self)
         return false
     end
     
@@ -78,6 +88,7 @@ function Extractor:OnInitialized()
     
     if Server then
         self:AddTimedCallback(Extractor.ExtractorBlipUpdate, kUpdateRate)
+        self.elapsedTimeRepaired = 0
     end
     
 end

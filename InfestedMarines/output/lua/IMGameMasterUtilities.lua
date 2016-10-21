@@ -86,6 +86,37 @@ function IMGetUndamagedExtractors()
     
 end
 
+function IMGetExtractorEHPFraction(extractor)
+    
+    if not extractor.GetIsAlive or not extractor:GetIsAlive() then
+        return 0
+    end
+    
+    local ehp = extractor:GetHealth() + extractor:GetArmor() * 2
+    local maxEhp = extractor:GetMaxHealth() + extractor:GetMaxArmor() * 2
+    
+    return ehp / maxEhp
+    
+end
+
+function IMGetExtractorCountFraction()
+    
+    -- returns a sum from all extractors, where 1 = an undamaged extractor, 0 = a dead extractor,
+    -- and damaged is somewhere in between.
+    
+    local extractors = EntityListToTable(Shared.GetEntitiesWithClassname("Extractor"))
+    
+    local sum = 0
+    for i=1, #extractors do
+        if extractors[i] and extractors[i].GetIsAlive and extractors[i]:GetIsAlive() then
+            sum = sum + IMGetExtractorEHPFraction(extractors[i])
+        end
+    end
+    
+    return sum
+    
+end
+
 function IWGetRandomWeightedIndex(weights)
     
     assert(#weights > 0)
@@ -429,14 +460,72 @@ function IMGetRandomMarine()
     
 end
 
+function IMPickRandomWithWeights(weights, items, numPicks)
+    
+    assert(#weights == #items)
+    
+    numPicks = numPicks or 1
+    local picked = {}
+    
+    while(numPicks > 0 and #items > 0) do
+        
+        local index = PickRandomWithWeight(weights)
+        table.insert(picked, items[index])
+        table.remove(weights, index)
+        table.remove(items, index)
+        numPicks = numPicks - 1
+        
+    end
+    
+    return picked
+    
+end
+
+function IMGetCystCount()
+    
+    local cysts = EntityListToTable(Shared.GetEntitiesWithClassname("Cyst"))
+    local count = #cysts
+    for i=1, #cysts do
+        if not cysts[i] or not cysts[i].GetIsAlive or not cysts[i]:GetIsAlive() then
+            count = count - 1
+        end
+    end
+    
+    return count
+    
+end
+
+function IMInvertWeights(weights, sorted)
+    for i=1, #weights do
+        weights[i] = 1.0 - weights[i]
+    end
+    return weights, sorted
+end
+
 -- return a sorted list of eligible extractors, sorted according to sum of square distances between
 -- each extractor and every marine.  Then, we can either pick from the bottom or top to choose
 -- closest or furthest.
-function IMGetDistanceRankedNodeList()
+function IMGetDistanceRankedNodeList(isFirstWave)
     
     local extractors = IMGetUndamagedExtractors()
     local cleanMarines = IMGetCleanMarines()
     local weights = {}
+    
+    -- exclude the starting rez node if it's the first wave
+    if isFirstWave then
+        local marine = IMGetRandomMarine()
+        local closest = 1
+        local closestDistSq = (extractors[1]:GetOrigin() - marine:GetOrigin()):GetLengthSquared()
+        for i=2, #extractors do
+            local distSq = (extractors[i]:GetOrigin() - marine:GetOrigin()):GetLengthSquared()
+            if distSq < closestDistSq then
+                closest = i
+                closestDistSq = distSq
+            end
+        end
+        
+        table.remove(extractors, closest)
+    end
     
     for e=1, #extractors do
         local sum = 0.0
@@ -453,11 +542,20 @@ function IMGetDistanceRankedNodeList()
     table.sort(weights, sortByWeight)
     
     local sorted = {}
+    local splitWeights = {}
+    local sum = 0.0
     for i=1, #weights do
+        sum = sum + weights[i][2]
         table.insert(sorted, weights[i][1])
+        table.insert(splitWeights, weights[i][2])
     end
     
-    return sorted
+    -- normalize data so it can be inverted easily
+    for i=1, #splitWeights do
+        splitWeights[i] = splitWeights[i] / sum
+    end
+    
+    return splitWeights, sorted
     
 end
 

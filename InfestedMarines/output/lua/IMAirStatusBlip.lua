@@ -17,8 +17,7 @@ local kAirStatusBlipUpdateRate = 0.25
 
 local networkVars = 
 {
-    maxLives = "integer",
-    currLives = "integer",
+    fraction = "float",
 }
 
 if Server then
@@ -41,8 +40,7 @@ end
 
 function IMAirStatusBlip:OnCreate()
     
-    self.maxLives = 5
-    self.currLives = self.maxLives
+    self.fraction = 1
     
     self:UpdateRelevancy()
     
@@ -51,8 +49,6 @@ end
 function IMAirStatusBlip:OnInitialized()
     
     if Client then
-        self.lastLives = self.currLives
-        self.lastMaxLives = self.maxLives
         self:AddTimedCallback(function() self:ClientUpdate() return true end, kAirStatusBlipUpdateRate)
     end
     
@@ -66,22 +62,9 @@ end
 
 function IMAirStatusBlip:ClientUpdate()
     
-    local foundChange = false
-    if self.lastLives ~= self.currLives then
-        self.lastLives = self.currLives
-        foundChange = true
-    end
-    
-    if self.lastMaxLives ~= self.maxLives then
-        self.lastMaxLives = self.maxLives
-        foundChange = true
-    end
-    
-    if foundChange then
-        local script = GetAirStatusGUI()
-        if script then
-            script:SetAirQuality(self.currLives / self.maxLives)
-        end
+    local script = GetAirStatusGUI()
+    if script then
+        script:SetAirQuality(self.fraction)
     end
     
 end
@@ -94,18 +77,13 @@ end
 
 if Server then
 
-    function IMAirStatusBlip:SetMaxLives(maxLives)
+    function IMAirStatusBlip:SetFraction(fraction)
         
-        self.maxLives = maxLives
+        fraction = math.min(math.max(fraction, 0), 1)
+        self.fraction = fraction
         
     end
     
-    function IMAirStatusBlip:SetCurrentLives(currLives)
-        
-        self.currLives = currLives
-        
-    end
-
 end
 
 Shared.LinkClassToMap("IMAirStatusBlip", IMAirStatusBlip.kMapName, networkVars)

@@ -122,7 +122,7 @@ if Server then
                 end
                 
                 -- check for if uninfected have toxic air quality
-                if GetGameMaster():GetLivesRemaining() <= 0 then
+                if GetGameMaster():GetAirQuality() <= 0.00001 then
                     self:EndGame( self.team2 )
                 end
             else

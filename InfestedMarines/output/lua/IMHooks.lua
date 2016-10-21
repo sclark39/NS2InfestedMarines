@@ -20,6 +20,7 @@ ModLoader.SetupFileHook("lua/HiveVisionMixin.lua", "lua/IMHiveVisionMixin.lua", 
 ModLoader.SetupFileHook("lua/HiveVision.lua", "lua/IMHiveVision.lua", "post")
 ModLoader.SetupFileHook("lua/Balance.lua", "lua/IMBalance.lua", "post")
 ModLoader.SetupFileHook("lua/BalanceHealth.lua", "lua/IMBalanceHealth.lua", "post")
+ModLoader.SetupFileHook("lua/BalanceMisc.lua", "lua/IMBalanceMisc.lua", "post")
 ModLoader.SetupFileHook("lua/GUIUnitStatus.lua", "lua/IMGUIUnitStatus.lua", "replace")
 ModLoader.SetupFileHook("lua/GUIScoreboard.lua", "lua/IMGUIScoreboard.lua", "post")
 ModLoader.SetupFileHook("lua/MinimapMappableMixin.lua", "lua/IMMinimapMappableMixin.lua", "post")

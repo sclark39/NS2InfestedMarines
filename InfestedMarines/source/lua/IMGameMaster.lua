@@ -62,21 +62,26 @@ IMGameMaster.kPhase = enum({ "Scatter", "Regroup" })
 IMGameMaster.kScatterCystBoost = 10 -- number of additional cysts to spawn quickly, per node
                                     -- in addition to the few that are spawned directly on the node.
 IMGameMaster.kRegroupCystBoost = 30 -- cysts per node for regroup phase.
-IMGameMaster.kRegularCystPropagationPeriod = 2 -- one cyst every 2 seconds.
+IMGameMaster.kRegularCystPropagationPeriod = 3 -- one cyst every 2 seconds.
+IMGameMaster.kFasterCystPropagationPeriod = 1 -- one cyst every 1 second.
 
 IMGameMaster.kDefaultDillyDallyTime = 5 -- time added for organization, etc.
 IMGameMaster.kScatterInfestationClearTime = 10 -- time added to allow for clearing cysts during scatter.
 IMGameMaster.kRegroupInfestationClearTime = 30 -- more time here b/c there's a lot more infestation.
+IMGameMaster.kCystToPurifierRatio = 7 -- 7 cysts balances to 1 extractor.
+IMGameMaster.kAirQualityChangePerSecondMax = 1/90 -- 90 seconds minimum to drain the bar from full
+IMGameMaster.kRatioChangeMax = 10 -- what the ratio has to be to have a positive max change
+IMGameMaster.kRatioChangeMin = 0.3333 -- if the ratio is lower than this, air quality change is maximized.
 
 function IMGameMaster:OnCreate()
     
-    self.maxLives = IMGameMaster.kDefaultMaxLives
-    self.currentLives = self.maxLives
+    self.airQFraction = 1.0
     self.damagedPurifiers = {}
     
     self.cooldownPeriod = 0.0 -- used to delay the next round of purifiers being damaged.
     self.timeBuffer = 5.0 -- extra five seconds by default.  This can be adjusted based on team performance to adjust difficulty
     self.fastCysts = {} -- table to be filled with { vector location, number } pairs.
+    self.firstWave = true
     
 end
 
@@ -94,19 +99,31 @@ function IMGameMaster:GetDillyDallyTime()
     return self.timeBuffer
 end
 
-function IMGameMaster:GetLivesRemaining()
-    return self.currentLives
-end
-
-function IMGameMaster:SetLives(lives)
-    self.maxLives = lives
-    self.currentLives = lives
-end
-
 function IMGameMaster:FastCystLocation(location, numCysts)
     
     table.insert(self.fastCysts, {location, numCysts})
     
+end
+
+function IMGameMaster:GetAirQualityChangeRatio()
+    local numCysts = IMGetCystCount()
+    local numExtractors = IMGetExtractorCountFraction() -- half damaged extractor = half the benefit
+    --Log("numCysts = %s", numCysts)
+    --Log("numExtractors = %s", numExtractors)
+    
+    -- +1 to avoid /0
+    local ratio = (numExtractors * IMGameMaster.kCystToPurifierRatio) / (numCysts + 1)
+    --Log("ratio = %s", ratio)
+    return ratio
+end
+
+function IMGameMaster:GetCystUpdatePeriod()
+    local ratio = self:GetAirQualityChangeRatio()
+    if ratio > 1 then
+        return IMGameMaster.kFasterCystPropagationPeriod
+    end
+    
+    return IMGameMaster.kRegularCystPropagationPeriod
 end
 
 function IMGameMaster:GetIsPurifierSaved(purifier)
@@ -142,6 +159,14 @@ function IMGameMaster:DoGameStart()
     self.infectedChooseDelay = IMGameMaster.kTimeBeforeInfectedChosen
     self:SetPhase(IMGameMaster.kPhase.Scatter)
     
+end
+
+function IMGameMaster:SetIsFirstWave(state)
+    self.firstWave = state
+end
+
+function IMGameMaster:GetIsFirstWave()
+    return self.firstWave
 end
 
 local function UpdateQueuedDamages(self)
@@ -187,17 +212,13 @@ end
 
 local function PerformRegroupNodeDamage(self)
     
-    local sortedPurifiers = IMGetDistanceRankedNodeList()
+    local weights, sorted = IMGetDistanceRankedNodeList(self:GetIsFirstWave())
     local numNodes = CalculateRegroupNodeCount()
     
-    -- we want the ones closest to the group, so pick from the top.
-    local pickedNodes = {}
-    while (numNodes > 0) do
-        Log("numNodes = %s", numNodes)
-        numNodes = numNodes - 1
-        table.insert(pickedNodes, sortedPurifiers[1])
-        self:FastCystLocation(sortedPurifiers[1]:GetOrigin(), IMGameMaster.kRegroupCystBoost)
-        table.remove(sortedPurifiers, 1)
+    -- pick nodes randomly based on weight
+    local pickedNodes = IMPickRandomWithWeights(weights, sorted, numNodes)
+    for i=1, #pickedNodes do
+        self:FastCystLocation(pickedNodes[i]:GetOrigin(), IMGameMaster.kRegroupCystBoost)
     end
     
     InfestNodes(pickedNodes)
@@ -208,16 +229,13 @@ end
 
 local function PerformScatterNodeDamage(self)
     
-    local sortedPurifiers = IMGetDistanceRankedNodeList()
+    local weights, sorted = IMInvertWeights(IMGetDistanceRankedNodeList(self:GetIsFirstWave()))
     local numNodes = CalculateScatterNodeCount()
     
-    -- we want the ones furthest away, so pick from the bottom.
-    local pickedNodes = {}
-    while (numNodes > 0 and #sortedPurifiers > 0) do
-        numNodes = numNodes - 1
-        table.insert(pickedNodes, sortedPurifiers[#sortedPurifiers])
-        self:FastCystLocation(sortedPurifiers[#sortedPurifiers]:GetOrigin(), IMGameMaster.kScatterCystBoost)
-        table.remove(sortedPurifiers, #sortedPurifiers)
+    -- pick nodes randomly based on weight
+    local pickedNodes = IMPickRandomWithWeights(weights, sorted, numNodes)
+    for i=1, #pickedNodes do
+        self:FastCystLocation(pickedNodes[i]:GetOrigin(), IMGameMaster.kScatterCystBoost)
     end
     
     InfestNodes(pickedNodes)
@@ -260,6 +278,8 @@ local function UpdateGameMasterDuties(self, deltaTime)
     end
     
     PerformNodeDamage(self)
+    self:SetIsFirstWave(false) -- so we don't exclude the starting location node again
+    
     assert(self.cooldownPeriod > 0) -- cooldown period MUST be set after this
     
 end
@@ -312,7 +332,7 @@ local function UpdateCysts(self)
     self.nextCyst = self.nextCyst or 0
     if self.nextCyst <= 0 then
         if GetCystManager():AddNewCyst() then -- keep trying until successful.
-            self.nextCyst = IMGameMaster.kRegularCystPropagationPeriod
+            self.nextCyst = self:GetCystUpdatePeriod() -- changes based on how well marines are doing.
         end
     end
     
@@ -326,6 +346,49 @@ local function UpdateCysts(self)
             -- finished spawning that many cysts, can return now.
             table.remove(self.fastCysts, i)
         end
+    end
+    
+end
+
+local function UpdateAirQuality(self)
+    
+    local deltaTime = IMGameMaster.kUpdatePeriod
+    local rateOfChange = 0.0
+    local ratio = self:GetAirQualityChangeRatio()
+    ratio = math.max(math.min(ratio, IMGameMaster.kRatioChangeMax), IMGameMaster.kRatioChangeMin)
+    if ratio >= 1 then
+        -- increasing, good for marines
+        local interp = (ratio - 1) / (IMGameMaster.kRatioChangeMax - 1)
+        rateOfChange = IMGameMaster.kAirQualityChangePerSecondMax * interp
+    else
+        -- decreasing, bad for marines
+        local interp = 1.0 - ((ratio - IMGameMaster.kRatioChangeMin) / (1 - IMGameMaster.kRatioChangeMin))
+        rateOfChange = -IMGameMaster.kAirQualityChangePerSecondMax * interp
+    end
+    
+    --Log("rate of change = %s per second", rateOfChange)
+    rateOfChange = rateOfChange * deltaTime
+    self.airQFraction = self.airQFraction + rateOfChange
+    GetAirStatusBlip():SetFraction(self.airQFraction)
+    
+end
+
+function IMGameMaster:GetAirQuality()
+    return self.airQFraction
+end
+
+function IMGameMaster:ReportRepairedExtractor(extractor)
+    
+    self:RemoveDamagedPurifier(extractor)
+    
+end
+
+function IMGameMaster:ReportDestroyedExtractor(extractor)
+    
+    local index = self:GetDamagedPurifierIndexByEntity(extractor)
+    if index then
+        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
+        table.remove(self.damagedPurifiers, index)
     end
     
 end
@@ -352,6 +415,7 @@ function IMGameMaster:OnUpdate(deltaTime)
     UpdateQueuedDamages(self)
     UpdateInfectionPick(self)
     UpdateCysts(self)
+    UpdateAirQuality(self)
     
     if useAutomatedGameMaster then
         UpdateGameMasterDuties(self, IMGameMaster.kUpdatePeriod)

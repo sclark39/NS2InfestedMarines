@@ -58,7 +58,7 @@ local function GetRandomCystNearLocation(location)
     local cystsInRange = GetEntitiesWithinRange("Cyst", location, IMCystManager.kCystInitialSearchRadius)
     while(#cystsInRange > 0) do
         local index = math.random(#cystsInRange)
-        if cystsInRange[index] then
+        if cystsInRange[index] and cystsInRange[index].GetIsAlive and cystsInRange[index]:GetIsAlive() then
             return cystsInRange[index]
         else
             table.remove(cystsInRange, index)
@@ -73,7 +73,7 @@ local function GetRandomCystNoLocation()
     local cysts = EntityListToTable(Shared.GetEntitiesWithClassname("Cyst"))
     while #cysts > 0 do
         local index = math.random(#cysts)
-        if not cysts[index] then
+        if not cysts[index] or not cysts[index].GetIsAlive or not cysts[index]:GetIsAlive() then
             table.remove(cysts, index)
         else
             return cysts[index]
@@ -103,7 +103,7 @@ local function Jump(cyst, offsetVec)
     local cystsInRange = GetEntitiesWithinRange("Cyst", pos, IMCystManager.kCystMinDistance )
     while (#cystsInRange > 0) do
         local index = math.random(#cystsInRange)
-        if cystsInRange[index] then
+        if cystsInRange[index] and cystsInRange[index].GetIsAlive and cystsInRange[index]:GetIsAlive() then
             return cystsInRange[index]
         else
             table.remove(cystsInRange, index)
@@ -119,7 +119,7 @@ local function EliminatePointsNearCysts(pts)
         local cysts = GetEntitiesWithinRange("Cyst", pts[i], IMCystManager.kCystMinDistance)
         local foundCyst = false
         for j=1, #cysts do
-            if cysts[j] then
+            if cysts[j] and cysts[j].GetIsAlive and cysts[j]:GetIsAlive() then
                 foundCyst = true
                 break
             end
@@ -169,7 +169,15 @@ end
 
 function IMCystManager:CreateCyst(position)
     
+    local groundTrace = Shared.TraceRay(position + Vector(0, 0.5, 0), position + Vector(0, -5, 0), CollisionRep.Default, PhysicsMask.CystBuild, EntityFilterAllButIsa("TechPoint"))
+    if groundTrace.fraction == 1 then
+        return false
+    end
+    
+    local coords = AlignCyst(Coords.GetTranslation(groundTrace.endPoint), groundTrace.normal)
+    coords.origin = groundTrace.endPoint
     local newCyst = CreateEntity( Cyst.kMapName, position, kAlienTeamType )
+    newCyst:SetCoords(coords)
     
 end
 

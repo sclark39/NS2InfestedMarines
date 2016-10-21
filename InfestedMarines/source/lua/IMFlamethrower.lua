@@ -7,18 +7,17 @@
 --    Limit the amount of ammo you have.
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
-
+Log("IMFlamethrower.lua")
 function Flamethrower:GetMaxClips()
     return 1
 end
 
 -- infinite ammo for now
-function ClipWeapon:CanReload()
-
+local old_Flamethrower_OnPrimaryAttack = Flamethrower.OnPrimaryAttack
+function Flamethrower:OnPrimaryAttack(player)
+    
+    old_Flamethrower_OnPrimaryAttack(self, player)
+    
     self.ammo = self:GetMaxAmmo()
-    return self.ammo > 0 and
-           self.clip < self:GetClipSize() and
-           not self.reloading and 
-           self.deployed
     
 end

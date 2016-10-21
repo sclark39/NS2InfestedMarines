@@ -13,11 +13,6 @@ if Client then
     
 end
 
-function Cyst:GetMapBlipInfo()
-    --return    success,    blipType,                       blipTeam,       isAttacked, isParasited
-    return      true,       kMinimapBlipType.Infestation,   kTeam1Index,    false,      false
-end
-
 local old_Cyst_OnCreate = Cyst.OnCreate
 function Cyst:OnCreate()
     
@@ -27,3 +22,71 @@ function Cyst:OnCreate()
     self.nearCysts.num = 0
     
 end
+
+function Cyst:GetCanAutoBuild()
+    return true
+end
+
+function Cyst:OnInitialized()
+    
+    InitMixin(self, InfestationMixin)
+    
+    ScriptActor.OnInitialized(self)
+
+    if Server then
+    
+        -- start out as disconnected; wait for impulse to arrive
+        self.connected = false
+        
+        self.nextUpdate = Shared.GetTime()
+        self.impulseActive = false
+        self.bursted = false
+        self.timeBursted = 0
+        self.children = { }
+        
+        InitMixin(self, SleeperMixin)
+        InitMixin(self, StaticTargetMixin)
+        
+        self:SetModel(Cyst.kModelName, Cyst.kAnimationGraph)
+        
+        -- This Mixin must be inited inside this OnInitialized() function.
+        if not HasMixin(self, "MapBlip") then
+            InitMixin(self, MapBlipMixin)
+        end
+        
+    elseif Client then    
+    
+        InitMixin(self, UnitStatusMixin)
+        
+    end
+    
+    InitMixin(self, IdleMixin)
+    
+end
+
+if Server then
+    
+    function Cyst:OnUpdate(deltaTime)
+        
+        ScriptActor.OnUpdate(self, deltaTime)
+        
+    end
+    
+end
+
+function Cyst:OnUpdateRender()
+
+    PROFILE("Cyst:OnUpdateRender")
+    
+    local model = self:GetRenderModel()
+    if model then
+
+        model:SetMaterialParameter("connected", 1)
+        
+    end
+    
+end
+
+
+
+

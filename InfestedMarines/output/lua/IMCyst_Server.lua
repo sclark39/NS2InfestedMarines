@@ -11,7 +11,7 @@ function Cyst:GetIsActuallyConnected()
 end
 
 function Cyst:GetSurroundingCystsCount()
-    return self.nearCysts and self.nearCysts.num or 0
+    return self.nearCysts.num
 end
 
 function Cyst:GetSurroundingCysts()
@@ -42,18 +42,27 @@ end
 
 function Cyst:AddCystConnection(cyst)
     
+    local oldLevel = self.nearCysts.num
     local id = cyst:GetId()
     if self.nearCysts[id] == nil then
         self.nearCysts[id] = true
         self.nearCysts.num = self.nearCysts.num + 1
     end
+    local newLevel = self.nearCysts.num
+    
+    GetCystManager():UpdateCystConnectionLevel(self, oldLevel, newLevel)
     
     -- ensure it is mutual
+    oldLevel = cyst.nearCysts.num
     local thisId = self:GetId()
     if cyst.nearCysts[thisId] == nil then
         cyst.nearCysts[thisId] = true
         cyst.nearCysts.num = cyst.nearCysts.num + 1
     end
+    newLevel = cyst.nearCysts.num
+    
+    GetCystManager():UpdateCystConnectionLevel(cyst, oldLevel, newLevel)
+    
     
 end
 

@@ -25,7 +25,7 @@ end
 -- returns true if the target will reflect damage back onto the marine
 function Marine:GetWillHaveDamageReflected(target, doer)
     -- infected cannot kill with flamethrower... they can LOOK like they're doing damage, however.
-    if self:GetIsInfected() then
+    if self:GetIsInfected() and target:isa("Marine") then
         if doer and doer:isa("Flamethrower") then
             return true
         end

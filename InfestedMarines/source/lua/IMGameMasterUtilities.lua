@@ -94,7 +94,8 @@ function IWGetRandomWeightedIndex(weights)
         end
     end
     
-    return i
+    Log("IWGetRandomWeightedIndex returning %s", pick)
+    return pick
     
 end
 

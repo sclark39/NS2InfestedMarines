@@ -122,7 +122,7 @@ function IMGameMaster:SetupStartingInfestation()
     
     -- pick N nodes randomly, preferring nodes further away from both the starting node,
     -- and each picked node.
-    local infestCount = 1 -- todo
+    local infestCount = 3 -- todo
     local pickedNodes = IMComputeStartingInfestedNodes(infestCount, purifiers, homeNode)
     
     for i=1, #pickedNodes do

@@ -52,7 +52,8 @@ function IMCystManager:OnCreate()
     -- manage cyst connectivity by setting up tables for the number of connected cysts each one
     -- has.
     self.cysts = {}
-    self.cysts.numLevels = 0
+    self.cysts.topLevel = 0
+    self.cysts[0] = {}
     
 end
 
@@ -70,6 +71,8 @@ local function GetRandomCystIndexFromList(list)
         end
     end
     
+    assert(pick > 0)
+    
     return pick
     
 end
@@ -79,7 +82,7 @@ local function RankExtractorsByDistance(x, pos)
     local weights = {}
     
     for i=1, #x do -- get length squared would lead to too much bias, I think...
-        table.insert((x:GetOrigin() - pos):GetLength())
+        table.insert(weights,(x[i]:GetOrigin() - pos):GetLength())
     end
     
     return weights
@@ -101,7 +104,7 @@ local function FindNewCystPlacementFromPosition(pos)
     
     -- bias to try to move towards the furthest extractor.
     local extractors = IMGetUndamagedExtractors()
-    local weights = RankExtractorsByDistance(pos)
+    local weights = RankExtractorsByDistance(extractors, pos)
     local pick = extractors[IWGetRandomWeightedIndex(weights)]
     
     local points = IMGetRandomPointsAroundPosition(pos)
@@ -119,7 +122,7 @@ end
 local function FindNewCystLocation(self)
     
     local success = false
-    for i=1, self.cysts.numLevels do
+    for i=0, self.cysts.topLevel do
         local list = self.cysts[i]
         while #list > 0 do
             local index = GetRandomCystIndexFromList(list)
@@ -141,6 +144,46 @@ local function FindNewCystLocation(self)
     
 end
 
+-- ensure the array of tables goes up this high
+function IMCystManager:VerifyCystConnectionLevel(level)
+    
+    while (level > self.cysts.topLevel) do
+        self.cysts.topLevel = self.cysts.topLevel + 1
+        self.cysts[self.cysts.topLevel] = {}
+    end
+    
+end
+
+-- a cyst gained or lost a nearby connected cyst.  It needs to change levels.
+function IMCystManager:UpdateCystConnectionLevel(cyst, oldLevel, newLevel)
+    
+    self:RemoveCystFromConnectionLevel(cyst, oldLevel)
+    self:AddCystToConnectionLevel(cyst, newLevel)
+    
+end
+
+function IMCystManager:RemoveCystFromConnectionLevel(cyst, level)
+    
+    local id = cyst:GetId()
+    for i=1, #self.cysts[level] do
+        if self.cysts[level][i] == id then
+            table.remove(self.cysts[level], i)
+            return true
+        end
+    end
+    
+    return false
+    
+end
+
+function IMCystManager:AddCystToConnectionLevel(cyst, level)
+    
+    self:VerifyCystConnectionLevel(level)
+    
+    table.insert(self.cysts[level], cyst:GetId())
+    
+end
+
 function IMCystManager:CreateCyst(position)
     
     local connectedCysts = GetEntitiesWithinRange("Cyst", position, IMCystManager.kCystConnectionRadius)
@@ -149,8 +192,10 @@ function IMCystManager:CreateCyst(position)
     Log("Created new cyst!")
     
     -- connect cysts
+    local count = 0
     for i=1, #connectedCysts do
         if connectedCysts[i] then
+            count = count + 1
             newCyst:AddCystConnection(connectedCysts[i])
         end
     end

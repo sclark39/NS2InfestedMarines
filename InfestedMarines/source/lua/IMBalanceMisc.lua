@@ -6,4 +6,4 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-kStructureWeldRate = 90
+kStructureWeldRate = 900

@@ -11,3 +11,14 @@
 function Flamethrower:GetMaxClips()
     return 1
 end
+
+-- infinite ammo for now
+function ClipWeapon:CanReload()
+
+    self.ammo = self:GetMaxAmmo()
+    return self.ammo > 0 and
+           self.clip < self:GetClipSize() and
+           not self.reloading and 
+           self.deployed
+    
+end

@@ -42,23 +42,28 @@ function IMComputeTravelTime(to, from, speed)
     
 end
 
--- computes the time required for one of the marine squads to walk to and weld the damaged node.
-function IMComputeMinimumTimeRequired(marineConfiguration, to, includeInfected, speed)
+-- computes the median time needed for CLEAN marines on the map to walk over to the node and
+-- repair it, also clear infestation.
+function IMComputeTimeRequiredToSave(purifier)
     
-    includeInfected = includeInfected or false
-    speed = speed or Marine.kWalkMaxSpeed
-    assert(speed)
-    assert(speed > 0    )
-    assert(to)
-    assert(marineConfiguration)
-    assert(#marineConfiguration > 0)
+    assert(purifier)
     
-    local minTime = IMComputeTravelTime(IMGetSquadCenter(marineConfiguration[1]), to) or 999999
-    for i=2, #marineConfiguration do
-        minTime = math.min(minTime, IMComputeTravelTime(IMGetSquadCenter(marineConfiguration[i]), to) or 999999)
+    local times = {}
+    local cleans = IMGetCleanMarines()
+    for i=1, #cleans do
+        local t = IMComputeTravelTime(purifier:GetOrigin(), cleans[i]:GetOrigin())
+        if t then
+            table.insert(times, t)
+        end
     end
     
-    return minTime + IMGameMaster.kMarineWeldTime + GetGameMaster():GetDillyDallyTime() + 2
+    if #times == 0 then
+        return nil
+    end
+    
+    -- double the travel time, to account for the fact that you move about half as fast when you're
+    -- constantly personal-space-checking people around you.
+    return table.median(times) * 2 + GetGameMaster():GetDillyDallyTime() + GetGameMaster():GetInfestationClearTime()
     
 end
 
@@ -101,77 +106,6 @@ end
 
 local function GetDistanceBetweenEntitiesSq(e1, e2)
     return (e1:GetOrigin() - e2:GetOrigin()):GetLengthSquared()
-end
-
-function IMGetSquadCenter(squad)
-    
-    local pos = Vector(0,0,0)
-    for i=1, #squad do
-        pos = pos + squad[i]:GetOrigin()
-    end
-    
-    local centroid = pos/#squad
-    
-    local closest = 1
-    local closestDistSq = (centroid - squad[1]:GetOrigin()):GetLengthSquared()
-    
-    for i=2, #squad do
-        local distSq = (centroid - squad[i]:GetOrigin()):GetLengthSquared()
-        if distSq < closestDistSq then
-            closestDistSq = distSq
-            closest = i
-        end
-    end
-    
-    return squad[closest]:GetOrigin()
-    
-end
-
--- build marineConfiguration table
-function IMBuildMarineConfigurationTable()
-    
-    local m = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
-    local s = {}
-    
-    for i=1, #m do
-        if m[i] then
-            local squadIndices = {}
-            for j=1, #s do
-                -- find appropriate squad(s!!!!  PLURAL) to insert into (combine all squads this marine
-                -- "bridges")
-                for k=1, #s[j] do
-                    if GetDistanceBetweenEntitiesSq(s[j][k], m[i]) <= IMGameMaster.kMarineSquadRangeSq then
-                        -- will be merged with this squad
-                        table.insert(squadIndices, j)
-                        break
-                    end
-                end
-            end
-            
-            if #squadIndices == 0 then
-                -- if no squad was suitable for this marine, make a new squad
-                local newSquad = {}
-                table.insert(newSquad, m[i])
-                table.insert(s, newSquad)
-            else
-                -- found squads, merge them together if multiple.
-                table.insert(s[squadIndices[1]], m[i]) -- add the marine to the first squad it matched
-                for n=2, #squadIndices do
-                    -- merge the remaining squads into the first
-                    for p=1, #s[squadIndices[n]] do
-                        table.insert(s[squadIndices[1]], s[squadIndices[n]][p])
-                    end
-                end
-                -- remove the old squads from before the merge process
-                for n=#squadIndices, 2, -1 do
-                    table.remove(s, n)
-                end
-            end
-        end
-    end
-    
-    return s
-    
 end
 
 -- Problem: if we make the number of extractors scale with the number of CLEAN players, people will catch on to the
@@ -258,42 +192,6 @@ local function GetPurifierFurthestFromPoint(purifiers, pt)
     end
     
     return purifiers[furthest], furthestDistSq
-    
-end
-
-function IMGetMarineSquadPositions(mc)
-    
-    local positions = {}
-    for i=1, #mc do
-        table.insert(positions, IMGetSquadCenter(mc[i]))
-    end
-    
-    return positions
-    
-end
-
-function IMGetFurthestByMarineGroup(extractors, marineConfiguration)
-    
-    local furthest = {}
-    for i=1, #marineConfiguration do
-        local result, distSq = GetPurifierFurthestFromPoint(extractors, IMGetSquadCenter(marineConfiguration[i]))
-        local entry = { pur = result, distSq = distSq }
-        table.insert(furthest, entry)
-    end
-    
-    local function sortFunc(t1, t2)
-        return t1.distSq > t2.distSq
-    end
-    
-    table.sort(furthest, sortFunc)
-    
-    -- return table of extractors.
-    local sorted = {}
-    for i=1, #furthest do
-        table.insert(sorted, furthest[i].pur)
-    end
-    
-    return sorted
     
 end
 
@@ -497,6 +395,21 @@ function IMInfestNode(node)
     
 end
 
+function IMGetCleanMarines()
+    
+    local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+    local vettedMarines = {}
+    
+    for i=1, #marines do
+        if marines[i] and marines[i].GetIsAlive and marines[i]:GetIsAlive() and marines[i].GetIsInfected and not marines[i]:GetIsInfected() then
+            table.insert(vettedMarines, marines[i])
+        end
+    end
+    
+    return vettedMarines
+    
+end
+
 function IMGetRandomMarine()
     
     local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
@@ -516,53 +429,36 @@ function IMGetRandomMarine()
     
 end
 
-function IMSortPurifiersByClosestMarineSquad(purifiers, marineConfiguration)
+-- return a sorted list of eligible extractors, sorted according to sum of square distances between
+-- each extractor and every marine.  Then, we can either pick from the bottom or top to choose
+-- closest or furthest.
+function IMGetDistanceRankedNodeList()
     
-    local marinePositions = IMGetMarineSquadPositions(marineConfiguration)
-    local pScored = {}
+    local extractors = IMGetUndamagedExtractors()
+    local cleanMarines = IMGetCleanMarines()
+    local weights = {}
     
-    for i=1, #purifiers do
-        
-        local closestSquad = 1
-        local closestSquadDistSq = (marinePositions[1] - purifiers[i]:GetOrigin()):GetLengthSquared()
-        
-        for j=2, #marinePositions do
-            local distSq = (marinePositions[j] - purifiers[i]:GetOrigin()):GetLengthSquared()
-            if distSq < closestSquadDistSq then
-                closestSquad = j
-                closestSquadDistSq = distSq
-            end
+    for e=1, #extractors do
+        local sum = 0.0
+        for m=1, #cleanMarines do
+            sum = sum + (extractors[e]:GetOrigin() - cleanMarines[m]:GetOrigin()):GetLengthSquared()
         end
-        
-        local newEntry = {}
-        newEntry.pur = purifiers[i]
-        newEntry.score = closestSquadDistSq
-        table.insert(pScored, newEntry)
-        
+        table.insert(weights, {extractors[e], sum})
     end
     
-    local function sortFunc(t1, t2)
-        return t1.score < t2.score
-    end
-    table.sort(pScored, sortFunc)
-    
-    local pSorted = {}
-    for i=1, #pScored do
-        table.insert(pSorted, pScored[i].pur)
+    local function sortByWeight(a, b)
+        return a[2] < b[2]
     end
     
-    return pSorted
+    table.sort(weights, sortByWeight)
     
-end
-
-function IMDebugPrintMarineConfiguration(marineConfiguration)
-    
-    for i=1, #marineConfiguration do
-        Log("  Squad %s:", i)
-        for j=1, #marineConfiguration[i] do
-            Log("    %s", marineConfiguration[i][j])
-        end
+    local sorted = {}
+    for i=1, #weights do
+        table.insert(sorted, weights[i][1])
     end
+    
+    return sorted
+    
 end
 
 

@@ -44,6 +44,7 @@ end
 
 class 'IMCystManager'
 
+IMCystManager.kCystInitialSearchRadius = 14
 IMCystManager.kCystConnectionRadius = 7
 IMCystManager.kCystSearchRadius = 6
 IMCystManager.kCystMinDistance = 5
@@ -52,10 +53,25 @@ function IMCystManager:OnCreate()
     
 end
 
-local function GetRandomCyst()
+local function GetRandomCystNearLocation(location)
+    
+    local cystsInRange = GetEntitiesWithinRange("Cyst", location, IMCystManager.kCystInitialSearchRadius)
+    while(#cystsInRange > 0) do
+        local index = math.random(#cystsInRange)
+        if cystsInRange[index] then
+            return cystsInRange[index]
+        else
+            table.remove(cystsInRange, index)
+        end
+    end
+    return nil
+    
+end
+
+local function GetRandomCystNoLocation()
     
     local cysts = EntityListToTable(Shared.GetEntitiesWithClassname("Cyst"))
-    while true do
+    while #cysts > 0 do
         local index = math.random(#cysts)
         if not cysts[index] then
             table.remove(cysts, index)
@@ -63,6 +79,19 @@ local function GetRandomCyst()
             return cysts[index]
         end
     end
+    
+    return nil
+    
+end
+
+-- random cyst map-wide, or if location is specified, random cyst within a generous radius
+local function GetRandomCyst(optional_location)
+    
+    if optional_location then
+        return GetRandomCystNearLocation(optional_location)
+    end
+    
+    return GetRandomCystNoLocation()
     
 end
 
@@ -104,9 +133,12 @@ local function EliminatePointsNearCysts(pts)
     
 end
 
-local function FindNewCystLocation(self)
+local function FindNewCystLocation(self, optional_start_location)
     
-    local startingCyst = GetRandomCyst()
+    local startingCyst = GetRandomCyst(optional_start_location)
+    if not startingCyst then
+        return false
+    end
     local angle = math.random() * math.pi * 2
     local ca = math.cos(angle)
     local sa = math.sin(angle)
@@ -138,17 +170,16 @@ end
 function IMCystManager:CreateCyst(position)
     
     local newCyst = CreateEntity( Cyst.kMapName, position, kAlienTeamType )
-    Log("Created new cyst!")
     
 end
 
-function IMCystManager:AddNewCyst()
+function IMCystManager:AddNewCyst(optional_start_location)
     
     local attempts = 5
     local newCystLocation = nil
     while not newCystLocation and attempts > 0 do
         attempts = attempts - 1
-        newCystLocation = FindNewCystLocation(self)
+        newCystLocation = FindNewCystLocation(self, optional_start_location)
     end
     
     if not newCystLocation then

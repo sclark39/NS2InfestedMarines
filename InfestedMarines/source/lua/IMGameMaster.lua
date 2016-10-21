@@ -11,10 +11,9 @@
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
 Script.Load("lua/IMGameMasterUtilities.lua")
-Script.Load("lua/IMGameMasterData.lua")
 
 local gameMaster = nil
-local useAutomatedGameMaster = false
+local useAutomatedGameMaster = true
 
 function GetGameMaster()
     
@@ -57,15 +56,38 @@ IMGameMaster.kMarineSquadRange = 25 -- any marines within 25m of another marine 
 IMGameMaster.kMarineSquadRangeSq = IMGameMaster.kMarineSquadRange * IMGameMaster.kMarineSquadRange
 IMGameMaster.kMarineWeldTime = 4    -- approximately the amount of seconds required once at a node to weld it fully.
 IMGameMaster.kTimeBeforeInfectedChosen = 30
+IMGameMaster.kPhase = enum({ "Scatter", "Regroup" })
+
+-- cysts propagate on their own slowly, but will RAPIDLY deploy near new nodes.
+IMGameMaster.kScatterCystBoost = 10 -- number of additional cysts to spawn quickly, per node
+                                    -- in addition to the few that are spawned directly on the node.
+IMGameMaster.kRegroupCystBoost = 30 -- cysts per node for regroup phase.
+IMGameMaster.kRegularCystPropagationPeriod = 2 -- one cyst every 2 seconds.
+
+IMGameMaster.kDefaultDillyDallyTime = 5 -- time added for organization, etc.
+IMGameMaster.kScatterInfestationClearTime = 10 -- time added to allow for clearing cysts during scatter.
+IMGameMaster.kRegroupInfestationClearTime = 30 -- more time here b/c there's a lot more infestation.
 
 function IMGameMaster:OnCreate()
     
     self.maxLives = IMGameMaster.kDefaultMaxLives
     self.currentLives = self.maxLives
+    self.damagedPurifiers = {}
     
     self.cooldownPeriod = 0.0 -- used to delay the next round of purifiers being damaged.
-    self.timeBuffer = 5.0 -- extra five seconds by default.  This is adjusted based on team performance to adjust difficulty
+    self.timeBuffer = 5.0 -- extra five seconds by default.  This can be adjusted based on team performance to adjust difficulty
+    self.fastCysts = {} -- table to be filled with { vector location, number } pairs.
     
+end
+
+function IMGameMaster:GetInfestationClearTime()
+    if self:GetPhase() == IMGameMaster.kPhase.Scatter then
+        return IMGameMaster.kScatterInfestationClearTime
+    elseif self:GetPhase() == IMGameMaster.kPhase.Regroup then
+        return IMGameMaster.kRegroupInfestationClearTime
+    else
+        assert(false)
+    end
 end
 
 function IMGameMaster:GetDillyDallyTime()
@@ -79,6 +101,12 @@ end
 function IMGameMaster:SetLives(lives)
     self.maxLives = lives
     self.currentLives = lives
+end
+
+function IMGameMaster:FastCystLocation(location, numCysts)
+    
+    table.insert(self.fastCysts, {location, numCysts})
+    
 end
 
 function IMGameMaster:GetIsPurifierSaved(purifier)
@@ -99,70 +127,20 @@ function IMGameMaster:GetHasInfectedBeenChosenYet()
     
 end
 
+function IMGameMaster:GetPhase()
+    self.phase = self.phase or IMGameMaster.kPhase.Scatter
+    return self.phase
+end
+
+function IMGameMaster:SetPhase(p)
+    self.phase = p
+end
+
 function IMGameMaster:DoGameStart()
-    
-    self:SetupStartingInfestation()
     
     self.pickedInfected = false
     self.infectedChooseDelay = IMGameMaster.kTimeBeforeInfectedChosen
-    
-end
-
-function IMGameMaster:SetupStartingInfestation()
-    
-    local purifiers = IMGetUndamagedExtractors()
-    -- pick a random marine, remove the closest extractor from the table -- we
-    -- don't want the extractor in marine starting area to become infested!
-    
-    local randomMarine = IMGetRandomMarine()
-    assert(randomMarine ~= nil)
-    local closestIndex = IMGetClosestIndexToPoint(purifiers, randomMarine:GetOrigin())
-    local homeNode = purifiers[closestIndex]
-    table.remove(purifiers, closestIndex)
-    
-    -- pick N nodes randomly, preferring nodes further away from both the starting node,
-    -- and each picked node.
-    local infestCount = 3 -- todo
-    local pickedNodes = IMComputeStartingInfestedNodes(infestCount, purifiers, homeNode)
-    
-    for i=1, #pickedNodes do
-        IMInfestNode(pickedNodes[i])
-    end
-    
-end
-
-local function UpdatePurifierStatus(self)
-    
-    local now = Shared.GetTime()
-    
-    self.damagedPurifiers = self.damagedPurifiers or {}
-    for i=#self.damagedPurifiers, 1, -1 do
-        assert(self.damagedPurifiers[i] ~= nil)
-        assert(self.damagedPurifiers[i].purId ~= nil)
-        local purifier = Shared.GetEntity(self.damagedPurifiers[i].purId)
-        local keepProcessing = true
-        if purifier then
-            if self:GetIsPurifierSaved(purifier) then
-                self:RemoveDamagedPurifier(purifier)
-                keepProcessing = false
-            end
-            
-            if keepProcessing and now > self.damagedPurifiers[i].endTime then
-                -- purifier destroyed!!!
-                -- remove from table, but leave blip so it stays on the interface
-                table.remove(self.damagedPurifiers, i)
-                local blip = Shared.GetEntity(purifier.purifierBlipId)
-                blip:SetState(IMAirPurifierBlip.kPurifierState.Destroyed)
-                local purifier = Shared.GetEntity(blip.entId)
-                assert(purifier ~= nil)
-                purifier:Kill()
-                self.currentLives = self.currentLives - 1
-            end
-        end
-    end
-    
-    GetAirStatusBlip().currLives = self.currentLives
-    GetAirStatusBlip().maxLives = self.maxLives
+    self:SetPhase(IMGameMaster.kPhase.Scatter)
     
 end
 
@@ -175,7 +153,8 @@ local function UpdateQueuedDamages(self)
             local purifier = Shared.GetEntity(self.queuedDamages[1].purId)
             local duration = self.queuedDamages[1].duration
             if purifier and duration then
-                self:AddDamagedPurifier(purifier, duration)
+                IMInfestNode(purifier)
+                purifier:SetCorrosionDamageFactorByTTK(duration)
             end
             table.remove(self.queuedDamages, 1)
             self.damageCooldown = 0.75
@@ -186,17 +165,76 @@ local function UpdateQueuedDamages(self)
     
 end
 
+local function InfestNodes(nodes)
+    
+    for i=1, #nodes do
+        GetGameMaster():QueuePurifierDamage(nodes[i])
+    end
+    
+end
+
+local function CalculateRegroupNodeCount()
+    
+    return math.ceil(IMGetCleanMarineCount() / 6)
+    
+end
+
+local function CalculateScatterNodeCount()
+    
+    return math.ceil(IMGetCleanMarineCount() / 2)
+    
+end
+
+local function PerformRegroupNodeDamage(self)
+    
+    local sortedPurifiers = IMGetDistanceRankedNodeList()
+    local numNodes = CalculateRegroupNodeCount()
+    
+    -- we want the ones closest to the group, so pick from the top.
+    local pickedNodes = {}
+    while (numNodes > 0) do
+        Log("numNodes = %s", numNodes)
+        numNodes = numNodes - 1
+        table.insert(pickedNodes, sortedPurifiers[1])
+        self:FastCystLocation(sortedPurifiers[1]:GetOrigin(), IMGameMaster.kRegroupCystBoost)
+        table.remove(sortedPurifiers, 1)
+    end
+    
+    InfestNodes(pickedNodes)
+    
+    self.cooldownPeriod = 5
+    
+end
+
+local function PerformScatterNodeDamage(self)
+    
+    local sortedPurifiers = IMGetDistanceRankedNodeList()
+    local numNodes = CalculateScatterNodeCount()
+    
+    -- we want the ones furthest away, so pick from the bottom.
+    local pickedNodes = {}
+    while (numNodes > 0 and #sortedPurifiers > 0) do
+        numNodes = numNodes - 1
+        table.insert(pickedNodes, sortedPurifiers[#sortedPurifiers])
+        self:FastCystLocation(sortedPurifiers[#sortedPurifiers]:GetOrigin(), IMGameMaster.kScatterCystBoost)
+        table.remove(sortedPurifiers, #sortedPurifiers)
+    end
+    
+    InfestNodes(pickedNodes)
+    
+    self.cooldownPeriod = 5
+    
+end
+
 local function PerformNodeDamage(self)
     
-    local marineConfigTable = IMBuildMarineConfigurationTable()
-    
-    -- execute randomly picked "scenario".  Scenario is responsible for damaging nodes, and does so
-    -- in a unique way.  For example, one scenario might damage many nodes, but give plenty of time,
-    -- another might damage few, but give very little time.  One might pick nodes that are far away
-    -- from marines... another might attempt to group marines together more.  It's just a way of
-    -- churning the players around more randomly, to hopefully prevent the games from feeling the
-    -- same every time.
-    IMGetRandomScenario()(marineConfigTable)
+    if self.phase == IMGameMaster.kPhase.Scatter then
+        PerformScatterNodeDamage(self)
+    elseif self.phase == IMGameMaster.kPhase.Regroup then
+        PerformRegroupNodeDamage(self)
+    else
+        assert(false)
+    end
     
 end
 
@@ -270,14 +308,34 @@ local function UpdateCysts(self)
         return
     end
     
+    -- regular cyst propagation
     self.nextCyst = self.nextCyst or 0
     if self.nextCyst <= 0 then
         if GetCystManager():AddNewCyst() then -- keep trying until successful.
-            self.nextCyst = 1
+            self.nextCyst = IMGameMaster.kRegularCystPropagationPeriod
         end
     end
     
     self.nextCyst = self.nextCyst - IMGameMaster.kUpdatePeriod
+    
+    -- rapid cyst propagation
+    for i=#self.fastCysts, 1, -1 do
+        GetCystManager():AddNewCyst(self.fastCysts[i][1])
+        self.fastCysts[i][2] = self.fastCysts[i][2] - 1
+        if self.fastCysts[i][2] <= 0 then
+            -- finished spawning that many cysts, can return now.
+            table.remove(self.fastCysts, i)
+        end
+    end
+    
+end
+
+function IMGameMaster:RequestBlipForExtractor(extractor)
+    
+    local index = self:GetDamagedPurifierIndexByEntity(extractor)
+    if not index then
+        self:AddDamagedPurifier(extractor)
+    end
     
 end
 
@@ -291,7 +349,6 @@ function IMGameMaster:OnUpdate(deltaTime)
         return
     end
     
-    UpdatePurifierStatus(self)
     UpdateQueuedDamages(self)
     UpdateInfectionPick(self)
     UpdateCysts(self)
@@ -302,18 +359,31 @@ function IMGameMaster:OnUpdate(deltaTime)
     
 end
 
-function IMGameMaster:QueuePurifierDamage(purifier, duration)
+function IMGameMaster:QueuePurifierDamage(purifier)
     
+    local duration = IMComputeTimeRequiredToSave(purifier)
     self.queuedDamages = self.queuedDamages or {}
     table.insert(self.queuedDamages, { purId = purifier:GetId(), duration = duration })
     
 end
 
-function IMGameMaster:AddDamagedPurifier(purifier, duration)
+function IMGameMaster:GetDamagedPurifierIndexByEntity(ent)
+    
+    local id = ent:GetId()
+    for i=1, #self.damagedPurifiers do
+        if id == self.damagedPurifiers[i].purId or id == self.damagedPurifiers[i].blipId then
+            return i
+        end
+    end
+    
+    return nil
+    
+end
+
+function IMGameMaster:AddDamagedPurifier(purifier)
     
     local newBlip = CreateEntity(IMAirPurifierBlip.kMapName, purifier:GetOrigin(), kMarineTeamType)
     newBlip:SetEntityId(purifier:GetId())
-    newBlip:SetRampTime(duration)
     
     local purId = purifier:GetId()
     local blipId = newBlip:GetId()
@@ -321,7 +391,6 @@ function IMGameMaster:AddDamagedPurifier(purifier, duration)
     self.damagedPurifiers = self.damagedPurifiers or {}
     for i=#self.damagedPurifiers,1,-1 do
         if self.damagedPurifiers[i].purId == purId then
-            self.damagedPurifiers[i].endTime = Shared.GetTime() + duration
             local oldBlip = Shared.GetEntity(self.damagedPurifiers[i].blipId)
             if oldBlip then
                 DestroyEntity(oldBlip)
@@ -334,13 +403,8 @@ function IMGameMaster:AddDamagedPurifier(purifier, duration)
     table.insert(self.damagedPurifiers,
     {
         purId = purId,
-        endTime = Shared.GetTime() + duration,
         blipId = blipId,
     })
-    
-    -- damage the extractor so it must be repaired
-    purifier:SetHealth(purifier:GetMaxHealth() * 0.1)
-    purifier:SetArmor(0)
     
 end
 

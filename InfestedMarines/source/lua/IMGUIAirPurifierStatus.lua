@@ -107,7 +107,7 @@ function IMGUIAirPurifierStatus:Initialize()
     self.icon:SetColor(IMGUIAirPurifierStatus.flashColor)
     self.icon:SetShader(IMGUIAirPurifierStatus.iconShader)
     
-    self:SetPulseRampupTime(IMGUIAirPurifierStatus.kDefaultPulseRampupTime)
+    self:SetFrequency(0.25)
     
     self.roomName = self.roomName or ""
     
@@ -164,13 +164,11 @@ function IMGUIAirPurifierStatus:Update(deltaTime)
     
 end
 
-function IMGUIAirPurifierStatus:SetPulseRampupTime(time)
+function IMGUIAirPurifierStatus:SetFrequency(freq)
     
-    if self.pulseRampDuration ~= time then
-        local now = Shared.GetTime()
-        self.pulseRampDuration = time
-        self.icon:SetFloatParameter("startTime", now)
-        self.icon:SetFloatParameter("endTime", now + self.pulseRampDuration)
+    if self.freq ~= freq then
+        self.freq = freq
+        self.icon:SetFloatParameter("pulseFreq", freq)
     end
     
 end
@@ -194,22 +192,18 @@ function IMGUIAirPurifierStatus:SetIconState(state)
     local now = Shared.GetTime()
     
     self.iconState = state
-    if state == IMAirPurifierBlip.kPurifierState.Normal then
+    if state == IMAirPurifierBlip.kPurifierState.Damaged then
         self.icon:SetTexture(IMGUIAirPurifierStatus.iconNormal)
-        self.icon:SetFloatParameter("startTime", now)
-        self.icon:SetFloatParameter("endTime", now + self.pulseRampDuration)
         self.icon:SetFloatParameter("pulseInfluence", 1)
         self.icon:SetColor(IMGUIAirPurifierStatus.flashColor)
         self.text:SetColor(IMGUIAirPurifierStatus.textColor)
     elseif state == IMAirPurifierBlip.kPurifierState.Destroyed then
         self.icon:SetTexture(IMGUIAirPurifierStatus.iconDestroyed)
-        self.icon:SetColor(Color(1,1,1,1))
         self.text:SetColor(IMGUIAirPurifierStatus.destroyedTextColor)
         self.icon:SetFloatParameter("pulseInfluence", 0)
-    else
-        assert(false)
+    else --state == IMAirPurifierBlip.kPurifierState.Fixed then
         self.icon:SetTexture(IMGUIAirPurifierStatus.iconNormal)
-        self.icon:SetColor(Color(1,1,1,1))
+        self.icon:SetFloatParameter("pulseInfluence", 0)
         self.text:SetColor(IMGUIAirPurifierStatus.textColor)
     end
     

@@ -131,7 +131,7 @@ function IMGUIAirPurifierManager:AddNode(entityId)
     local newNode = GetGUIManager():CreateGUIScript("IMGUIAirPurifierStatus")
     newNode.entityId = entityId
     newNode:SetPosition(IMGUIAirPurifierStatus.GetStartingPosition(), true)
-    newNode:SetIconState(IMAirPurifierBlip.kPurifierState.Normal)
+    newNode:SetIconState(IMAirPurifierBlip.kPurifierState.Damaged)
     table.insert(self.nodes, newNode)
     
     return newNode

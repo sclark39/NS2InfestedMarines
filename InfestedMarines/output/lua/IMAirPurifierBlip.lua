@@ -13,7 +13,7 @@ class 'IMAirPurifierBlip' (Entity)
 
 IMAirPurifierBlip.kMapName = "airpurifierblip"
 
-IMAirPurifierBlip.kPurifierState = enum({"Normal", "Destroyed", "Damaged", "Fixed"})
+IMAirPurifierBlip.kPurifierState = enum({"Destroyed", "Damaged", "Fixed"})
 
 local networkVars = 
 {
@@ -26,7 +26,7 @@ local networkVars =
 function IMAirPurifierBlip:OnCreate()
     
     self.entId = Entity.invalidId
-    self.state = IMAirPurifierBlip.kPurifierState.Normal
+    self.state = IMAirPurifierBlip.kPurifierState.Damaged
     self.frequency = 0.25
     self:UpdateRelevancy()
     

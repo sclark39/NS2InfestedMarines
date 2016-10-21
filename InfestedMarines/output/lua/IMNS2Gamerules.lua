@@ -104,8 +104,8 @@ if Server then
                 
                 local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
                 for i=1, #marines do
-                    if marines[i] and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
-                        if marines[i].GetIsInfected and marines[i]:GetIsInfected() then
+                    if marines[i] and marines[i].GetIsInfected and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
+                        if marines[i]:GetIsInfected() then
                             foundInfected = true
                         else
                             foundUninfected = true

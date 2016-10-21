@@ -153,11 +153,9 @@ function LiveMixin:TakeDamage(damage, attacker, doer, point, direction, armorUse
                 -- player friendly-fired a friendly player to death.  They die, player they attacked
                 -- gets their health/armor back.
                 attacker:Kill(attacker, doer, point, direction)
-                killedFromDamage = false
-            else
-                self:Kill(attacker, doer, point, direction)
-                killedFromDamage = true
             end
+            self:Kill(attacker, doer, point, direction)
+            
         end
         
         return killedFromDamage, (oldHealth - self.health + (oldArmor - self.armor) * 2)    

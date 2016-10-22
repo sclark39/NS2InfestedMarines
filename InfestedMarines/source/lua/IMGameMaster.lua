@@ -304,8 +304,9 @@ local function PickInfected(self)
     infectedPlayer:SetIsInfected(true)
     
     Log("infectedPlayer = %s (name is '%s')", infectedPlayer, infectedPlayer.name)
+    local numPlayers = GetGamerules().team1:GetNumPlayers()
     for i=1, numPlayers do
-        Server.SendNetworkMessage(GetGamerules().team1:GetPlayer(i), "InfectedStatusMessage", { infected = (i==infectedIndex) }, true)
+        Server.SendNetworkMessage(GetGamerules().team1:GetPlayer(i), "InfectedStatusMessage", { infected = (GetGamerules().team1:GetPlayer(i) == infectedPlayer) }, true)
     end
     
 end

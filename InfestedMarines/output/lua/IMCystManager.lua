@@ -48,8 +48,14 @@ IMCystManager.kCystInitialSearchRadius = 14
 IMCystManager.kCystConnectionRadius = 7
 IMCystManager.kCystSearchRadius = 6
 IMCystManager.kCystMinDistance = 5
+IMCystManager.kCystNumWallTraces = 10
+IMCystManager.kAreaOfDenialDuration = 5 -- seconds that an area must be cyst free after cyst dies.
+IMCystManager.kDenialAreaRadius = 7
+IMCystManager.kDenialAreaRadiusSq = IMCystManager.kDenialAreaRadius * IMCystManager.kDenialAreaRadius
 
 function IMCystManager:OnCreate()
+    
+    self.denialAreas = {}
     
 end
 
@@ -133,6 +139,113 @@ local function EliminatePointsNearCysts(pts)
     
 end
 
+local function ArePointsAboutEqual(p1, p2)
+    
+    local diff = p1 - p2
+    if math.abs(diff.x) < 0.0001 and math.abs(diff.y) < 0.0001 and math.abs(diff.z) < 0.0001 then
+        return true
+    end
+    
+    return false
+    
+end
+
+local function GetIsOnPathingMesh(self, point, thresholdDistSq)
+    
+    -- requires a bit of a workaround because there is no engine function to get if a point is
+    -- on the pathing mesh.  Instead, we get the closest point on the pathing mesh, and compare
+    -- them.  Unfortunately, if the point is so far off the mesh a good "closest" point cannot
+    -- be found... the engine, in its infinite wisdom, will return the original point... so we
+    -- need to detect when this occurs.  We'll give it the passed in point with a slight +y
+    -- offset, so if it's the exact same point... it *should* in all likelihood be a reliable
+    -- indicator that the point was invalid.
+    
+    local adjustedPoint = point + Vector(0, 0.5, 0)
+    local newPoint = Pathing.GetClosestPoint(adjustedPoint)
+    
+    if ArePointsAboutEqual(newPoint, adjustedPoint) then
+        -- these should NOT be equal, ever.  It's slid off the pathing mesh, return false.
+        return false
+    end
+    
+    local diff = (point - newPoint)
+    diff.y = diff.y * 0.25 -- we don't care as much about vertical displacement.
+    local distSq = diff:GetLengthSquared()
+    if distSq > thresholdDistSq then
+        -- too far away from original point.  Likely what's happening is this point is off the
+        -- map in the void somewhere, but close enough to "snap" back to the pathing mesh.  We
+        -- don't want this.
+        return false
+    end
+    
+    return true
+    
+end
+
+local function CheapTraceCystLocation(self, startPoint, endPoint)
+    
+    local diff = (endPoint - startPoint) / IMCystManager.kCystNumWallTraces
+    local threshold = diff:GetLength() * 1.1 -- allow about 10% more distance.
+    local thresholdSq = threshold * threshold
+    for i=1, IMCystManager.kCystNumWallTraces do
+        local pt = startPoint + (diff * i)
+        if not GetIsOnPathingMesh(self, pt, thresholdSq) then
+            return false
+        end
+    end
+    
+    return true
+    
+end
+
+local function GetRandomNonWallCyst(self, startPoint, pointTable)
+    
+    while (#pointTable > 0) do
+        local index = math.random(#pointTable)
+        
+        -- check to ensure cyst is pretty much on pathing mesh for several points along the trace.
+        if pointTable[index] and CheapTraceCystLocation(self, startPoint, pointTable[index]) then
+            return pointTable[index]
+        else
+            table.remove(pointTable, index)
+        end
+    end
+    
+    return nil
+    
+end
+
+local function GetIsPointInDenialArea(self, point)
+    
+    local now = Shared.GetTime()
+    
+    for i=#self.denialAreas, 1, -1 do
+        -- ensure denial area is still active
+        if self.denialAreas[i].tEnd < now then
+            table.remove(self.denialAreas, i)
+        else
+            if (point - self.denialAreas[i].pt):GetLengthSquared() <= IMCystManager.kDenialAreaRadiusSq then
+                return true
+            end
+        end
+    end
+    
+    return false
+    
+end
+
+local function EliminatePointsNearDenialAreas(self, points)
+    
+    for i=#points, 1, -1 do
+        if GetIsPointInDenialArea(self, points[i]) then
+            table.remove(points, i)
+        end
+    end
+    
+    return points
+    
+end
+
 local function FindNewCystLocation(self, optional_start_location)
     
     local startingCyst = GetRandomCyst(optional_start_location)
@@ -158,12 +271,20 @@ local function FindNewCystLocation(self, optional_start_location)
     -- cysts nearby.  Now we make a new cyst at some random point near this.
     local pts = IMGetRandomPointsAroundPosition(currentCyst:GetOrigin())
     pts = EliminatePointsNearCysts(pts)
+    EliminatePointsNearDenialAreas(self, pts)
+    
     if #pts == 0 then
         return false
     end
     
-    -- return random one for now... maybe we can rank them later for better results?
-    return pts[math.random(#pts)]
+    -- return a random point from this list, ensuring it doesn't pass through a wall.
+    return GetRandomNonWallCyst(self, currentCyst:GetOrigin(), pts)
+    
+end
+
+function IMCystManager:CreateAreaOfDenial(point)
+    
+    table.insert(self.denialAreas, { pt = point, tEnd = Shared.GetTime() + IMCystManager.kAreaOfDenialDuration } )
     
 end
 

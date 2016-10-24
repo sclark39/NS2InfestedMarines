@@ -63,7 +63,7 @@ function IMComputeTimeRequiredToSave(purifier)
     
     -- double the travel time, to account for the fact that you move about half as fast when you're
     -- constantly personal-space-checking people around you.
-    return table.median(times) * 2 + GetGameMaster():GetDillyDallyTime() + GetGameMaster():GetInfestationClearTime()
+    return table.median(times) * 1.5 + GetGameMaster():GetDillyDallyTime() + GetGameMaster():GetInfestationClearTime()
     
 end
 

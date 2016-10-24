@@ -7,7 +7,7 @@
 --    Limit the amount of ammo you have.
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
-Log("IMFlamethrower.lua")
+
 function Flamethrower:GetMaxClips()
     return 1
 end

@@ -108,12 +108,10 @@ end
 function IMGameMaster:GetAirQualityChangeRatio()
     local numCysts = IMGetCystCount()
     local numExtractors = IMGetExtractorCountFraction() -- half damaged extractor = half the benefit
-    --Log("numCysts = %s", numCysts)
-    --Log("numExtractors = %s", numExtractors)
     
     -- +1 to avoid /0
     local ratio = (numExtractors * IMGameMaster.kCystToPurifierRatio) / (numCysts + 1)
-    --Log("ratio = %s", ratio)
+    
     return ratio
 end
 

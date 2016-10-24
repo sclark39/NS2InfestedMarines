@@ -44,16 +44,3 @@ function Marine:GetWillHaveDamageReflected(target, doer)
     
     return true
 end
-
--- infect marine if attacker is infected, otherwise kill like normal.
-local old_Marine_OnKill = Marine.OnKill
-function Marine:OnKill(attacker, doer, point, direction)
-    
-    -- infected can infect the uninfected, but can also kill fellow infected for good.
-    if attacker.GetIsInfected and attacker:GetIsInfected() and self.GetIsInfected and not self:GetIsInfected() then
-        self:AddTimedCallback(Marine.Infect, 0.5)
-    end
-    
-    old_Marine_OnKill(self, attacker, doer, point, direction)
-    
-end

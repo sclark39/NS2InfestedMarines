@@ -16,3 +16,4 @@ Script.Load("lua/IMConsoleCommands.lua")
 
 Shared.RegisterNetworkMessage("InfectedStatusMessage", { infected = "boolean" })
 Shared.RegisterNetworkMessage("InfectedProcessMessage", { })
+Shared.RegisterNetworkMessage("RoundStartMessage", { })

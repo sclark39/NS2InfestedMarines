@@ -157,6 +157,9 @@ function IMGameMaster:DoGameStart()
     self.infectedChooseDelay = IMGameMaster.kTimeBeforeInfectedChosen
     self:SetPhase(IMGameMaster.kPhase.Scatter)
     
+    -- set all players objectives
+    Server.SendNetworkMessage("RoundStartMessage", {}, true)
+    
 end
 
 function IMGameMaster:SetIsFirstWave(state)

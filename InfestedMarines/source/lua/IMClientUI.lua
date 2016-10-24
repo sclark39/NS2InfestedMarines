@@ -10,3 +10,5 @@
 
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIAirPurifierManager")
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIAirStatus")
+AddClientUIScriptForTeam(kTeam1Index, "IMGUIObjectivesMarine")
+AddClientUIScriptForTeam(kTeam1Index, "IMGUIObjectivesAlien")

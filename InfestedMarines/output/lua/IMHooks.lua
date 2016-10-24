@@ -22,7 +22,6 @@ ModLoader.SetupFileHook("lua/Balance.lua", "lua/IMBalance.lua", "post")
 ModLoader.SetupFileHook("lua/BalanceHealth.lua", "lua/IMBalanceHealth.lua", "post")
 ModLoader.SetupFileHook("lua/BalanceMisc.lua", "lua/IMBalanceMisc.lua", "post")
 ModLoader.SetupFileHook("lua/GUIUnitStatus.lua", "lua/IMGUIUnitStatus.lua", "replace")
-ModLoader.SetupFileHook("lua/GUIScoreboard.lua", "lua/IMGUIScoreboard.lua", "post")
 ModLoader.SetupFileHook("lua/MinimapMappableMixin.lua", "lua/IMMinimapMappableMixin.lua", "post")
 ModLoader.SetupFileHook("lua/LiveMixin.lua", "lua/IMLiveMixin.lua", "post")
 ModLoader.SetupFileHook("lua/Weapons/Marine/Flame.lua", "lua/IMFlame.lua", "post")
@@ -33,6 +32,9 @@ ModLoader.SetupFileHook("lua/Cyst_Server.lua", "lua/IMCyst_Server.lua", "post")
 ModLoader.SetupFileHook("lua/NS2Utility.lua", "lua/IMNS2Utility.lua", "post")
 ModLoader.SetupFileHook("lua/CorrodeMixin.lua", "lua/IMCorrodeMixin.lua", "post")
 ModLoader.SetupFileHook("lua/Extractor.lua", "lua/IMExtractor.lua", "post")
+
+ModLoader.SetupFileHook("lua/ScoringMixin.lua", "lua/IMScoringMixin.lua", "post")
+ModLoader.SetupFileHook("lua/PointGiverMixin.lua", "lua/IMPointGiverMixin.lua", "post")
 
 -- New GUI elements
 ModLoader.SetupFileHook("lua/ClientUI.lua", "lua/IMClientUI.lua", "post")

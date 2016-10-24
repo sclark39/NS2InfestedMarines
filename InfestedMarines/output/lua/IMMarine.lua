@@ -15,6 +15,8 @@ Marine.kInvalidInfestationTargetSound = PrecacheAsset("sound/NS2.fev/common/inva
 Marine.kInfectionFreezeTime = 0.5 -- freeze player for this long when they are infested, to prevent
 -- team killing.
 
+Marine.kPointsForInfest = 20
+
 function Marine:GetCrosshairTargetForInfection()
     local viewAngles = self:GetViewAngles()
     local viewCoords = viewAngles:GetCoords()
@@ -110,6 +112,7 @@ local function AttemptInfection(self)
     end
     
     if Server then
+	    self:AddScore(self.kPointsForInfest)
         target:Infect()
     end
     

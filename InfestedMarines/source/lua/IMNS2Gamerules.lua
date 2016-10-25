@@ -424,4 +424,36 @@ if Server then
         self:ResetPlayerScores()
     end
 
+    -- Alive players hear only alive players, dead players only hear dead players
+    function NS2Gamerules:GetCanPlayerHearPlayer(listenerPlayer, speakerPlayer, channelType)
+
+        local canHear = false
+
+        if Server.GetConfigSetting("alltalk") or Server.GetConfigSetting("pregamealltalk") and not self:GetGameStarted() then
+            return true
+        end
+
+        -- Check if the listerner has the speaker muted.
+        if listenerPlayer:GetClientMuted(speakerPlayer:GetClientIndex()) then
+            return false
+        end
+
+        -- If both players have the same team number, they can hear each other
+        if listenerPlayer:GetIsAlive() == speakerPlayer:GetIsAlive() then
+            if channelType == nil or channelType == VoiceChannel.Global then
+                canHear = true
+            else
+                canHear = listenerPlayer:GetDistance(speakerPlayer) < kMaxWorldSoundDistance
+            end
+        end
+
+        -- Or if cheats AND dev mode is on, they can hear each other
+        if(Shared.GetCheatsEnabled() and Shared.GetDevMode()) then
+            canHear = true
+        end
+
+        return canHear
+
+    end
+
 end

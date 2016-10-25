@@ -7,6 +7,7 @@
 --    Stores the list of all the file hooks that are called by the mod loader.
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
+Script.Load("lua/IMModBlacklist.lua")
 
 ModLoader.SetupFileHook("lua/NS2Gamerules.lua", "lua/IMNS2Gamerules.lua", "post")
 ModLoader.SetupFileHook("lua/Gamerules.lua", "lua/IMGamerules.lua", "post")
@@ -32,7 +33,6 @@ ModLoader.SetupFileHook("lua/Cyst_Server.lua", "lua/IMCyst_Server.lua", "post")
 ModLoader.SetupFileHook("lua/NS2Utility.lua", "lua/IMNS2Utility.lua", "post")
 ModLoader.SetupFileHook("lua/CorrodeMixin.lua", "lua/IMCorrodeMixin.lua", "post")
 ModLoader.SetupFileHook("lua/Extractor.lua", "lua/IMExtractor.lua", "post")
-ModLoader.SetupFileHook("lua/TechData.lua", "lua/IMTechData.lua", "post")
 
 ModLoader.SetupFileHook("lua/ScoringMixin.lua", "lua/IMScoringMixin.lua", "post")
 ModLoader.SetupFileHook("lua/PointGiverMixin.lua", "lua/IMPointGiverMixin.lua", "post")

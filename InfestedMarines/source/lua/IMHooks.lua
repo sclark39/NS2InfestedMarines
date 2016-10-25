@@ -32,6 +32,7 @@ ModLoader.SetupFileHook("lua/Cyst_Server.lua", "lua/IMCyst_Server.lua", "post")
 ModLoader.SetupFileHook("lua/NS2Utility.lua", "lua/IMNS2Utility.lua", "post")
 ModLoader.SetupFileHook("lua/CorrodeMixin.lua", "lua/IMCorrodeMixin.lua", "post")
 ModLoader.SetupFileHook("lua/Extractor.lua", "lua/IMExtractor.lua", "post")
+ModLoader.SetupFileHook("lua/TechData.lua", "lua/IMTechData.lua", "post")
 
 ModLoader.SetupFileHook("lua/ScoringMixin.lua", "lua/IMScoringMixin.lua", "post")
 ModLoader.SetupFileHook("lua/PointGiverMixin.lua", "lua/IMPointGiverMixin.lua", "post")

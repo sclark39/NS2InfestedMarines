@@ -4,5 +4,5 @@ modEntry =
     Server = "lua/IMServer.lua",
     Shared = "lua/IMShared.lua",
     FileHooks = "lua/IMHooks.lua",
-    Priority = 5
+    Priority = 100 -- This needs to be higher than the piority of any incompatible mod
 }

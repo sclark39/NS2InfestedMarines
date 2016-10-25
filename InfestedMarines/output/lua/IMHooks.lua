@@ -7,6 +7,7 @@
 --    Stores the list of all the file hooks that are called by the mod loader.
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
+Script.Load("lua/IMModBlacklist.lua")
 
 ModLoader.SetupFileHook("lua/NS2Gamerules.lua", "lua/IMNS2Gamerules.lua", "post")
 ModLoader.SetupFileHook("lua/Gamerules.lua", "lua/IMGamerules.lua", "post")

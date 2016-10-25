@@ -106,10 +106,8 @@ if Server then
                 for i=1, #marines do
                     if marines[i] and marines[i].GetIsInfected and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
                         if marines[i]:GetIsInfected() then
-                            Log("found an infected marine (%s)", marines[i])
                             foundInfected = true
                         else
-                            Log("found an un-infected marine (%s)", marines[i])
                             foundUninfected = true
                         end
                     end

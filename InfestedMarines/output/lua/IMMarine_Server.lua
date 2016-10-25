@@ -44,3 +44,15 @@ function Marine:GetWillHaveDamageReflected(target, doer)
     
     return true
 end
+
+-- called when reflective damage is being used.  Returns true if victim should also die to damage,
+-- (mutual reflection), false if victim should be unharmed (true reflection).
+function Marine:GetWillReflectedDamageHitVictim(target, doer)
+    
+    if self.GetIsInfected and self:GetIsInfected() and target and target.GetIsInfected and not target:GetIsInfected() and doer and doer:isa("Flamethrower") then
+        return false
+    end
+    
+    return true
+    
+end

@@ -154,7 +154,10 @@ function LiveMixin:TakeDamage(damage, attacker, doer, point, direction, armorUse
                 -- gets their health/armor back.
                 attacker:Kill(attacker, doer, point, direction)
             end
-            self:Kill(attacker, doer, point, direction)
+            
+            if (not damageReflected) or (not attacker.GetWillReflectedDamageHitVictim) or attacker:GetWillReflectedDamageHitVictim(self, doer) then
+                self:Kill(attacker, doer, point, direction)
+            end
             
         end
         

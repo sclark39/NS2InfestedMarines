@@ -438,7 +438,6 @@ function IMGameMaster:ReportExtractorBeingDamaged(extractor)
     
     -- setup how much time the extractor has before it dies.
     local duration = IMComputeTimeRequiredToSave(extractor)
-    Log("setting TTK of %s to %s", extractor, duration)
     if duration then
         extractor:SetCorrosionDamageFactorByTTK(duration)
     end

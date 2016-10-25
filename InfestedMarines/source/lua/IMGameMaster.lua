@@ -176,11 +176,9 @@ local function UpdateQueuedDamages(self)
     if #self.queuedDamages > 0 then
         self.damageCooldown = self.damageCooldown or 0
         if self.damageCooldown <= 0 then
-            local purifier = Shared.GetEntity(self.queuedDamages[1].purId)
-            local duration = self.queuedDamages[1].duration
-            if purifier and duration then
+            local purifier = Shared.GetEntity(self.queuedDamages[1])
+            if purifier then
                 IMInfestNode(purifier)
-                purifier:SetCorrosionDamageFactorByTTK(duration)
             end
             table.remove(self.queuedDamages, 1)
             self.damageCooldown = 0.75
@@ -263,16 +261,14 @@ local function UpdateGameMasterDuties(self, deltaTime)
         return
     end
     
-    if #self.damagedPurifiers > 0 then
+    -- don't advance until all extractors have been destroyed or saved.  Don't consider
+    -- extractors that have been saved but still have yet to be repaired.
+    if IMGetCorrodingExtractorsExist() then
         return
     end
     
-    if self.queuedDamages and #self.queuedDamages > 0 then
-        return
-    end
-    
-    -- NOTE: the cooldown period will only decrease once there are no more damaged
-    -- purifiers.  Cooldown period is set when the damage occurs.
+    -- NOTE: the cooldown period will only decrease once there are no more corroding/about-to-be
+    -- corroding extractors.
     if self.cooldownPeriod > 0 then
         self.cooldownPeriod = self.cooldownPeriod - deltaTime
         return
@@ -304,7 +300,6 @@ local function PickInfected(self)
     
     infectedPlayer:SetIsInfected(true)
     
-    Log("infectedPlayer = %s (name is '%s')", infectedPlayer, infectedPlayer.name)
     local numPlayers = GetGamerules().team1:GetNumPlayers()
     for i=1, numPlayers do
         Server.SendNetworkMessage(GetGamerules().team1:GetPlayer(i), "IMInfectedStatusMessage", { infected = (GetGamerules().team1:GetPlayer(i) == infectedPlayer) }, true)
@@ -414,15 +409,55 @@ end
 
 function IMGameMaster:ReportDestroyedExtractor(extractor)
     
-    local index = self:GetDamagedPurifierIndexByEntity(extractor)
-    if index then
-        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
+    local blipId = extractor.purifierBlipId
+    if not blipId then
+        return
+    end
+    
+    local blip = Shared.GetEntity(blipId)
+    if blip then
+        blip:SetState(IMAirPurifierBlip.kPurifierState.Destroyed)
+        local index = self:GetDamagedPurifierIndexByEntity(blip)
         table.remove(self.damagedPurifiers, index)
     end
     
 end
 
-function IMGameMaster:RequestBlipForExtractor(extractor)
+-- saved, but not repaired.  Ie no longer taking damage, but still damaged.
+function IMGameMaster:ReportSavedExtractor(extractor)
+    
+    self:EnsureExtractorHasBlip(extractor)
+    
+    local index = self:GetDamagedPurifierIndexByEntity(extractor)
+    if index then
+        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
+        blip:SetState(IMAirPurifierBlip.kPurifierState.Damaged)
+    end
+    
+end
+
+-- taking damage!
+function IMGameMaster:ReportExtractorBeingDamaged(extractor)
+    
+    self:EnsureExtractorHasBlip(extractor)
+    
+    -- setup how much time the extractor has before it dies.
+    local duration = IMComputeTimeRequiredToSave(extractor)
+    Log("setting TTK of %s to %s", extractor, duration)
+    if duration then
+        extractor:SetCorrosionDamageFactorByTTK(duration)
+    end
+    
+    local index = self:GetDamagedPurifierIndexByEntity(extractor)
+    if index then
+        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
+        blip:SetState(IMAirPurifierBlip.kPurifierState.BeingDamaged)
+    end
+    
+end
+
+
+function IMGameMaster:EnsureExtractorHasBlip(extractor)
     
     local index = self:GetDamagedPurifierIndexByEntity(extractor)
     if not index then
@@ -430,6 +465,7 @@ function IMGameMaster:RequestBlipForExtractor(extractor)
     end
     
 end
+
 
 function IMGameMaster:OnUpdate(deltaTime)
     
@@ -457,7 +493,7 @@ function IMGameMaster:QueuePurifierDamage(purifier)
     
     local duration = IMComputeTimeRequiredToSave(purifier)
     self.queuedDamages = self.queuedDamages or {}
-    table.insert(self.queuedDamages, { purId = purifier:GetId(), duration = duration })
+    table.insert(self.queuedDamages, purifier:GetId())
     
 end
 
@@ -471,6 +507,39 @@ function IMGameMaster:GetDamagedPurifierIndexByEntity(ent)
     end
     
     return nil
+    
+end
+
+local function GetIsDamaged(self)
+    return (self:GetHealth() < self:GetMaxHealth() - 0.01) and (self:GetArmor() < self:GetMaxArmor() - 0.01)
+end
+
+function IMGameMaster:UpdateExtractor(purifier)
+    
+    -- figure out what needs doing
+    if not purifier then
+        return
+    end
+    
+    if not(purifier.GetIsAlive and purifier:GetIsAlive()) then
+        -- it's dead.  Ensure the blip is set to dead.
+        self:ReportDestroyedExtractor(purifier)
+    else
+        -- it's alive
+        if purifier.isCorroded then
+            -- it's just become corroded
+            self:ReportExtractorBeingDamaged(purifier)
+        else
+            -- see if it needs repairing
+            if GetIsDamaged(purifier) then
+                -- it's just become un-corroded
+                self:ReportSavedExtractor(purifier)
+            else
+                -- it's just been fully repaired and an elapsed time for keeping it around has ended.
+                self:ReportRepairedExtractor(purifier)
+            end
+        end
+    end
     
 end
 

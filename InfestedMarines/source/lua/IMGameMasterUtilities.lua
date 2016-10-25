@@ -43,7 +43,8 @@ function IMComputeTravelTime(to, from, speed)
 end
 
 -- computes the median time needed for CLEAN marines on the map to walk over to the node and
--- repair it, also clear infestation.
+-- repair it, also clear infestation.  Assume the node is at full health.  Punishes marines for
+-- not repairing nodes.
 function IMComputeTimeRequiredToSave(purifier)
     
     assert(purifier)
@@ -96,6 +97,32 @@ function IMGetExtractorEHPFraction(extractor)
     local maxEhp = extractor:GetMaxHealth() + extractor:GetMaxArmor() * 2
     
     return ehp / maxEhp
+    
+end
+
+local function GetWillExtractorBeCorroded(extractor)
+    
+    local cysts = GetEntitiesWithinRange("Cyst", extractor:GetOrigin(), Cyst.kInfestationRadius)
+    for i=1, #cysts do
+        if cysts[i] and cysts[i].GetIsAlive and cysts[i]:GetIsAlive() then
+            return true
+        end
+    end
+    
+end
+
+-- test not just extractors that are being corroded, but extractors that are within infestation
+-- range of a cyst, so they are ABOUT to be corroded.
+function IMGetCorrodingExtractorsExist()
+    
+    local extractors = EntityListToTable(Shared.GetEntitiesWithClassname("Extractor"))
+    for i=1, #extractors do
+        if extractors[i] and GetWillExtractorBeCorroded(extractors[i]) then
+            return true
+        end
+    end
+    
+    return false
     
 end
 

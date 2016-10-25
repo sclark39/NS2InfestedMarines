@@ -17,8 +17,10 @@ class 'IMGUIAirPurifierStatus' (GUIScript)
 IMGUIAirPurifierStatus.kIconSpaceSize = Vector(128, 108, 0)
 IMGUIAirPurifierStatus.kTextHeight = 20
 IMGUIAirPurifierStatus.kShadowOffset = Vector(2,2,0)
+IMGUIAirPurifierStatus.kWrenchVerticalOffset = 18
 
 IMGUIAirPurifierStatus.kIconSize = Vector(256, 256, 0)
+IMGUIAirPurifierStatus.kWrenchSize = Vector(64, 64, 0)
 
 IMGUIAirPurifierStatus.kFont = Fonts.kAgencyFB_Medium
 
@@ -35,6 +37,9 @@ IMGUIAirPurifierStatus.destroyedTextColor = Color(121/255, 41/255, 41/255, 1)
 IMGUIAirPurifierStatus.iconScaleFactor = 0.8287
 IMGUIAirPurifierStatus.textScaleFactor = 1.5
 
+local wrenchIconTechId = kTechId.Weld
+
+
 local kMoveSpeedFactor = 0.25 -- the lower this is, the faster it converges
 
 local function SharedUpdate(self, deltaTime)
@@ -48,8 +53,12 @@ local function SharedUpdate(self, deltaTime)
     self.displayedPosition = self.displayedPosition * (1.0 - interpVal) + self.desiredPosition * interpVal
     local iconScaleFact = (IMGUIAirPurifierStatus.kIconSpaceSize.x / IMGUIAirPurifierStatus.kIconSize.x) * IMGUIAirPurifierStatus.iconScaleFactor
     local iconOffset = (IMGUIAirPurifierStatus.kIconSpaceSize - (IMGUIAirPurifierStatus.kIconSize * iconScaleFact)) * 0.5
-    self.icon:SetPosition(GUIScaleHeight(self.displayedPosition) + iconOffset)
+    self.icon:SetPosition(GUIScaleHeight(self.displayedPosition + iconOffset))
     self.icon:SetSize(GUIScaleHeight(IMGUIAirPurifierStatus.kIconSize * iconScaleFact))
+    
+    self.wrench:SetSize(GUIScaleHeight(IMGUIAirPurifierStatus.kWrenchSize))
+    local leftEdge = IMGUIAirPurifierStatus.kWrenchSize.x * 0.5
+    self.wrench:SetPosition(GUIScaleHeight(Vector( leftEdge + self.displayedPosition.x , IMGUIAirPurifierStatus.kWrenchVerticalOffset + self.displayedPosition.y , 0)))
     
     self.text:SetScale(Vector(1,1,1))
     local unscaledTextHeight = self.text:GetTextHeight("0")
@@ -107,6 +116,13 @@ function IMGUIAirPurifierStatus:Initialize()
     self.icon:SetColor(IMGUIAirPurifierStatus.flashColor)
     self.icon:SetShader(IMGUIAirPurifierStatus.iconShader)
     
+    self.wrench = GUIManager:CreateGraphicItem()
+    self.wrench:SetAnchor(GUIItem.Middle, GUIItem.Top)
+    self.wrench:SetIsVisible(false)
+    self.wrench:SetLayer(kGUILayerPlayerHUDForeground2)
+    self.wrench:SetTexture("ui/buildmenu.dds")
+    self.wrench:SetTexturePixelCoordinates(unpack(GetTextureCoordinatesForIcon(kTechId.Weld)))
+    
     self:SetFrequency(0.25)
     
     self.roomName = self.roomName or ""
@@ -118,10 +134,12 @@ function IMGUIAirPurifierStatus:Uninitialize()
     GUI.DestroyItem(self.text)
     GUI.DestroyItem(self.textShadow)
     GUI.DestroyItem(self.icon)
+    GUI.DestroyItem(self.wrench)
     
     self.text = nil
     self.textShadow = nil
     self.icon = nil
+    self.wrench = nil
     
     GetGUIManager():DestroyGUIScript(self)
     
@@ -192,19 +210,27 @@ function IMGUIAirPurifierStatus:SetIconState(state)
     local now = Shared.GetTime()
     
     self.iconState = state
-    if state == IMAirPurifierBlip.kPurifierState.Damaged then
+    if state == IMAirPurifierBlip.kPurifierState.BeingDamaged then
         self.icon:SetTexture(IMGUIAirPurifierStatus.iconNormal)
         self.icon:SetFloatParameter("pulseInfluence", 1)
         self.icon:SetColor(IMGUIAirPurifierStatus.flashColor)
         self.text:SetColor(IMGUIAirPurifierStatus.textColor)
+        self.wrench:SetIsVisible(false)
     elseif state == IMAirPurifierBlip.kPurifierState.Destroyed then
         self.icon:SetTexture(IMGUIAirPurifierStatus.iconDestroyed)
         self.text:SetColor(IMGUIAirPurifierStatus.destroyedTextColor)
         self.icon:SetFloatParameter("pulseInfluence", 0)
+        self.wrench:SetIsVisible(false)
+    elseif state == IMAirPurifierBlip.kPurifierState.Damaged then
+        self.icon:SetTexture(IMGUIAirPurifierStatus.iconNormal)
+        self.icon:SetFloatParameter("pulseInfluence", 0)
+        self.text:SetColor(IMGUIAirPurifierStatus.textColor)
+        self.wrench:SetIsVisible(true)
     else --state == IMAirPurifierBlip.kPurifierState.Fixed then
         self.icon:SetTexture(IMGUIAirPurifierStatus.iconNormal)
         self.icon:SetFloatParameter("pulseInfluence", 0)
         self.text:SetColor(IMGUIAirPurifierStatus.textColor)
+        self.wrench:SetIsVisible(false)
     end
     
 end

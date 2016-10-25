@@ -62,13 +62,25 @@ function Cyst:OnInitialized()
 end
 
 if Server then
-    
+  
     function Cyst:OnUpdate(deltaTime)
+
+        PROFILE("Cyst:OnUpdate")
         
         ScriptActor.OnUpdate(self, deltaTime)
         
+        if not self:GetIsAlive() then
+            local destructionAllowedTable = { allowed = true }
+            if self.GetDestructionAllowed then
+                self:GetDestructionAllowed(destructionAllowedTable)
+            end
+            
+            if destructionAllowedTable.allowed then
+                DestroyEntity(self)
+            end
+        end
+        
     end
-    
 end
 
 function Cyst:OnUpdateRender()

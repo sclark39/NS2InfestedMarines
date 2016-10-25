@@ -45,10 +45,11 @@ local function GetIsDamaged(self)
     return (self:GetHealth() < self:GetMaxHealth() - 0.01) and (self:GetArmor() < self:GetMaxArmor() - 0.01)
 end
 
+
 function Extractor:ExtractorBlipUpdate(deltaTime)
     local damaged = GetIsDamaged(self)
     if GetIsDamaged(self) and not self.purifierBlipId then
-        GetGameMaster():RequestBlipForExtractor(self)
+        GetGameMaster():UpdateExtractor(self)
     end
     
     if self.purifierBlipId then
@@ -58,26 +59,33 @@ function Extractor:ExtractorBlipUpdate(deltaTime)
                 self.elapsedTimeRepaired = 0.0
                 if self:GetIsAlive() then
                     blip:SetFrequency(GetFrequencyByHealthAndArmorStatus(self))
-                    blip:SetState(IMAirPurifierBlip.kPurifierState.Damaged)
-                else
-                    blip:SetState(IMAirPurifierBlip.kPurifierState.Destroyed)
                 end
             else
                 self.elapsedTimeRepaired = self.elapsedTimeRepaired + deltaTime
-                blip:SetState(IMAirPurifierBlip.kPurifierState.Fixed)
+                if blip:GetState() ~= IMAirPurifierBlip.kPurifierState.Fixed then
+                    GetGameMaster():UpdateExtractor(self)
+                end
                 if self.elapsedTimeRepaired >= kKeepBlipAfterRepairTime then
-                    GetGameMaster():ReportRepairedExtractor(self)
+                    GetGameMaster():UpdateExtractor(self)
                 end
             end
         end
     end
     
     if not self:GetIsAlive() then
-        GetGameMaster():ReportDestroyedExtractor(self)
+        GetGameMaster():UpdateExtractor(self)
         return false
     end
     
     return true
+    
+end
+
+function Extractor:OnKill(attacker, doer, point, direction)
+    
+    ScriptActor.OnKill(self, attacker, doer, point, direction)
+    
+    GetGameMaster():UpdateExtractor(self)
     
 end
 
@@ -92,6 +100,7 @@ function Extractor:OnInitialized()
     end
     
 end
+
 
 if Server then
     function Extractor:GetCorrosionDamageFactor()

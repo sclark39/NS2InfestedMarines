@@ -12,7 +12,7 @@ Marine.kInfectionRange = 3.0
 Marine.kInfectionRangeSq = Marine.kInfectionRange * Marine.kInfectionRange
 
 Marine.kInvalidInfestationTargetSound = PrecacheAsset("sound/NS2.fev/common/invalid")
-Marine.kInfectionFreezeTime = 0.5 -- freeze player for this long when they are infested, to prevent
+Marine.kInfectionFreezeTime = 1.0 -- freeze player for this long when they are infested, to prevent
 -- team killing.
 
 Marine.kPointsForInfest = 20
@@ -20,6 +20,8 @@ Marine.kPointsForInfest = 20
 Marine.kInfestedEnergyMax = 1.0
 Marine.kInfestedDurationMax = 120.0 -- two minutes without feeding before infested starves.
 Marine.kInfestedFeedLossRate = Marine.kInfestedEnergyMax / Marine.kInfestedDurationMax
+
+Marine.kInfestationCinematicOffset = Vector(0, 1.32, 0)
 
 local old_Marine_OnCreate = Marine.OnCreate
 function Marine:OnCreate()
@@ -98,6 +100,22 @@ function Marine:SetIsInfected(state)
     
 end
 
+local function TriggerThingoutEffects(self, timePassed, attacker)
+    
+    local coords = self:GetCoords()
+    if attacker then
+        coords.origin = coords.origin + Marine.kInfestationCinematicOffset
+        self:TriggerEffects("marine_infestation_attacker", {effecthostcoords = coords})
+    else
+        coords.origin = coords.origin + Marine.kInfestationCinematicOffset * 0.5
+        self:TriggerEffects("marine_infestation_victim", {effecthostcoords = coords})
+    end
+    
+    
+    return false -- don't repeat
+    
+end
+
 function Marine:Infect()
     
     self:SetIsInfected(true)
@@ -108,8 +126,7 @@ function Marine:Infect()
         Server.SendNetworkMessage(self, "IMInfectedProcessMessage", {}, true)
     end
     
-    self:TriggerEffects("bilebomb_hit")
-    --TODO better effects
+    self:AddTimedCallback(TriggerThingoutEffects, 0.5)
     
 end
 
@@ -147,6 +164,8 @@ local function AttemptInfection(self)
         self:AddScore(self.kPointsForInfest)
         target:Infect()
         self:AddInfestedEnergy(Marine.kInfestedEnergyMax)
+        
+        TriggerThingoutEffects(self, 0.0, true)
     end
     
 end

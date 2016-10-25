@@ -13,6 +13,7 @@ Script.Load("lua/IMAirPurifierBlip.lua")
 Script.Load("lua/IMAirStatusBlip.lua")
 Script.Load("lua/IMMapBlip.lua")
 Script.Load("lua/IMConsoleCommands.lua")
+Script.Load("lua/IMInfestationEffects.lua")
 
 Shared.RegisterNetworkMessage("IMInfectedStatusMessage", { infected = "boolean" })
 Shared.RegisterNetworkMessage("IMInfectedProcessMessage", { })

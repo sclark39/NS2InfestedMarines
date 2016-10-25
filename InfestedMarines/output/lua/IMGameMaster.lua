@@ -55,7 +55,7 @@ IMGameMaster.kMarineSquadRange = 25 -- any marines within 25m of another marine 
                                     -- the same "squad"
 IMGameMaster.kMarineSquadRangeSq = IMGameMaster.kMarineSquadRange * IMGameMaster.kMarineSquadRange
 IMGameMaster.kMarineWeldTime = 4    -- approximately the amount of seconds required once at a node to weld it fully.
-IMGameMaster.kTimeBeforeInfectedChosen = 1
+IMGameMaster.kTimeBeforeInfectedChosen = 30
 IMGameMaster.kPhase = enum({ "Scatter", "Regroup" })
 
 -- cysts propagate on their own slowly, but will RAPIDLY deploy near new nodes.

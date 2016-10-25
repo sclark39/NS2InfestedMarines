@@ -30,6 +30,7 @@ function Marine:OnCreate()
     
     self.infestedEnergy = 1.0
     self.infected = false
+    self.infestationFreeze = false
     
 end
 
@@ -130,6 +131,11 @@ function Marine:Infect()
     
 end
 
+local function UnfreezeInfestation(self, timePassed)
+    self.infestationFreeze = false
+    return false
+end
+
 local function AttemptInfection(self)
     
     -- make it a single event upon the button press, not a continuous thing.
@@ -160,12 +166,17 @@ local function AttemptInfection(self)
         return
     end
     
+    self.infestationFreeze = true --prevent player from moving while they are infesting another.
+    
     if Server then
         self:AddScore(self.kPointsForInfest)
         target:Infect()
         self:AddInfestedEnergy(Marine.kInfestedEnergyMax)
         
         TriggerThingoutEffects(self, 0.0, true)
+        
+        -- unfreeze player once infestation process has ended.
+        self:AddTimedCallback(UnfreezeInfestation, Marine.kInfectionFreezeTime)
     end
     
 end
@@ -186,10 +197,20 @@ function Marine:SecondaryAttack()
     
 end
 
+local old_Marine_OnProcessMove = Marine.OnProcessMove
+function Marine:OnProcessMove(input)
+    
+    if not self.infestationFreeze then
+        old_Marine_OnProcessMove(self, input)
+    end
+    
+end
+
 local kNewMarineNetvars = 
 {
     infected = "boolean",
     infestedEnergy = "float",
+    infestationFreeze = "boolean",
 }
 
 Class_Reload("Marine", kNewMarineNetvars)

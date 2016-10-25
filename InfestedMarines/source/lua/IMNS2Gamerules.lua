@@ -407,4 +407,12 @@ if Server then
         end
     end
 
+    --reset (update) scores at round end
+    local oldEndGame = NS2Gamerules.EndGame
+    function NS2Gamerules:EndGame(...)
+        oldEndGame(self, ...)
+
+        self:ResetPlayerScores()
+    end
+
 end

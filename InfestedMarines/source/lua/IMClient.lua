@@ -70,6 +70,38 @@ local function SetObjectives(text, type)
     
 end
 
+local function ClearObjectives() --instantaneous
+    
+    local player = Client.GetLocalPlayer()
+    local mDisplay = GetMarineObjectivePanel()
+    local aDisplay = GetAlienObjectivePanel()
+    if mDisplay then
+        mDisplay:SetVisibility(false)
+    end
+    if aDisplay then
+        aDisplay:SetVisibility(false)
+    end
+    
+end
+
+local function HideObjectives()
+    
+    local player = Client.GetLocalPlayer()
+    local mDisplay = GetMarineObjectivePanel()
+    local aDisplay = GetAlienObjectivePanel()
+    
+    if mDisplay and player.marineObjDisplayed then
+        mDisplay:AnimateOut()
+        player.marineObjDisplayed = false
+    end
+    
+    if aDisplay and player.alienObjDisplayed then
+        aDisplay:AnimateOut()
+        player.alienObjDisplayed = false
+    end
+    
+end
+
 local function OnInfectedStatusMessage(msg)
     
     if msg.infected then
@@ -78,14 +110,24 @@ local function OnInfectedStatusMessage(msg)
         SetObjectives("You are not infested!  One or more of your \"friends\" however, are.  Watch each other closely.  Infestation is spreading throughout the facility and poisoning the air!  Clear the infestation and repair the Air Purifiers before the air becomes lethal!", "marine")
     end
 end
-Client.HookNetworkMessage("InfectedStatusMessage", OnInfectedStatusMessage)
+Client.HookNetworkMessage("IMInfectedStatusMessage", OnInfectedStatusMessage)
 
 local function OnInfectedProcessMessage(msg)
     SetObjectives("You have been infested!\nRight-click marines when close enough (outline turns red) to infest them.  Pretend you're uninfested to avoid suspicion, but you will starve to death soon if you do not infest more humans!", "alien")
 end
-Client.HookNetworkMessage("InfectedProcessMessage", OnInfectedProcessMessage)
+Client.HookNetworkMessage("IMInfectedProcessMessage", OnInfectedProcessMessage)
 
 local function OnRoundStartMessage(msg)
     SetObjectives("Infestation is taking over the facility; the air is becoming toxic!  Repair the Air Purifiers before the air becomes lethal.  We cannot lose this facility!\n\n(Infested has not yet been chosen.)", "marine")
 end
-Client.HookNetworkMessage("RoundStartMessage", OnRoundStartMessage)
+Client.HookNetworkMessage("IMRoundStartMessage", OnRoundStartMessage)
+
+local function OnHideObjectives(msg)
+    HideObjectives()
+end
+Client.HookNetworkMessage("IMHideObjectives", OnHideObjectives)
+
+local function OnClearObjectives(msg)
+    ClearObjectives()
+end
+Client.HookNetworkMessage("IMClearObjectives", OnClearObjectives)

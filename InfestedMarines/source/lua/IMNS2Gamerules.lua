@@ -151,7 +151,7 @@ if Server then
      * respawn playing players.
     ]]
     function NS2Gamerules:ResetGame()
-
+        
         self:SetGameState(kGameState.NotStarted)
 
         TournamentModeOnReset()
@@ -340,6 +340,8 @@ if Server then
         self.team1:OnResetComplete()
         self.team2:OnResetComplete()
         
+        Server.SendNetworkMessage("IMClearObjectives", {}, true)
+        
     end
     
     local function StartCountdown(self)
@@ -417,7 +419,8 @@ if Server then
     local oldEndGame = NS2Gamerules.EndGame
     function NS2Gamerules:EndGame(...)
         oldEndGame(self, ...)
-
+        
+        GetGameMaster():OnRoundEnd()
         self:ResetPlayerScores()
     end
 

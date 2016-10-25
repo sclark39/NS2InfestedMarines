@@ -215,6 +215,13 @@ function IMGUIObjectivesAlien:AnimateOut()
 end
 
 
+function IMGUIObjectivesAlien:GetIsShowing()
+    
+    return (self.current_state == 'hiding') or (self.current_state == 'visible') or (self.current_state == 'unhiding')
+    
+end
+
+
 function IMGUIObjectivesAlien:Update(deltaTime)
     
     if self.current_state == 'hidden_before' then

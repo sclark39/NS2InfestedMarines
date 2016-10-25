@@ -105,7 +105,7 @@ function Marine:Infect()
     
     Log("marine '%s' has been infected!", self)
     if Server then
-        Server.SendNetworkMessage(self, "InfectedProcessMessage", {}, true)
+        Server.SendNetworkMessage(self, "IMInfectedProcessMessage", {}, true)
     end
     
     self:TriggerEffects("bilebomb_hit")

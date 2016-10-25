@@ -55,7 +55,7 @@ IMGameMaster.kMarineSquadRange = 25 -- any marines within 25m of another marine 
                                     -- the same "squad"
 IMGameMaster.kMarineSquadRangeSq = IMGameMaster.kMarineSquadRange * IMGameMaster.kMarineSquadRange
 IMGameMaster.kMarineWeldTime = 4    -- approximately the amount of seconds required once at a node to weld it fully.
-IMGameMaster.kTimeBeforeInfectedChosen = 30
+IMGameMaster.kTimeBeforeInfectedChosen = 1
 IMGameMaster.kPhase = enum({ "Scatter", "Regroup" })
 
 -- cysts propagate on their own slowly, but will RAPIDLY deploy near new nodes.
@@ -158,7 +158,7 @@ function IMGameMaster:DoGameStart()
     self:SetPhase(IMGameMaster.kPhase.Scatter)
     
     -- set all players objectives
-    Server.SendNetworkMessage("RoundStartMessage", {}, true)
+    Server.SendNetworkMessage("IMRoundStartMessage", {}, true)
     
 end
 
@@ -307,7 +307,7 @@ local function PickInfected(self)
     Log("infectedPlayer = %s (name is '%s')", infectedPlayer, infectedPlayer.name)
     local numPlayers = GetGamerules().team1:GetNumPlayers()
     for i=1, numPlayers do
-        Server.SendNetworkMessage(GetGamerules().team1:GetPlayer(i), "InfectedStatusMessage", { infected = (GetGamerules().team1:GetPlayer(i) == infectedPlayer) }, true)
+        Server.SendNetworkMessage(GetGamerules().team1:GetPlayer(i), "IMInfectedStatusMessage", { infected = (GetGamerules().team1:GetPlayer(i) == infectedPlayer) }, true)
     end
     
 end
@@ -393,6 +393,12 @@ local function UpdateInfestedFeed(self)
     for i=1, #iMarines do
         iMarines[i]:DeductInfestedEnergy(loss)
     end
+    
+end
+
+function IMGameMaster:OnRoundEnd()
+    
+    Server.SendNetworkMessage("IMHideObjectives", {}, true)
     
 end
 

@@ -106,34 +106,42 @@ if Server then
                 for i=1, #marines do
                     if marines[i] and marines[i].GetIsInfected and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
                         if marines[i]:GetIsInfected() then
+                            Log("found an infected marine (%s)", marines[i])
                             foundInfected = true
                         else
+                            Log("found an un-infected marine (%s)", marines[i])
                             foundUninfected = true
                         end
                     end
                 end
                 
                 if foundInfected and not foundUninfected then
+                    Log("Found infected, but no uninfected.  Ending with a win for team2.")
                     self:EndGame( self.team2 )
-                elseif not foundInfected and foundUninfected then
+                elseif (not foundInfected) and foundUninfected then
+                    Log("Found uninfected, but no infected.  Ending with a win for team1.")
                     self:EndGame( self.team1 )
-                elseif not foundInfected and not foundUninfected then
+                elseif (not foundInfected) and (not foundUninfected) then
+                    Log("Didn't find infected or uninfected marines.  Ending with a draw.")
                     self:DrawGame()
                 end
                 
                 -- check for if uninfected have toxic air quality
                 if GetGameMaster():GetAirQuality() <= 0.00001 then
+                    Log("Air quality is toxic.  Ending with a win for team2.")
                     self:EndGame( self.team2 )
                 end
             else
                 local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
-                local count = 0
+                local foundAlive = false
                 for i=1, #marines do
                     if marines[i] and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
-                        count = count + 1
+                        foundAlive = true
+                        break
                     end
                 end
-                if count <= 1 then
+                if not foundAlive then
+                    Log("All marines dead before first infected even chosen.  Ending with a win for team2.")
                     self:EndGame( self.team2 )
                 end
             end

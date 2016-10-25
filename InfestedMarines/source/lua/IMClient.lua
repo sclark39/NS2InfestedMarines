@@ -13,6 +13,7 @@ Script.Load("lua/IMGUIAirPurifierStatus.lua")
 Script.Load("lua/IMGUIAirPurifierManager.lua")
 Script.Load("lua/IMGUIObjectivesMarine.lua")
 Script.Load("lua/IMGUIObjectivesAlien.lua")
+Script.Load("lua/IMGUIInfestedFeedTimer.lua")
 
 local function SwitchToObjectives(type)
     

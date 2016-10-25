@@ -23,6 +23,12 @@ function Marine:UpdateMisc(input)
         end
     end
     
+    -- update feed level
+    local timer = GetFeedTimerGUI()
+    if timer then
+        timer:SetFeedFraction(self.infestedEnergy / Marine.kInfestedEnergyMax)
+    end
+    
     old_Marine_UpdateMisc(self, input)
     
 end

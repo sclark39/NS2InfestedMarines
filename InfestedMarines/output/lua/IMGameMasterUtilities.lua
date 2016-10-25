@@ -426,6 +426,21 @@ function IMInfestNode(node)
     
 end
 
+function IMGetInfestedMarines()
+    
+    local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+    local vettedMarines = {}
+    
+    for i=1, #marines do
+        if marines[i] and marines[i].GetIsAlive and marines[i]:GetIsAlive() and marines[i].GetIsInfected and marines[i]:GetIsInfected() then
+            table.insert(vettedMarines, marines[i])
+        end
+    end
+    
+    return vettedMarines
+    
+end
+
 function IMGetCleanMarines()
     
     local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))

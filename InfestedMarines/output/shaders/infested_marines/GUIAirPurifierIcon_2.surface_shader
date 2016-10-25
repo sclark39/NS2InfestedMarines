@@ -1,0 +1,26 @@
+<shader>
+	
+	<inputs>
+		<input name="baseTexture"   type="texture" address="wrap" />
+        <input name="pulseInfluence"type="float">1</input>
+        <input name="pulseFreq"     type="float">1</input>
+	</inputs> 
+	
+	<code>
+
+		void MaterialShader(bool textured, float2 texCoord, float4 color, inout Material material)
+		{
+            const float pi = 3.14159265359f;
+            
+            float intensity = (sin(time * pulseFreq * pi * 2) * 0.5f + 0.5f) * pulseInfluence;
+            
+            float4 icon = tex2D(baseTexture, texCoord);
+            float4 result = icon * (1.0f - intensity) + color * intensity;
+            result.a = icon.a;
+            
+            material.resultColor = result;
+		}
+	
+	</code>
+
+</shader>

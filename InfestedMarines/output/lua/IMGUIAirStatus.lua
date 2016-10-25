@@ -171,10 +171,4 @@ function IMGUIAirStatus:SetAirQuality(fraction, optional_immediate)
     
 end
 
--- debug
-local function OnConsoleSetFraction(fraction)
-    GetAirStatusGUI():SetAirQuality(fraction)
-end
-Event.Hook("Console_sfrac", OnConsoleSetFraction)
-
 

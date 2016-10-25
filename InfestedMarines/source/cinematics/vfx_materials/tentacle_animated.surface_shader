@@ -1,0 +1,37 @@
+<shader>
+
+    <inputs>
+        <input name="albedoMap" type="texture" address="wrap" />
+        <input name="numFrames" type="float">1</input>
+        <input name="framesPerSecond" type="float">30</input>
+    </inputs>
+    
+    <params>
+        <param name="twoSided">true</param>
+        <param name="alphaTest">true</param>
+    </params>
+    
+    <code>
+    <![CDATA[
+        float3 DecodeNormal(const float4 texNormal)
+        {
+            float4 n = texNormal * 2 - 1;
+            //return float3(n.a, n.g, sqrt(1 - dot(n.ag, n.ag)) );
+            return n.xyz;
+        }
+        void MaterialShader(in Material_Input input, inout Material material)
+        {
+            float frame = floor(framesPerSecond * time);
+            float vOffset = (1.0f / numFrames) * frame;
+            float v = input.texCoord.y / numFrames;
+            float2 uvs = float2(input.texCoord.x, v) + float2(0, vOffset);
+            
+            float4 tex = tex2D(albedoMap, uvs);
+            
+            material.albedo = tex.rgb / tex.a;
+            material.opacity = tex.a;
+        }
+    ]]>
+    </code>
+
+</shader>

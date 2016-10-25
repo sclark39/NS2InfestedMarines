@@ -383,6 +383,19 @@ local function UpdateAirQuality(self)
     
 end
 
+local function UpdateInfestedFeed(self)
+    
+    local deltaTime = IMGameMaster.kUpdatePeriod
+    local iMarines = IMGetInfestedMarines()
+    
+    local loss = Marine.kInfestedFeedLossRate * deltaTime
+    
+    for i=1, #iMarines do
+        iMarines[i]:DeductInfestedEnergy(loss)
+    end
+    
+end
+
 function IMGameMaster:GetAirQuality()
     return self.airQFraction
 end
@@ -426,6 +439,7 @@ function IMGameMaster:OnUpdate(deltaTime)
     UpdateInfectionPick(self)
     UpdateCysts(self)
     UpdateAirQuality(self)
+    UpdateInfestedFeed(self)
     
     if useAutomatedGameMaster then
         UpdateGameMasterDuties(self, IMGameMaster.kUpdatePeriod)

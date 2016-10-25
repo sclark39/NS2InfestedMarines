@@ -15,7 +15,7 @@ local oldPreOnKill = PointGiverMixin.PreOnKill
 function PointGiverMixin:PreOnKill(attacker, doer, point, direction)
 
 	--save attacker for giving the right amount of points
-	if self.GetIsInfected and attacker.GetIsInfected then
+	if attacker and self.GetIsInfected and attacker.GetIsInfected then
 		self.attacker = attacker
 	end
 

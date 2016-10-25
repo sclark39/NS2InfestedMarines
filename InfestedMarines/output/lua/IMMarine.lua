@@ -17,6 +17,36 @@ Marine.kInfectionFreezeTime = 0.5 -- freeze player for this long when they are i
 
 Marine.kPointsForInfest = 20
 
+Marine.kInfestedEnergyMax = 1.0
+Marine.kInfestedDurationMax = 120.0 -- two minutes without feeding before infested starves.
+Marine.kInfestedFeedLossRate = Marine.kInfestedEnergyMax / Marine.kInfestedDurationMax
+
+local old_Marine_OnCreate = Marine.OnCreate
+function Marine:OnCreate()
+    
+    old_Marine_OnCreate(self)
+    
+    self.infestedEnergy = 1.0
+    self.infected = false
+    
+end
+
+function Marine:AddInfestedEnergy(amount)
+    
+    self.infestedEnergy = math.min(self.infestedEnergy + amount, Marine.kInfestedEnergyMax)
+    
+end
+
+function Marine:DeductInfestedEnergy(amount)
+    
+    self.infestedEnergy = self.infestedEnergy - amount
+    
+    if self.infestedEnergy <= 0 then
+        self:Kill()
+    end
+    
+end
+
 function Marine:GetCrosshairTargetForInfection()
     local viewAngles = self:GetViewAngles()
     local viewCoords = viewAngles:GetCoords()
@@ -63,6 +93,8 @@ function Marine:SetIsInfected(state)
     
     self.infected = (state == true)
     self:MarkBlipDirty()
+    
+    self:AddInfestedEnergy(Marine.kInfestedEnergyMax)
     
 end
 
@@ -112,8 +144,9 @@ local function AttemptInfection(self)
     end
     
     if Server then
-	    self:AddScore(self.kPointsForInfest)
+        self:AddScore(self.kPointsForInfest)
         target:Infect()
+        self:AddInfestedEnergy(Marine.kInfestedEnergyMax)
     end
     
 end
@@ -137,6 +170,7 @@ end
 local kNewMarineNetvars = 
 {
     infected = "boolean",
+    infestedEnergy = "float",
 }
 
 Class_Reload("Marine", kNewMarineNetvars)

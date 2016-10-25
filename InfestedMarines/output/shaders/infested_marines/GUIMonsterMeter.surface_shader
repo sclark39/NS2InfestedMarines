@@ -1,0 +1,25 @@
+<shader>
+    
+    <inputs>
+        <input name="baseTexture"   type="texture" address="wrap" />
+        <input name="fillFraction"  type="float">1</input>
+    </inputs> 
+    
+    <code>
+
+        void MaterialShader(bool textured, float2 texCoord, float4 color, inout Material material)
+        {
+            const float darkenMult = 0.125;
+            
+            float monster = tex2D(baseTexture, texCoord).r;
+            float lightness = 1.0f - saturate(((1.0- texCoord.y) - fillFraction) * 1000.0f);
+            lightness = (lightness * (1.0f - darkenMult)) + darkenMult;
+            float4 result = color * lightness;
+            result.a = monster;
+            
+            material.resultColor = result;
+        }
+    
+    </code>
+
+</shader>

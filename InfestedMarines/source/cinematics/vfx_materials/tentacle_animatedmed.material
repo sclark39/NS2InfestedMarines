@@ -1,0 +1,4 @@
+shader = "cinematics/vfx_materials/tentacle_animated.surface_shader"
+albedoMap = "cinematics/vfx_materials/tentacle_animated.dds"
+numFrames = 16
+framesPerSecond = 42

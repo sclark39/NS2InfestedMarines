@@ -108,7 +108,7 @@ local function TriggerThingoutEffects(self, timePassed, attacker)
         coords.origin = coords.origin + Marine.kInfestationCinematicOffset
         self:TriggerEffects("marine_infestation_attacker", {effecthostcoords = coords})
     else
-        coords.origin = coords.origin + Marine.kInfestationCinematicOffset * 0.5
+        coords.origin = coords.origin + Marine.kInfestationCinematicOffset
         self:TriggerEffects("marine_infestation_victim", {effecthostcoords = coords})
     end
     
@@ -117,10 +117,14 @@ local function TriggerThingoutEffects(self, timePassed, attacker)
     
 end
 
+local function UnfreezeInfestation(self, timePassed)
+    self.infestationFreeze = false
+    return false
+end
+
 function Marine:Infect()
     
     self:SetIsInfected(true)
-    self:SetStun(Marine.kInfectionFreezeTime)
     
     Log("marine '%s' has been infected!", self)
     if Server then
@@ -129,11 +133,10 @@ function Marine:Infect()
     
     self:AddTimedCallback(TriggerThingoutEffects, 0.5)
     
-end
-
-local function UnfreezeInfestation(self, timePassed)
-    self.infestationFreeze = false
-    return false
+    self.infestationFreeze = true --prevent player from moving while they are infesting another.
+    -- unfreeze player once infestation process has ended.
+    self:AddTimedCallback(UnfreezeInfestation, Marine.kInfectionFreezeTime)
+    
 end
 
 local function AttemptInfection(self)

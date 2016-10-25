@@ -16,9 +16,9 @@ class 'IMGUIInfestedFeedTimer' (GUIScript)
 
 -- the following measurements are in pixels, based on a 1920x1080 display.  They will scale to fill any
 -- screen size based on the vertical resolution.
-IMGUIInfestedFeedTimer.kRightEdgeMargin = 128 -- right edge of monster is 128 pixels from right edge of screen
+IMGUIInfestedFeedTimer.kRightEdgeMargin = 24 -- right edge of monster is 128 pixels from right edge of screen
 IMGUIInfestedFeedTimer.kTextureSourceSize = Vector(556, 679, 0) -- literal pixels, source image, not scaled.
-IMGUIInfestedFeedTimer.kMonsterTargetSize = Vector(291, 358, 0) -- scaled monster size, on screen.
+IMGUIInfestedFeedTimer.kMonsterTargetSize = Vector(205, 253, 0) -- scaled monster size, on screen.
 
 IMGUIInfestedFeedTimer.kMonsterTexture = PrecacheAsset("ui/infested_marines/infested_silhouette.dds")
 -- cannot precache gui shaders, causes compile errors :/

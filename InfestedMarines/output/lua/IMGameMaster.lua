@@ -13,7 +13,6 @@
 Script.Load("lua/IMGameMasterUtilities.lua")
 
 local gameMaster = nil
-local useAutomatedGameMaster = true
 
 function GetGameMaster()
     
@@ -329,10 +328,6 @@ end
 
 local function UpdateCysts(self)
     
-    if not GetGamerules():GetGameStarted() then
-        return
-    end
-    
     -- regular cyst propagation
     self.nextCyst = self.nextCyst or 0
     if self.nextCyst <= 0 then
@@ -469,6 +464,10 @@ end
 
 function IMGameMaster:OnUpdate(deltaTime)
     
+    if not GetGamerules():GetGameStarted() then
+        return
+    end
+    
     self.throttle = self.throttle or 0
     self.throttle = self.throttle + deltaTime
     if self.throttle >= IMGameMaster.kUpdatePeriod then
@@ -482,10 +481,7 @@ function IMGameMaster:OnUpdate(deltaTime)
     UpdateCysts(self)
     UpdateAirQuality(self)
     UpdateInfestedFeed(self)
-    
-    if useAutomatedGameMaster then
-        UpdateGameMasterDuties(self, IMGameMaster.kUpdatePeriod)
-    end
+    UpdateGameMasterDuties(self, IMGameMaster.kUpdatePeriod)
     
 end
 
@@ -595,7 +591,3 @@ local function OnUpdateGameMaster(deltaTime)
     GetGameMaster():OnUpdate(deltaTime)
 end
 Event.Hook("UpdateServer", OnUpdateGameMaster)
-
-function IMGameMaster:SetAutomationState(state)
-    useAutomatedGameMaster = state
-end

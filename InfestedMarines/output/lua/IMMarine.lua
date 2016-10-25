@@ -126,7 +126,6 @@ function Marine:Infect()
     
     self:SetIsInfected(true)
     
-    Log("marine '%s' has been infected!", self)
     if Server then
         Server.SendNetworkMessage(self, "IMInfectedProcessMessage", {}, true)
     end

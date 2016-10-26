@@ -308,6 +308,25 @@ local function AttemptInfection(self)
     
 end
 
+function Marine:GetCanDropWeapon(weapon, ignoreDropTimeLimit)
+
+    if not weapon then
+        weapon = self:GetActiveWeapon()
+    end
+    
+    if weapon ~= nil and weapon.GetIsDroppable and weapon:GetIsDroppable() then
+    
+        -- Don't drop weapons too fast.
+        if ignoreDropTimeLimit then
+            return true
+        end
+        
+    end
+    
+    return false
+    
+end
+
 function Marine:SecondaryAttackEnd()
     
     self.isSecondaryAttacking = false

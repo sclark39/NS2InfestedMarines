@@ -427,7 +427,8 @@ if Server then
 
         local canHear = false
 
-        if Server.GetConfigSetting("alltalk") or Server.GetConfigSetting("pregamealltalk") and not self:GetGameStarted() then
+        --alltalk pregame
+        if not self:GetGameStarted() then
             return true
         end
 
@@ -436,8 +437,8 @@ if Server then
             return false
         end
 
-        -- If both players have the same team number, they can hear each other
-        if listenerPlayer:GetIsAlive() == speakerPlayer:GetIsAlive() then
+        -- Alive can only hear alive and dead players can listen to everybody
+        if listenerPlayer:GetIsAlive() == speakerPlayer:GetIsAlive() or not listenerPlayer:GetIsAlive() then
             if channelType == nil or channelType == VoiceChannel.Global then
                 canHear = true
             else

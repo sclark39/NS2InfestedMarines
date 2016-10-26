@@ -8,6 +8,8 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
+Flamethrower.kConeWidth = 0.34
+
 function Flamethrower:GetMaxClips()
     return 1
 end

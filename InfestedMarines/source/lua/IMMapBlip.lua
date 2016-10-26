@@ -15,6 +15,35 @@ local networkVars =
     isInfested = "boolean",
 }
 
+if Client then
+    local blipRotation = Vector(0,0,0)
+    function MapBlip:UpdateMinimapItemHook(minimap, item)
+
+        PROFILE("MapBlip:UpdateMinimapItemHook")
+
+        local rotation = self:GetRotation()
+        if rotation ~= item.prevRotation then
+            item.prevRotation = rotation
+            blipRotation.z = rotation
+            item:SetRotation(blipRotation)
+        end
+        local blipTeam = self:GetMapBlipTeam(minimap)
+        local blipColor = item.blipColor
+        
+        if self.OnSameMinimapBlipTeam(minimap.playerTeam, blipTeam) or minimap.spectating then
+            
+            if self.isInCombat and self:GetMapBlipType() ~= kMinimapBlipType.Marine then
+                blipColor = self.PulseRed(1.0)
+            end
+            self:UpdateHook(minimap, item)
+            
+        end
+        self.currentMapBlipColor = blipColor
+
+    end
+    
+end
+
 function MapBlip:UpdateRelevancy()
     
     self:SetRelevancyDistance(Math.infinity)

@@ -147,7 +147,7 @@ function IMGUIObjectivesAlien:OnResolutionChanged()
 end
 
 
-function IMGUIObjectivesAlien:SetText(text, duration)
+function IMGUIObjectivesAlien:SetText(text, duration, immediate)
     
     if duration and duration > 0.001 then --it's a temporary text, need to store the last permanent value
         self.last_permanent_raw_text = self.last_permanent_raw_text or self.raw_text
@@ -185,31 +185,43 @@ function IMGUIObjectivesAlien:SetText(text, duration)
     self.nextText = wrapped_text
     self.textState = textState.fadingOut
     
+    if immediate then
+        self.textOpacity = 1
+        self.textState = textState.visible
+        GUIItem.SetText( self.panel_text, self.nextText )
+        self.currentFont = self.nextFont
+        self.panel_text:SetFontName(self.currentFont)
+    end
+    
 end
 
 
-function IMGUIObjectivesAlien:AnimateIn()
+function IMGUIObjectivesAlien:AnimateIn(immediate)
     
     self.showing = true
     self.current_state = 'unhiding'
     local startTime = Shared.GetTime()
-    self.endTime = startTime + kTransitionTime
+    self.endTime = immediate and startTime or (startTime + kTransitionTime)
     self.panel:SetFloatParameter("startTime", startTime)
     self.panel:SetFloatParameter("endTime", self.endTime)
+    self.panel:SetFloatParameter("startPosition", 2.0)
+    self.panel:SetFloatParameter("endPosition", 1.0)
     self.panel:SetFloatParameter("startOpacity", 0.0)
     self.panel:SetFloatParameter("endOpacity", 1.0)
     
 end
 
 
-function IMGUIObjectivesAlien:AnimateOut()
+function IMGUIObjectivesAlien:AnimateOut(immediate)
     
     self.showing = false
     self.current_state = 'hiding'
     local startTime = Shared.GetTime()
-    self.endTime = startTime + kTransitionTime
+    self.endTime = immediate and startTime or (startTime + kTransitionTime)
     self.panel:SetFloatParameter("startTime", startTime)
     self.panel:SetFloatParameter("endTime", self.endTime)
+    self.panel:SetFloatParameter("startPosition", 1.0)
+    self.panel:SetFloatParameter("endPosition", 0.0)
     self.panel:SetFloatParameter("startOpacity", 1.0)
     self.panel:SetFloatParameter("endOpacity", 0.0)
     self:SetText('',0)
@@ -222,7 +234,53 @@ function IMGUIObjectivesAlien:GetTypeString()
 end
 
 
+local function UpdateVisibilityAndText(self)
+    
+    local player = Client.GetLocalPlayer()
+    if not player then
+        return
+    end
+    
+    local playerId = player:GetId()
+    local immediateUpdate = playerId ~= self.lastPlayerId
+    
+    local isMarine = player and player:isa("Marine") and player.GetIsAlive and player:GetIsAlive()
+    local isInfested = isMarine and player.GetIsInfested and player:GetIsInfested()
+    
+    local objective = Marine.kObjective.NoObjective
+    if isMarine then
+        objective = (player.GetObjective and player:GetObjective()) or objective
+    end
+    
+    local lut = Marine.kObjectiveStatusEvaluationTable[self:GetTypeString()][objective]
+    
+    local desiredVisibility = lut.vis
+    local desiredText = lut.textFunc()
+    local updateNeeded = immediateUpdate or (self.lastObjective ~= objective)
+    
+    if updateNeeded then
+        if desiredVisibility then
+            if not self.showing then
+                self:AnimateIn(immediateUpdate)
+                self:SetVisibility(true)
+            end
+            self:SetText(desiredText, nil, immediateUpdate)
+        else
+            if self.showing then
+                self:AnimateOut(immediateUpdate)
+            end
+        end
+    end
+    
+    self.lastPlayerId = playerId
+    self.lastObjective = objective
+    
+end
+
+
 function IMGUIObjectivesAlien:Update(deltaTime)
+    
+    UpdateVisibilityAndText(self)
     
     if self.current_state == 'hidden_before' then
         return

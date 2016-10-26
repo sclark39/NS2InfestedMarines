@@ -92,10 +92,16 @@ function IMGUIInfestedFeedTimer:Update(deltaTime)
     local player = Client.GetLocalPlayer()
     local shouldBeVisible = false
     
-    if player and player:isa("Marine") and player.GetIsInfected and player:GetIsInfected() then
-        shouldBeVisible = true
-    else
-        shouldBeVisible = false
+    if player then
+        if player:isa("Marine") and player.GetIsInfected and player:GetIsInfected() then
+            shouldBeVisible = true
+            local immediate = player:GetId() ~= self.lastSpectateId
+            self:SetFeedFraction(player.infestedEnergy / Marine.kInfestedEnergyMax, immediate)
+            self.lastSpectateId = player:GetId()
+        else
+            shouldBeVisible = false
+        end
+        
     end
     
     self:SetVisibility(shouldBeVisible)

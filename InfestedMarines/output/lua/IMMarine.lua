@@ -215,6 +215,20 @@ function Marine:GetCanInfectTarget(target)
     return true
 end
 
+function Marine:GetPlayerStatusDesc()
+    
+    if (self:GetIsAlive() == false) then
+        return kPlayerStatus.Dead
+    end
+    
+    if self:GetIsInfected() then
+        return kPlayerStatus.Infested
+    end
+    
+    return kPlayerStatus.Void
+    
+end
+
 function Marine:GetIsInfected()
     
     return (self.infected == true)

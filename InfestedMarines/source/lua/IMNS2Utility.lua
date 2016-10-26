@@ -12,7 +12,12 @@ local old_CanEntityDoDamageTo = CanEntityDoDamageTo
 function CanEntityDoDamageTo(attacker, target, cheats, devMode, friendlyFire, damageType)
     
     if attacker and attacker:isa("Marine") and target and target:isa("Marine") then
-        return true
+        -- don't allow players to damage each other before infected has been chosen.
+        if Server then
+            return GetGameMaster():GetHasInfectedBeenChosenYet()
+        else
+            return true -- damage is only dealt on server anyways...
+        end
     end
     
     -- extra protection for extractors

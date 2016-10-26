@@ -31,7 +31,7 @@ function IMGUIInfestedOverlay:Initialize()
     
     self.border = GUIManager:CreateGraphicItem()
     self.border:SetAnchor(GUIItem.Left, GUIItem.Top)
-    self.border:SetLayer(kGUILayerPlayerHUD)
+    self.border:SetLayer(kGUILayerDeathScreen)
     self.border:SetTexture(IMGUIInfestedOverlay.kTexture)
     self.border:SetIsVisible(false)
     

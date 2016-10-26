@@ -202,9 +202,12 @@ end
 local old_Marine_OnProcessMove = Marine.OnProcessMove
 function Marine:OnProcessMove(input)
     
-    if not self.infestationFreeze then
-        old_Marine_OnProcessMove(self, input)
+    if self.infestationFreeze then
+        input.move:Scale(0)
+        input.commands = 0
     end
+    
+    old_Marine_OnProcessMove(self, input)
     
 end
 

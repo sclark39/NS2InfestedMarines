@@ -67,10 +67,11 @@ IMGameMaster.kFasterCystPropagationPeriod = 3 -- one cyst every 3 second.
 IMGameMaster.kDefaultDillyDallyTime = 5 -- time added for organization, etc.
 IMGameMaster.kScatterInfestationClearTime = 10 -- time added to allow for clearing cysts during scatter.
 IMGameMaster.kRegroupInfestationClearTime = 30 -- more time here b/c there's a lot more infestation.
-IMGameMaster.kCystToPurifierRatio = 3 -- 3 was 7 then was 5 cysts balances to 1 extractor.
+IMGameMaster.kCystToPurifierRatio = 2 -- 2 seems to be a good balance.
 IMGameMaster.kAirQualityChangePerSecondMax = 1/90 -- 90 seconds minimum to drain the bar from full
 IMGameMaster.kRatioChangeMax = 10 -- what the ratio has to be to have a positive max change
 IMGameMaster.kRatioChangeMin = 0.1 -- if the ratio is lower than this, air quality change is maximized.
+IMGameMaster.kRatioPositiveBoost = 3.0 -- rate of change is multiplied by this when positive.
 
 function IMGameMaster:OnCreate()
     
@@ -359,7 +360,7 @@ local function UpdateAirQuality(self)
     if ratio >= 1 then
         -- increasing, good for marines
         local interp = (ratio - 1) / (IMGameMaster.kRatioChangeMax - 1)
-        rateOfChange = IMGameMaster.kAirQualityChangePerSecondMax * interp
+        rateOfChange = IMGameMaster.kAirQualityChangePerSecondMax * interp * IMGameMaster.kRatioPositiveBoost
     else
         -- decreasing, bad for marines
         local interp = 1.0 - ((ratio - IMGameMaster.kRatioChangeMin) / (1 - IMGameMaster.kRatioChangeMin))

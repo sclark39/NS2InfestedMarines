@@ -6,8 +6,8 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-Cyst.kBoxTraceExtents = Cyst.kExtents * 2
-Cyst.kBoxTraceExtents.y = Cyst.kExtents.y
+Cyst.kBoxTraceExtents = Cyst.kExtents
+Cyst.kBoxTraceExtents.y = 0.01
 
 if Client then
     

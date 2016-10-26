@@ -288,17 +288,47 @@ function IMCystManager:CreateAreaOfDenial(point)
     
 end
 
-function IMCystManager:CreateCyst(position)
+local function DoGroundTraceForCyst(position, redo)
     
     local groundTrace = Shared.TraceBox(Cyst.kBoxTraceExtents, position + Vector(0, 1.5, 0), position + Vector(0, -5, 0),  CollisionRep.Default, PhysicsMask.CystBuild, EntityFilterAllButIsa("TechPoint"))
     if groundTrace.fraction == 1 then
+        return nil
+    end
+    
+    if not redo and math.abs(groundTrace.normal.y) <= 0.5 and groundTrace.fraction < 0.01 then
+        -- we didn't go very far, and the normal implies that we are sticking in a wall.
+        -- attempt to push out of the wall, then check to ensure we're still over the pathing mesh.
+        local newPos = position + groundTrace.normal * 0.25
+        
+        local adjustedPoint = newPos + Vector(0, 0.5, 0)
+        local newPoint = Pathing.GetClosestPoint(adjustedPoint)
+        
+        if ArePointsAboutEqual(newPoint, adjustedPoint) then
+            -- these should NOT be equal, ever.  It's slid off the pathing mesh, fail.
+            return nil
+        end
+        
+        return DoGroundTraceForCyst(newPoint, true)
+    end
+    
+    return groundTrace
+    
+end
+
+function IMCystManager:CreateCyst(position)
+    
+    local groundTrace = DoGroundTraceForCyst(position)
+    if not groundTrace then
         return false
     end
     
     local coords = AlignCyst(Coords.GetTranslation(groundTrace.endPoint), groundTrace.normal)
-    coords.origin = groundTrace.endPoint
-    local newCyst = CreateEntity( Cyst.kMapName, position, kAlienTeamType )
+    --coords.origin = groundTrace.endPoint - ((Cyst.kExtents.y + Cyst.kBoxTraceExtents.y) * coords.yAxis)
+    coords.origin = groundTrace.endPoint - (Cyst.kBoxTraceExtents.y * coords.yAxis * 10)
+    local newCyst = CreateEntity( Cyst.kMapName, coords.origin, kAlienTeamType )
     newCyst:SetCoords(coords)
+    
+    return true
     
 end
 
@@ -315,9 +345,7 @@ function IMCystManager:AddNewCyst(optional_start_location)
         return false
     end
     
-    self:CreateCyst(newCystLocation)
-    
-    return true
+    return self:CreateCyst(newCystLocation)
     
 end
 

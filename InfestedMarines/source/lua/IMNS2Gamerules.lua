@@ -52,7 +52,7 @@ if Server then
     
     -- prevent late joiners from starting alive
     function NS2Gamerules:GetCanSpawnImmediately()
-        return not self:GetGameStarted()
+        return not self:GetGameStarted() or GetGameMaster():AllowLateJoin()
     end
     
     -- prevents players from joining alien team.

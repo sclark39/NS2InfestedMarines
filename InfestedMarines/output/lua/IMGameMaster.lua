@@ -138,6 +138,12 @@ function IMGameMaster:GetIsPurifierSaved(purifier)
     
 end
 
+function IMGameMaster:AllowLateJoin()
+    
+    return self.infectedChooseDelay and (self.infectedChooseDelay >= 5.0) or false
+    
+end
+
 function IMGameMaster:GetHasInfectedBeenChosenYet()
     
     return self.pickedInfected

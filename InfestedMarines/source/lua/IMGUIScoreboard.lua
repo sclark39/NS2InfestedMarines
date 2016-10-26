@@ -26,7 +26,7 @@ local function GetIsVisibleTeam(teamNumber)
     
         if localPlayer.GetIsInfected and localPlayer:GetIsInfected() then
             isVisibleTeam = true
-        elseif localPlayer.GetIsAlive and not localPlayer:GetIsAlive() then
+        elseif not (localPlayer.GetIsAlive and localPlayer:GetIsAlive()) then
             isVisibleTeam = true
         elseif localPlayer:GetTeamNumber() == kSpectatorIndex then
             isVisibleTeam = true

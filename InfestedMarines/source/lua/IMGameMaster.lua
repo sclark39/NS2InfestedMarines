@@ -76,6 +76,8 @@ IMGameMaster.kRatioPositiveBoost = 3.0 -- rate of change is multiplied by this w
 function IMGameMaster:OnCreate()
     
     self.airQFraction = 1.0
+    GetAirStatusBlip():SetFraction(self.airQFraction)
+    
     self.damagedPurifiers = {}
     
     self.cooldownPeriod = 0.0 -- used to delay the next round of purifiers being damaged.

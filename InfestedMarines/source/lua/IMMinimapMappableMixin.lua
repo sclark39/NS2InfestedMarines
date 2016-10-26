@@ -40,6 +40,8 @@ if Client then
         if player and canBeObscured then
             seeAll = seeAll or HasMixin(player, "OverheadMove")
             seeAll = seeAll or (player.GetIsInfected and player:GetIsInfected())
+            seeAll = seeAll or player:isa("Spectator")
+            seeAll = seeAll or not (player.GetIsAlive and player:GetIsAlive())
             
             if not seeAll then
                 if not parent then

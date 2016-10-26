@@ -301,7 +301,11 @@ local function PickInfected(self)
     
     local numPlayers = GetGamerules().team1:GetNumPlayers()
     for i=1, numPlayers do
-        Server.SendNetworkMessage(GetGamerules().team1:GetPlayer(i), "IMInfectedStatusMessage", { infected = (GetGamerules().team1:GetPlayer(i) == infectedPlayer) }, true)
+        local player = GetGamerules().team1:GetPlayer(i)
+        if player then
+            Server.SendNetworkMessage(player, "IMInfectedStatusMessage", { infected = (player == infectedPlayer) }, true)
+            player:TriggerEffects("initial_infestation_sound")
+        end
     end
     
 end

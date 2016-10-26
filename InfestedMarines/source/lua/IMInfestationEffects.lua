@@ -16,7 +16,7 @@ kInfestedMarinesEffects =
             {cinematic = "cinematics/infested_marines/infested_marine.cinematic"},
             {cinematic = "cinematics/alien/gorge/bilebomb_impact.cinematic"},
             {sound = "sound/NS2.fev/alien/common/swarm"},
-        }
+        },
     },
     
     marine_infestation_victim = 
@@ -26,8 +26,15 @@ kInfestedMarinesEffects =
             {cinematic = "cinematics/alien/gorge/bilebomb_impact.cinematic", world_space = true},
             {sound = "sound/NS2.fev/alien/common/res_received", world_space = true},
             {sound = "sound/NS2.fev/alien/common/regeneration", world_space = true},
-        }
-    }
+        },
+    },
+    
+    initial_infestation_sound = 
+    {
+        {
+            { private_sound = "sound/NS2.fev/alien/common/swarm" },
+        },
+    },
 }
 
 GetEffectManager():AddEffectData("IMInfestationEffects", kInfestedMarinesEffects)

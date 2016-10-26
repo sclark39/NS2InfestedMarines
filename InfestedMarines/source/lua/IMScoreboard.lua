@@ -58,7 +58,8 @@ function Scoreboard_ReloadPlayerData()
     
         local statusTxt = "-"
         if pie.status ~= kPlayerStatus.Hidden then
-            statusTxt = "" -- looks ugly, no use having it anyways.
+            local statusTranslationString = kStatusTranslationStringMap[pie.status]
+            statusTxt = statusTranslationString and Locale.ResolveString(statusTranslationString) or statusTranslationString
         end
         
         local playerRecord = playerData[pie.clientId]

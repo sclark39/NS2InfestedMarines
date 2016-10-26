@@ -54,7 +54,7 @@ IMGameMaster.kMarineSquadRange = 25 -- any marines within 25m of another marine 
                                     -- the same "squad"
 IMGameMaster.kMarineSquadRangeSq = IMGameMaster.kMarineSquadRange * IMGameMaster.kMarineSquadRange
 IMGameMaster.kMarineWeldTime = 4    -- approximately the amount of seconds required once at a node to weld it fully.
-IMGameMaster.kTimeBeforeInfectedChosen = 30
+IMGameMaster.kTimeBeforeInfectedChosen = 3
 IMGameMaster.kPhase = enum({ "Scatter", "Regroup" })
 
 -- cysts propagate on their own slowly, but will RAPIDLY deploy near new nodes.
@@ -278,24 +278,35 @@ local function UpdateGameMasterDuties(self, deltaTime)
     
 end
 
+local function GetInfestedPickCount()
+    
+    local numMarines = IMGetCleanMarineCount()
+    return math.ceil(numMarines / 9)
+    
+end
+
 local function PickInfected(self)
     
     -- TODO pick X players, X scales with player count.
     local players = GetGamerules().team1:GetPlayers()
-    local infectedPlayer = nil
+    local numPicks = GetInfestedPickCount()
+    local infectedPlayers = {}
     
-    while (not infectedPlayer) and #players > 0 do
+    while numPicks > 0 and #players > 0 do
         local index = math.random(#players)
         if players[index] and players[index].SetIsInfected then
-            infectedPlayer = players[index]
+            numPicks = numPicks - 1
+            table.insert(infectedPlayers, players[index])
         else
             table.remove(players, index)
         end
     end
     
-    assert(infectedPlayer)
+    assert(#infectedPlayers > 0)
     
-    infectedPlayer:SetIsInfected(true)
+    for i=1, #infectedPlayers do
+        infectedPlayers[i]:SetIsInfected(true)
+    end
     
     local numPlayers = GetGamerules().team1:GetNumPlayers()
     for i=1, numPlayers do

@@ -140,7 +140,7 @@ function GUIScoreboard:UpdateTeam(updateTeam)
         local ping = playerRecord.Ping
         local pingStr = tostring(ping)
         local currentPosition = Vector(player["Background"]:GetPosition())
-        local playerStatus = isVisibleTeam and playerRecord.Status or "-"
+        local playerStatus = "  "
         local isSpectator = playerRecord.IsSpectator
         local isDead = isVisibleTeam and playerRecord.Status == deadString
         local isInfested = isVisibleTeam and not isDead and playerRecord.Status == infestedString

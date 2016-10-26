@@ -17,7 +17,7 @@ Marine.kInvalidInfestationTargetSound = PrecacheAsset("sound/NS2.fev/common/inva
 Marine.kInfectionFreezeTime = 1.0 -- freeze player for this long when they are infested, to prevent
 -- team killing.
 
-Marine.kPointsForInfest = 20
+Marine.kPointsForInfest = 80
 
 Marine.kInfestedEnergyMax = 1.0
 Marine.kInfestedDurationMax = 120.0 -- two minutes without feeding before infested starves.

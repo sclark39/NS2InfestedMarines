@@ -58,7 +58,6 @@ local function SharedUpdate(self, deltaTime)
         if self.isCorroded and self.timeCorrodeStarted + kCorrodeShaderDuration < Shared.GetTime() then
             self.isCorroded = false
             if self:isa("Extractor") then
-                Log("Updating extractor because it is no longer corroding")
                 GetGameMaster():UpdateExtractor(self)
             end
         end

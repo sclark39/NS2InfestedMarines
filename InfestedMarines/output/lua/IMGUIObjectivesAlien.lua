@@ -159,7 +159,7 @@ function IMGUIObjectivesAlien:SetText(text, duration)
     -- size text appropriately
     local good = false
     local font = GetFontForScale()
-    local maxHeight = self.panel:GetSize().y - GUIScaleHeight(textPadding.y * 2) * 3
+    local maxHeight = self.panel:GetSize().y - GUIScaleHeight(textPadding.y * 2)
     local wrapped_text = nil
     while not good do
         
@@ -190,6 +190,7 @@ end
 
 function IMGUIObjectivesAlien:AnimateIn()
     
+    self.showing = true
     self.current_state = 'unhiding'
     local startTime = Shared.GetTime()
     self.endTime = startTime + kTransitionTime
@@ -203,6 +204,7 @@ end
 
 function IMGUIObjectivesAlien:AnimateOut()
     
+    self.showing = false
     self.current_state = 'hiding'
     local startTime = Shared.GetTime()
     self.endTime = startTime + kTransitionTime
@@ -215,10 +217,8 @@ function IMGUIObjectivesAlien:AnimateOut()
 end
 
 
-function IMGUIObjectivesAlien:GetIsShowing()
-    
-    return (self.current_state == 'hiding') or (self.current_state == 'visible') or (self.current_state == 'unhiding')
-    
+function IMGUIObjectivesAlien:GetTypeString()
+    return "alien"
 end
 
 

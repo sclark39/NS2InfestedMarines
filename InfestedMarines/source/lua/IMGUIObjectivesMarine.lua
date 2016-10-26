@@ -155,7 +155,7 @@ function IMGUIObjectivesMarine:SetText(text, duration)
     -- size text appropriately
     local good = false
     local font = GetFontForScale()
-    local maxHeight = self.panel:GetSize().y - GUIScaleHeight(textPadding.y * 2) * 1.5
+    local maxHeight = self.panel:GetSize().y - GUIScaleHeight(textPadding.y * 2)
     local wrapped_text = nil
     while not good do
         
@@ -186,6 +186,7 @@ end
 
 function IMGUIObjectivesMarine:AnimateIn()
     
+    self.showing = true
     self.current_state = 'unhiding'
     local startTime = Shared.GetTime()
     self.endTime = startTime + kTransitionTime
@@ -199,6 +200,7 @@ end
 
 function IMGUIObjectivesMarine:AnimateOut()
     
+    self.showing = false
     self.current_state = 'hiding'
     local startTime = Shared.GetTime()
     self.endTime = startTime + kTransitionTime
@@ -210,6 +212,9 @@ function IMGUIObjectivesMarine:AnimateOut()
     
 end
 
+function IMGUIObjectivesMarine:GetTypeString()
+    return "marine"
+end
 
 function IMGUIObjectivesMarine:Update(deltaTime)
     

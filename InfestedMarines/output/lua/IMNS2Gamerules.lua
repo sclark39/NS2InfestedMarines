@@ -340,8 +340,6 @@ if Server then
         self.team1:OnResetComplete()
         self.team2:OnResetComplete()
         
-        Server.SendNetworkMessage("IMClearObjectives", {}, true)
-        
     end
     
     local function StartCountdown(self)

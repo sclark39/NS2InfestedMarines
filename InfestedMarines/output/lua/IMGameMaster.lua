@@ -156,9 +156,6 @@ function IMGameMaster:DoGameStart()
     self.infectedChooseDelay = IMGameMaster.kTimeBeforeInfectedChosen
     self:SetPhase(IMGameMaster.kPhase.Scatter)
     
-    -- set all players objectives
-    Server.SendNetworkMessage("IMRoundStartMessage", {}, true)
-    
 end
 
 function IMGameMaster:SetIsFirstWave(state)
@@ -303,7 +300,6 @@ local function PickInfected(self)
     for i=1, numPlayers do
         local player = GetGamerules().team1:GetPlayer(i)
         if player then
-            Server.SendNetworkMessage(player, "IMInfectedStatusMessage", { infected = (player == infectedPlayer) }, true)
             player:TriggerEffects("initial_infestation_sound")
         end
     end
@@ -392,8 +388,6 @@ end
 
 function IMGameMaster:OnRoundEnd()
     
-    Server.SendNetworkMessage("IMHideObjectives", {}, true)
-    
 end
 
 function IMGameMaster:GetAirQuality()
@@ -464,8 +458,39 @@ function IMGameMaster:EnsureExtractorHasBlip(extractor)
     
 end
 
+local function GetObjectiveForMarine(self, marine)
+    
+    if GetGamerules():GetGameStarted() then
+        if self:GetHasInfectedBeenChosenYet() then
+            if marine.GetIsInfected and marine:GetIsInfected() then
+                return Marine.kObjective.Infected
+            else
+                return Marine.kObjective.NotInfected
+            end
+        else
+            return Marine.kObjective.NobodyInfected
+        end
+    end
+    
+    return Marine.kObjective.GameOver
+    
+end
+
+local function UpdatePlayerObjectives(self)
+    
+    -- set all players objectives
+    local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+    for i=1, #marines do
+        if marines[i] and marines[i].SetObjective then
+            marines[i]:SetObjective(GetObjectiveForMarine(self, marines[i]))
+        end
+    end
+    
+end
 
 function IMGameMaster:OnUpdate(deltaTime)
+    
+    UpdatePlayerObjectives(self)
     
     if not GetGamerules():GetGameStarted() then
         return

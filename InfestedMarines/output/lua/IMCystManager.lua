@@ -290,7 +290,7 @@ end
 
 function IMCystManager:CreateCyst(position)
     
-    local groundTrace = Shared.TraceRay(position + Vector(0, 0.5, 0), position + Vector(0, -5, 0), CollisionRep.Default, PhysicsMask.CystBuild, EntityFilterAllButIsa("TechPoint"))
+    local groundTrace = Shared.TraceBox(Cyst.kBoxTraceExtents, position + Vector(0, 1.5, 0), position + Vector(0, -5, 0),  CollisionRep.Default, PhysicsMask.CystBuild, EntityFilterAllButIsa("TechPoint"))
     if groundTrace.fraction == 1 then
         return false
     end

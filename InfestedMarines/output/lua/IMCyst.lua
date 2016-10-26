@@ -6,6 +6,9 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
+Cyst.kBoxTraceExtents = Cyst.kExtents * 2
+Cyst.kBoxTraceExtents.y = Cyst.kExtents.y
+
 if Client then
     
     function Cyst:OnTimedUpdate()

@@ -327,6 +327,20 @@ function Marine:GetCanDropWeapon(weapon, ignoreDropTimeLimit)
     
 end
 
+function Marine:GetsPointsForWelding(entity)
+    
+    if self:GetIsInfected() then
+        return false
+    end
+    
+    if not (entity and entity:isa("Extractor")) then
+        return false
+    end
+    
+    return true
+    
+end
+
 function Marine:SecondaryAttackEnd()
     
     self.isSecondaryAttacking = false

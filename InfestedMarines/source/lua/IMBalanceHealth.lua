@@ -8,3 +8,4 @@
 
 kExtractorHealth = 2400
 kExtractorArmor = 1050
+kBuildPointValue = 0

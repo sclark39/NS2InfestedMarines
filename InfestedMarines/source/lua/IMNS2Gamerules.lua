@@ -75,6 +75,12 @@ if Server then
         return 5
     end
     
+    -- disable bots for this gamemode
+    function NS2Gamerules:SetMaxBots(newMax, com)
+        self.botTeamController:SetMaxBots(0)
+        self.botTeamController:UpdateBots()
+    end
+    
     function NS2Gamerules:GetWarmUpPlayerLimit()
         return 0
     end

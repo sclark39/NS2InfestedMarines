@@ -43,7 +43,7 @@ function HiveVisionMixin:OnUpdate(deltaTime)
                         if self.targetedForInfection then
                             HiveVision_AddModel( model, kHiveVisionOutlineColor.Red)
                         else
-                            HiveVision_AddModel( model, kHiveVisionOutlineColor.KharaaOrange)
+                            HiveVision_AddModel( model, kHiveVisionOutlineColor.Yellow)
                         end
                     end
                 else

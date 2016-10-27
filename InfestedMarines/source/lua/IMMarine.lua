@@ -14,7 +14,7 @@ Marine.kInfectionRange = 3.0
 Marine.kInfectionRangeSq = Marine.kInfectionRange * Marine.kInfectionRange
 
 Marine.kInvalidInfestationTargetSound = PrecacheAsset("sound/NS2.fev/common/invalid")
-Marine.kInfectionFreezeTime = 1.0 -- freeze player for this long when they are infested, to prevent
+Marine.kInfectionFreezeTime = 1.5 -- freeze player for this long when they are infested, to prevent
 -- team killing.
 
 Marine.kPointsForInfest = 80

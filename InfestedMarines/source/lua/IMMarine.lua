@@ -89,6 +89,34 @@ Marine.kObjectiveStatusEvaluationTable =
     }
 }
 
+Marine.kCoughingUpdateIntervalSevere = 3.0
+Marine.kCoughingUpdateIntervalMild = 6.0
+
+local function DoCoughing(self)
+    
+    self:TriggerEffects("bad_air")
+    
+end
+
+local function UpdateCoughing(self, timePassed)
+    
+    -- Make marine cough a lot if the air quality is really low.
+    -- Cough less often if air quality is bad but not terrible.
+    -- Keep checking without coughing if air quality is good.
+    
+    local airQuality = GetGameMaster():GetAirQuality()
+    if airQuality <= 0.25 then
+        DoCoughing(self)
+        return Marine.kCoughingUpdateIntervalSevere
+    elseif airQuality <= 0.5 then
+        DoCoughing(self)
+        return Marine.kCoughingUpdateIntervalMild
+    end
+    
+    return Marine.kCoughingUpdateIntervalMild
+    
+end
+
 local old_Marine_OnCreate = Marine.OnCreate
 function Marine:OnCreate()
     
@@ -98,6 +126,10 @@ function Marine:OnCreate()
     self.infected = false
     self.infestationFreeze = false
     self.objective = Marine.kObjective.NoObjective
+    
+    if Server then
+        self:AddTimedCallback(UpdateCoughing, Marine.kCoughingUpdateIntervalMild)
+    end
     
 end
 if Server then

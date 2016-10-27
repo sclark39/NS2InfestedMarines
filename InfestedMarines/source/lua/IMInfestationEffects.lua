@@ -49,6 +49,14 @@ kInfestedMarinesEffects =
             { cinematic = "cinematics/alien/nutrientmist_structure.cinematic", world_space = true },
         },
     },
+    
+    bad_air = 
+    {
+        {
+            { private_sound = "sound/NS2.fev/marine/common/spore_wound_female", sex = "female", done = true },
+            { private_sound = "sound/NS2.fev/marine/common/spore_wound", done = true },
+        },
+    },
 }
 
 GetEffectManager():AddEffectData("IMInfestationEffects", kInfestedMarinesEffects)

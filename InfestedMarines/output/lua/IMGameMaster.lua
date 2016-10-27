@@ -385,8 +385,7 @@ local function UpdateAirChangeIndicatorByRatio(self, ratio)
         fracStepped = math.ceil(-4*frac)
     end
     
-    assert(fracStepped <= 3)
-    assert(fracStepped >= -3)
+    fracStepped = math.min(math.max(fracStepped, -3), 3)
     
     GetAirStatusBlip():SetChangeRate(fracStepped)
     

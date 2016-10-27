@@ -31,6 +31,7 @@ function HiveVisionMixin:OnUpdate(deltaTime)
         
         visible = visible and (player ~= self)
         visible = visible and playerCanSeeHiveVision
+        visible = visible or not Client.GetIsControllingPlayer() -- spectators can see all
         
         local needsUpdate = (visible ~= self.hiveSightVisible) or (infected ~= self.hiveSightInfected) or (self.hiveSightTargeting ~= self.targetedForInfection)
         if needsUpdate and self.timeHiveVisionChanged + kHiveVisionUpdateRate < now then

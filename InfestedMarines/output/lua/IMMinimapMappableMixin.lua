@@ -38,6 +38,7 @@ if Client then
         
         local seeAll = false
         if player and canBeObscured then
+            seeAll = seeAll or not Client.GetIsControllingPlayer() -- dead players can see all
             seeAll = seeAll or HasMixin(player, "OverheadMove")
             seeAll = seeAll or (player.GetIsInfected and player:GetIsInfected())
             seeAll = seeAll or player:isa("Spectator")

@@ -22,7 +22,7 @@ local kInfestedColor = Color(0,1,0,1)
 local function GetIsVisibleTeam(teamNumber)
     local isVisibleTeam = false
     local localPlayer = Client.GetLocalPlayer()
-    if localPlayer then
+    if localPlayer and Client.GetIsControllingPlayer() then
     
         if localPlayer.GetIsInfected and localPlayer:GetIsInfected() then
             isVisibleTeam = true
@@ -32,6 +32,9 @@ local function GetIsVisibleTeam(teamNumber)
             isVisibleTeam = true
         end
         
+    else
+        -- spectating players can see all
+        isVisibleTeam = true
     end
     
     return isVisibleTeam

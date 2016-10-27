@@ -21,6 +21,12 @@ function HiveVision_SetEnabled(enabled)
         return
     end
     
+    -- spectators can see all
+    if not Client.GetIsControllingPlayer() then
+        old_HiveVision_SetEnabled(true)
+        return
+    end
+    
     if (player.GetIsInfected and player:GetIsInfected()) or player:isa("Commander") then
         old_HiveVision_SetEnabled(true)
     else

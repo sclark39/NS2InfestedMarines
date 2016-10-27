@@ -85,6 +85,10 @@ if Server then
         return 0
     end
     
+    function NS2Gamerules:VotingConcedeVoteAllowed()
+        return false
+    end
+    
     function NS2Gamerules:CheckGameStart()
         if self:GetGameState() <= kGameState.PreGame then
             if self.team1:GetNumPlayers() < 2 then

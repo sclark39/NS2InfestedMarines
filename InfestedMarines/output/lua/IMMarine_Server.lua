@@ -49,7 +49,13 @@ end
 -- (mutual reflection), false if victim should be unharmed (true reflection).
 function Marine:GetWillReflectedDamageHitVictim(target, doer)
     
+    -- infected cannot kill uninfected with the flamethrower
     if self.GetIsInfected and self:GetIsInfected() and target and target.GetIsInfected and not target:GetIsInfected() and doer and doer:isa("Flamethrower") then
+        return false
+    end
+    
+    -- infected cannot kill other infected.
+    if self.GetIsInfected and self:GetIsInfected() and target and target.GetIsInfected and target:GetIsInfected() then
         return false
     end
     

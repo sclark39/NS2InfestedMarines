@@ -51,7 +51,10 @@ function IMGUIInfestedFeedTimer:Initialize()
     self.monsterIcon = GUIManager:CreateGraphicItem()
     self.monsterIcon:SetAnchor(GUIItem.Right, GUIItem.Center)
     self.monsterIcon:SetColor(kMonsterColor)
-    self.monsterIcon:SetLayer(kGUILayerPlayerHUDForeground1)
+    --self.monsterIcon:SetLayer(kGUILayerPlayerHUDForeground1)
+    
+    -- UGH!  Damn voice chat icons are at layer TWO.  Doesn't give me a lot of options...
+    self.monsterIcon:SetLayer(kGUILayerDeathScreen)
     self.monsterIcon:SetShader(IMGUIInfestedFeedTimer.kMonsterShader)
     self.monsterIcon:SetTexture(IMGUIInfestedFeedTimer.kMonsterTexture)
     self.monsterIcon:SetIsVisible(false)

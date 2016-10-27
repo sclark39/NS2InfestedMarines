@@ -14,6 +14,8 @@ local kTTKAtOne = 150 -- takes 150 seconds for corrosion to kill an extractor at
 
 local kKeepBlipAfterRepairTime = 5
 
+Extractor.kPurificationEffectsInterval = 2.0
+
 local function CalculateTimeRemaining(self)
     
     local ehp = self:GetArmor() * 2 + self:GetHealth()
@@ -89,6 +91,28 @@ function Extractor:OnKill(attacker, doer, point, direction)
     
 end
 
+local function AirPurificationEffects(self, timePassed)
+    
+    if not self:GetIsAlive() then
+        return false
+    end
+    
+    local ehp = self:GetHealth() + self:GetArmor() * 2
+    local maxehp = self:GetMaxHealth() + self:GetMaxArmor() * 2
+    local frac = ehp / maxehp
+    
+    if frac <= 0 then
+        return false
+    end
+    
+    local nextInterval = Extractor.kPurificationEffectsInterval / frac
+    
+    self:TriggerEffects("air_purifier_working")
+    
+    return nextInterval
+    
+end
+
 local old_Extractor_OnInitialized = Extractor.OnInitialized
 function Extractor:OnInitialized()
     
@@ -96,6 +120,7 @@ function Extractor:OnInitialized()
     
     if Server then
         self:AddTimedCallback(Extractor.ExtractorBlipUpdate, kUpdateRate)
+        self:AddTimedCallback(AirPurificationEffects, math.random(Extractor.kPurificationEffectsInterval))
         self.elapsedTimeRepaired = 0
     end
     

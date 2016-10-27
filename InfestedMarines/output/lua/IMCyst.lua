@@ -9,10 +9,17 @@
 Cyst.kBoxTraceExtents = Cyst.kExtents
 Cyst.kBoxTraceExtents.y = 0.01
 
-if Client then
+Cyst.kToxinEffectInterval = 5.0
+
+local function CystToxins(self, timePassed)
     
-    function Cyst:OnTimedUpdate()
+    if not self:GetIsAlive() then
+        return false
     end
+    
+    self:TriggerEffects("cyst_toxins")
+    
+    return Cyst.kToxinEffectInterval
     
 end
 
@@ -20,6 +27,12 @@ local old_Cyst_OnCreate = Cyst.OnCreate
 function Cyst:OnCreate()
     
     old_Cyst_OnCreate(self)
+    
+    -- emit cyst toxins every Cyst.kToxinEffectInterval seconds.  (first call is random so cysts created at the same time
+    -- aren't synchronized).
+    if Server then
+        self:AddTimedCallback(CystToxins, math.random(Cyst.kToxinEffectInterval))
+    end
     
 end
 

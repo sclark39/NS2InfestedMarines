@@ -13,11 +13,10 @@ class 'IMAirStatusBlip' (Entity)
 
 IMAirStatusBlip.kMapName = "airstatusblip"
 
-local kAirStatusBlipUpdateRate = 0.25
-
 local networkVars = 
 {
     fraction = "float",
+    changeRate = "integer (-3 to 3)"
 }
 
 if Server then
@@ -46,27 +45,31 @@ function IMAirStatusBlip:OnCreate()
     
 end
 
-function IMAirStatusBlip:OnInitialized()
-    
-    if Client then
-        self:AddTimedCallback(function() self:ClientUpdate() return true end, kAirStatusBlipUpdateRate)
-    end
-    
-end
-
 function IMAirStatusBlip:OnDestroy()
     if Server then
         DestroyAirStatusBlip()
     end
 end
 
-function IMAirStatusBlip:ClientUpdate()
-    
-    local script = GetAirStatusGUI()
-    if script then
-        script:SetAirQuality(self.fraction)
+function IMAirStatusBlip:GetAirQuality()
+    return self.fraction
+end
+
+function IMAirStatusBlip:GetChangeRate()
+    return self.changeRate
+end
+
+if Client then
+    function GetAirStatusBlip()
+        local blips = EntityListToTable(Shared.GetEntitiesWithClassname("IMAirStatusBlip"))
+        for i=1, #blips do
+            if blips[i] then
+                return blips[i]
+            end
+        end
+        
+        return nil
     end
-    
 end
 
 function IMAirStatusBlip:UpdateRelevancy()
@@ -82,6 +85,10 @@ if Server then
         fraction = math.min(math.max(fraction, 0), 1)
         self.fraction = fraction
         
+    end
+    
+    function IMAirStatusBlip:SetChangeRate(rate)
+        self.changeRate = rate
     end
     
 end

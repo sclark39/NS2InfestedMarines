@@ -35,6 +35,20 @@ kInfestedMarinesEffects =
             { private_sound = "sound/NS2.fev/alien/common/swarm" },
         },
     },
+    
+    cyst_toxins = 
+    {
+        {
+            { cinematic = "cinematics/infested_marines/cyst_toxins.cinematic", world_space = true },
+        },
+    },
+    
+    air_purifier_working = 
+    {
+        {
+            { cinematic = "cinematics/alien/nutrientmist_structure.cinematic", world_space = true },
+        },
+    },
 }
 
 GetEffectManager():AddEffectData("IMInfestationEffects", kInfestedMarinesEffects)

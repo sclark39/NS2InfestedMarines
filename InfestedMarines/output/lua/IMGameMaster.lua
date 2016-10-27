@@ -370,6 +370,28 @@ local function UpdateCysts(self)
     
 end
 
+local function UpdateAirChangeIndicatorByRatio(self, ratio)
+    
+    local rate = 0
+    local fracStepped = 0.0
+    
+    if ratio >= 1 then
+        ratio = ratio * IMGameMaster.kRatioPositiveBoost
+        local frac = (ratio-1) / (IMGameMaster.kRatioChangeMax-1)
+        frac = math.min(1, frac)
+        fracStepped = math.ceil(4*frac) - 1
+    else
+        local frac = ((ratio-1) / (IMGameMaster.kRatioChangeMin-1))
+        fracStepped = math.ceil(-4*frac)
+    end
+    
+    assert(fracStepped <= 3)
+    assert(fracStepped >= -3)
+    
+    GetAirStatusBlip():SetChangeRate(fracStepped)
+    
+end
+
 local function UpdateAirQuality(self)
     
     local deltaTime = IMGameMaster.kUpdatePeriod
@@ -382,11 +404,12 @@ local function UpdateAirQuality(self)
         rateOfChange = IMGameMaster.kAirQualityChangePerSecondMax * interp * IMGameMaster.kRatioPositiveBoost
     else
         -- decreasing, bad for marines
-        local interp = 1.0 - ((ratio - IMGameMaster.kRatioChangeMin) / (1 - IMGameMaster.kRatioChangeMin))
+        local interp = 1.0 - ((ratio - IMGameMaster.kRatioChangeMin) / (1.0 - IMGameMaster.kRatioChangeMin))
         rateOfChange = -IMGameMaster.kAirQualityChangePerSecondMax * interp
     end
     
-    --Log("rate of change = %s per second", rateOfChange)
+    UpdateAirChangeIndicatorByRatio(self, ratio)
+    
     rateOfChange = rateOfChange * deltaTime
     self.airQFraction = self.airQFraction + rateOfChange
     GetAirStatusBlip():SetFraction(self.airQFraction)

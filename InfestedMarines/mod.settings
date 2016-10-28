@@ -1,8 +1,8 @@
-name        = "test mod 1"
+name        = "Infested Marines"
 source_dir  = "source"
 output_dir  = "output"
-description = [=[test mod 1]=]
+description = [=[You have been dispatched to deal with a dangerous pathogen detected within a remote TSF outpost. Race to repair the air purifiers before the pathogen corrodes them too severely and the air is overwhelmed with spores. But watch out, one of your teammates has already been infested!]=]
 image       = "preview.jpg"
-tag_modtype = ""
-tag_support = ""
+tag_modtype = "Custom Game Mode"
+tag_support = "Must be run on Server"
 publish_id = "2e813610"

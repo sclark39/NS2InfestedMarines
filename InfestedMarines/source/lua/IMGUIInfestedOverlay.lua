@@ -8,72 +8,76 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
+Script.Load("lua/GUIAnimatedScript.lua")
+
 function GetInfestedHUDScript()
     return ClientUI.GetScript("IMGUIInfestedOverlay")
 end
 
-class 'IMGUIInfestedOverlay' (GUIScript)
+class 'IMGUIInfestedOverlay' (GUIAnimatedScript)
 
 IMGUIInfestedOverlay.kTexture = PrecacheAsset("ui/infested_marines/infested_border.dds")
 
-local function SharedUpdate(self, deltaTime)
-    
-    self.border:SetPosition(Vector(0,0,0))
-    local w = Client.GetScreenWidth()
-    local h = Client.GetScreenHeight()
-    self.border:SetSize(Vector(w, h, 0))
-    
-end
-
 function IMGUIInfestedOverlay:Initialize()
+    
+    GUIAnimatedScript.Initialize(self)
     
     self.updateInterval = 1/10 -- 10fps
     
-    self.border = GUIManager:CreateGraphicItem()
-    self.border:SetAnchor(GUIItem.Left, GUIItem.Top)
-    self.border:SetLayer(kGUILayerDeathScreen)
-    self.border:SetTexture(IMGUIInfestedOverlay.kTexture)
-    self.border:SetIsVisible(false)
+    self.background = self:CreateAnimatedGraphicItem()
+    self.background:SetTexture(IMGUIInfestedOverlay.kTexture)
+    self.background:SetIsScaling(false)
+    self.background:SetSize(Vector(Client.GetScreenWidth(), Client.GetScreenHeight(),0))
+    self.background:SetLayer(kGUILayerDeathScreen)
+    
+    local player = Client.GetLocalPlayer()
+    local shouldBeVisible = player and player:isa("Marine") and player.GetIsInfected and player:GetIsInfected() 
+    if shouldBeVisible then
+        self.background:SetColor(Color(1,1,1,1))
+    else
+        self.background:SetColor(Color(1,1,1,0))
+    end
+    self.lastState = shouldBeVisible
     
 end
 
-function IMGUIInfestedOverlay:Uninitialize()
+function IMGUIInfestedOverlay:Reset()
+
+    GUIAnimatedScript.Reset(self)
     
-    if self.border then
-        GUI.DestroyItem(self.border)
-        self.border = nil
-    end
+    self.background:SetSize(Vector(Client.GetScreenWidth(), Client.GetScreenHeight(),0))
     
 end
 
 function IMGUIInfestedOverlay:SetVisibility(state)
     
-    if self.border then
-        self.border:SetIsVisible(state)
+    if self.background then
+        if self.lastState ~= state then
+            self.lastState = state
+            if state then
+                self.background:FadeIn(1.5, "INFEST_OVERLAY")
+            else
+                self.background:FadeOut(0, "INFEST_OVERLAY")
+                
+            end
+        end
+        --self.border:SetIsVisible(state)
     end
     
 end
 
 function IMGUIInfestedOverlay:OnResolutionChanged()
-
-    SharedUpdate(self)
-
+    self:Uninitialize()
+    self:Initialize()
 end
 
 function IMGUIInfestedOverlay:Update(deltaTime)
     
-    SharedUpdate(self, deltaTime)
+    GUIAnimatedScript.Update(self, deltaTime)
     
     -- convenient to do this visibility check here.
     local player = Client.GetLocalPlayer()
-    local shouldBeVisible = false
-    
-    if player and player:isa("Marine") and player.GetIsInfected and player:GetIsInfected() then
-        shouldBeVisible = true
-    else
-        shouldBeVisible = false
-    end
-    
+    local shouldBeVisible = player and player:isa("Marine") and player.GetIsInfected and player:GetIsInfected()     
     self:SetVisibility(shouldBeVisible)
     
 end

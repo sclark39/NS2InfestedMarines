@@ -16,7 +16,7 @@ class 'IMGUIInfestedFeedTimer' (GUIScript)
 
 -- the following measurements are in pixels, based on a 1920x1080 display.  They will scale to fill any
 -- screen size based on the vertical resolution.
-IMGUIInfestedFeedTimer.kRightEdgeMargin = 24 -- right edge of monster is 128 pixels from right edge of screen
+IMGUIInfestedFeedTimer.kRightEdgeMargin = 64-- right edge of monster is 128 pixels from right edge of screen
 IMGUIInfestedFeedTimer.kTextureSourceSize = Vector(556, 679, 0) -- literal pixels, source image, not scaled.
 IMGUIInfestedFeedTimer.kMonsterTargetSize = Vector(205, 253, 0) -- scaled monster size, on screen.
 
@@ -37,8 +37,9 @@ local function SharedUpdate(self, deltaTime)
     local scaleFact = GUIScaleHeight(1)
     self.monsterIcon:SetSize(scaleFact * IMGUIInfestedFeedTimer.kMonsterTargetSize)
     local xPos = -IMGUIInfestedFeedTimer.kRightEdgeMargin - IMGUIInfestedFeedTimer.kMonsterTargetSize.x
-    local yPos = -IMGUIInfestedFeedTimer.kMonsterTargetSize.y * 0.5
+    local yPos = -IMGUIInfestedFeedTimer.kMonsterTargetSize.y
     self.monsterIcon:SetPosition(scaleFact * Vector(xPos, yPos, 0))
+    self.monsterIcon:SetLayer(kGUILayerDeathScreen + 1)
     
     self.monsterIcon:SetFloatParameter("fillFraction", self.displayedFraction)
     
@@ -46,10 +47,11 @@ end
 
 function IMGUIInfestedFeedTimer:Initialize()
     
+    
     self.updateInterval = 1/60 -- 60fps
     
     self.monsterIcon = GUIManager:CreateGraphicItem()
-    self.monsterIcon:SetAnchor(GUIItem.Right, GUIItem.Center)
+    self.monsterIcon:SetAnchor(GUIItem.Right, GUIItem.Bottom)
     self.monsterIcon:SetColor(kMonsterColor)
     --self.monsterIcon:SetLayer(kGUILayerPlayerHUDForeground1)
     
@@ -76,6 +78,7 @@ end
 function IMGUIInfestedFeedTimer:SetVisibility(state)
     
     if self.monsterIcon then
+        
         self.monsterIcon:SetIsVisible(state)
     end
     

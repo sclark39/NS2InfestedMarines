@@ -40,7 +40,7 @@ kInfestedMarinesEffects =
     initial_infestation_sound = 
     {
         {
-            { private_sound = "sound/NS2.fev/alien/common/swarm" },
+            { private_sound = "sound/NS2.fev/common/dissolve" },
         },
     },
     

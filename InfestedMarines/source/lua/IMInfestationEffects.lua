@@ -54,7 +54,7 @@ kInfestedMarinesEffects =
     air_purifier_working = 
     {
         {
-            { cinematic = "cinematics/alien/nutrientmist_structure.cinematic", world_space = true },
+            { cinematic = "cinematics/infested_marines/air_purifying.cinematic", world_space = true },
         },
     },
     

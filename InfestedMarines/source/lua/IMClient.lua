@@ -21,12 +21,17 @@ local allowedAchievements =
 {
     "Season_0_1",
     "Season_0_2",
-    "Season_0_3",
+    "Season_0_3"
 }
 
 local oldSetAchievement = Client.SetAchievement
 function Client.SetAchievement( name )
     if allowedAchievements[name] then
         oldSetAchievement( name )
+
+        if name == "Season_0_1" then
+            Client.GrantPromoItems()
+            InventoryNewItemNotifyPush( kHalloween16ShoulderPatchItemId )
+        end
     end
 end

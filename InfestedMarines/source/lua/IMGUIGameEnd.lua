@@ -46,7 +46,7 @@ function GUIGameEnd:SetGameEnded(playerWon, playerDraw, playerTeamType )
 
     local player = Client.GetLocalPlayer()
     
-    if player.GetIsInfected and player.GetIsInfected() then
+    if player.GetIsInfected and player:GetIsInfected() then
         playerTeamType = kAlienTeamType
     end
     

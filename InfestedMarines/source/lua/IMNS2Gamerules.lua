@@ -80,47 +80,35 @@ if Server then
         if self:GetGameStarted() then
             -- game may have "started", but check first to ensure it's actually at a point where it
             -- should be able to end before checking the end conditions.
-            if GetGameMaster():GetHasInfectedBeenChosenYet() then
-                -- check for if all infected are dead or all uninfected are dead
-                local foundInfected = false
-                local foundUninfected = false
-                
-                local marines = self:GetTeam1():GetPlayers()
-                for i=1, #marines do
-                    if marines[i] and marines[i]:isa("Marine") and marines[i].GetIsInfected and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
-                        if marines[i]:GetIsInfected() then
-                            foundInfected = true
-                        else
-                            foundUninfected = true
-                        end
+        
+            -- check for if all infected are dead or all uninfected are dead
+            local foundInfected = not GetGameMaster():GetHasInfectedBeenChosenYet() or false
+            local foundUninfected = false
+            
+            local marines = self:GetTeam1():GetPlayers()
+            for i=1, #marines do
+                if marines[i] and marines[i]:isa("Marine") and marines[i].GetIsInfected and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
+                    if marines[i]:GetIsInfected() then
+                        foundInfected = true
+                    else
+                        foundUninfected = true
                     end
-                end
-                
-                if foundInfected and not foundUninfected then
-                    self:EndGame( self.team2 )
-                elseif (not foundInfected) and foundUninfected then
-                    self:EndGame( self.team1 )
-                elseif (not foundInfected) and (not foundUninfected) then
-                    self:DrawGame()
-                end
-                
-                -- check for if uninfected have toxic air quality
-                if GetGameMaster():GetAirQuality() <= 0.00001 then
-                    self:EndGame( self.team2 )
-                end
-            else
-                local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
-                local foundAlive = false
-                for i=1, #marines do
-                    if marines[i] and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
-                        foundAlive = true
-                        break
-                    end
-                end
-                if not foundAlive then
-                    self:EndGame( self.team2 )
                 end
             end
+            
+            if foundInfected and not foundUninfected then
+                self:EndGame( self.team2 )
+            elseif (not foundInfected) and foundUninfected then
+                self:EndGame( self.team1 )
+            elseif (not foundInfected) and (not foundUninfected) then
+                self:DrawGame()
+            end
+            
+            -- check for if uninfected have toxic air quality
+            if GetGameMaster():GetAirQuality() <= 0.00001 then
+                self:EndGame( self.team2 )
+            end
+            
         end
     end
     

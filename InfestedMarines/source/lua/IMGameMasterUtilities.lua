@@ -146,7 +146,7 @@ end
 
 function IMGetCleanMarineCount()
     
-    local m = self:GetTeam1():GetPlayers()
+    local m = GetGamerules():GetTeam1():GetPlayers()
     local count = 0
     for i=1, #m do
         if m[i] then
@@ -301,7 +301,7 @@ end
 
 function IMGetInfestedMarines()
     
-    local marines = self:GetTeam1():GetPlayers()
+    local marines = GetGamerules():GetTeam1():GetPlayers()
     local vettedMarines = {}
     
     for i=1, #marines do
@@ -316,7 +316,7 @@ end
 
 function IMGetCleanMarines()
     
-    local marines = self:GetTeam1():GetPlayers()
+    local marines = GetGamerules():GetTeam1():GetPlayers()
     local vettedMarines = {}
     
     for i=1, #marines do
@@ -331,7 +331,7 @@ end
 
 function IMGetRandomMarine()
     
-    local marines = self:GetTeam1():GetPlayers()
+    local marines = GetGamerules():GetTeam1():GetPlayers()
     local vettedMarines = {}
     
     for i=1, #marines do

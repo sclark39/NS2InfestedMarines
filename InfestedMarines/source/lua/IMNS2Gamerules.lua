@@ -45,7 +45,7 @@ if Server then
     end
     
     function NS2Gamerules:GetPregameLength()
-        return 5
+        return 0
     end
     
     -- disable bots for this gamemode

@@ -521,7 +521,7 @@ end
 local function UpdatePlayerObjectives(self)
     
     -- set all players objectives
-    local marines = self:GetTeam1():GetPlayers()
+    local marines = GetGamerules():GetTeam1():GetPlayers()
     for i=1, #marines do
         if marines[i] and marines[i].SetObjective then
             marines[i]:SetObjective(GetObjectiveForMarine(self, marines[i]))

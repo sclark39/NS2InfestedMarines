@@ -92,7 +92,6 @@ function GUIDeathScreen:Update(deltaTime)
     
     if isDead ~= self.lastIsDead or isInfected ~= self.lastIsInfected then
         
-        RawPrint( "INFECT SPLASH: ", isDead )
        --
         -- Check for the killer name as it will be nil if it hasn't been received yet.
         local killerName = nil

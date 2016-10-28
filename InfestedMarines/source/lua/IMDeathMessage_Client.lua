@@ -179,6 +179,10 @@ local function AddDeathMessage(killerIsPlayer, killerIndex, killerTeamNumber, ic
     
     local shouldAddMessage = false
     
+    if not targetIsPlayer then
+        return
+    end
+    
     if not player:GetIsAlive() -- if dead
         or player.GetIsInfected and player:GetIsInfected() -- or infected
         or not Client.GetIsControllingPlayer() -- or spectating

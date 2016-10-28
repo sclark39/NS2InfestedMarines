@@ -44,6 +44,7 @@ ModLoader.SetupFileHook("lua/PointGiverMixin.lua", "lua/IMPointGiverMixin.lua", 
 --Change GUI
 ModLoader.SetupFileHook( "lua/GUIMinimapFrame.lua", "lua/IMGUIMinimapFrame.lua", "post" )
 ModLoader.SetupFileHook("lua/Hud/Marine/GUIMarineHUD.lua", "lua/IMGUIMarineHUD.lua", "post" )
+ModLoader.SetupFileHook("lua/GUIDeathScreen.lua", "lua/IMGUIDeathScreen.lua", "replace" )
 
 -- New GUI elements
 ModLoader.SetupFileHook("lua/ClientUI.lua", "lua/IMClientUI.lua", "post")

@@ -7,6 +7,3 @@
 --    Prevents kill feed from displaying.
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
-
-function TeamDeathMessageMixin:OnEntityKilled(targetEntity, killer, doer, point, direction)
-end

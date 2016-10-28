@@ -310,6 +310,11 @@ local function AttemptInfection(self)
         target:Infect()
         self:AddInfestedEnergy(Marine.kInfestedEnergyMax)
         
+        local team = self:GetTeam()
+        local deathMessageTable = team:GetDeathMessage(self, kDeathMessageIcon.Consumed, target)
+        team:ForEachPlayer(function(player) if player:GetClient() then Server.SendNetworkMessage(player:GetClient(), "DeathMessage", deathMessageTable, true) end end)
+            
+            
         TriggerThingoutEffects(self, 0.0, true)
         
         -- unfreeze player once infestation process has ended.
@@ -384,6 +389,7 @@ local kNewMarineNetvars =
     infected = "boolean",
     infestedEnergy = "float",
     infestationFreeze = "boolean",
+    timeInfested = "time",
     objective = "enum Marine.kObjective",
 }
 

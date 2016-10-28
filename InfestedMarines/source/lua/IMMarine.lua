@@ -23,6 +23,8 @@ Marine.kInfestedEnergyMax = 1.0
 Marine.kInfestedDurationMax = 120.0 -- two minutes without feeding before infested starves.
 Marine.kInfestedFeedLossRate = Marine.kInfestedEnergyMax / Marine.kInfestedDurationMax
 
+Marine.kInfestedRecentTimeThreshold = 3.0
+
 Marine.kInfestationCinematicOffset = Vector(0, 1.32, 0)
 
 Marine.kObjective = enum({"NoObjective", "NobodyInfected", "NotInfected", "Infected", "GameOver"})
@@ -214,12 +216,24 @@ function Marine:GetIsInfected()
     
 end
 
+function Marine:GetWasRecentlyInfested()
+    
+    if self.timeInfested and Shared.GetTime() < self.timeInfested + Marine.kInfestedRecentTimeThreshold then
+        return true
+    end
+    
+    return false
+    
+end
+
 function Marine:SetIsInfected(state)
     
     self.infected = (state == true)
     self:MarkBlipDirty()
     
     self:AddInfestedEnergy(Marine.kInfestedEnergyMax)
+    
+    self.timeInfested = Shared.GetTime()
     
 end
 

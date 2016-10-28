@@ -25,6 +25,12 @@ function CanEntityDoDamageTo(attacker, target, cheats, devMode, friendlyFire, da
         return false
     end
     
+    -- prevent infested from killing the one who turned them for a short time immediately after they were
+    -- turned.
+    if attacker and attacker:isa("Marine") and target and target:isa("Marine") and attacker:GetIsInfected() and attacker:GetWasRecentlyInfested() then
+        return false
+    end
+    
     return old_CanEntityDoDamageTo(attacker, target, cheats, devMode, friendlyFire, damageType)
     
 end

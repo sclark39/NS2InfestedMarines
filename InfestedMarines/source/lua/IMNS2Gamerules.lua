@@ -384,7 +384,7 @@ if Server then
     function NS2Gamerules:EndGame(...)
         oldEndGame(self, ...)
         
-        GetGameMaster():OnRoundEnd()
+        GetGameMaster():OnRoundEnd(...)
         self:ResetPlayerScores()
     end
 

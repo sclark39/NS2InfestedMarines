@@ -310,10 +310,13 @@ local function PickInfected(self)
     end
     
     assert(#infectedPlayers > 0)
-    
+    self.initialInfected = {}
+
     for i=1, #infectedPlayers do
         infectedPlayers[i]:SetIsInfected(true)
         infectedPlayers[i]:TriggerEffects( "initial_infestation_pick_sound" )
+
+        self.initialInfected[infectedPlayers[i]:GetSteamId()] = true
     end
     
     local numPlayers = GetGamerules().team1:GetNumPlayers()
@@ -428,8 +431,38 @@ local function UpdateInfestedFeed(self)
     
 end
 
-function IMGameMaster:OnRoundEnd()
-    
+function IMGameMaster:OnRoundEnd(winner)
+    local marines = {}
+    local infested = {}
+    local function sortPlayer(player)
+        if player:GetIsAlive() then
+            if player:GetIsInfected() then
+                infested[#infested+1] = player
+            else
+                marines[#marines+1] = player
+            end
+        end
+    end
+    GetGamerules():GetTeam1():ForEachPlayer(sortPlayer)
+
+    local winningTeamType = winner and winner.GetTeamType and winner:GetTeamType() or kNeutralTeamType
+    if winningTeamType == kMarineTeamType then
+        if #marines == 1 then
+            local client = marines[1]:GetClient()
+            if client then
+                Server.SetAchievement(client, "Season_0_3")
+            end
+        end
+    else
+        if #marines == 0 then
+            for i = 1, #infested do
+                if self.initialInfected[infested[i]:GetSteamId()] then
+                    local client = infested[i]:GetClient()
+                    Server.SetAchievement(client, "Season_0_2")
+                end
+            end
+        end
+    end
 end
 
 function IMGameMaster:GetAirQuality()

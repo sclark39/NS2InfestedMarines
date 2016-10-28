@@ -65,4 +65,17 @@ if Server then
 
 		oldCopyPlayerDataFrom(self, player)
 	end
+
+	local achScore = 500
+	local oldAddScore = ScoringMixin.AddScore
+	function ScoringMixin:AddScore(...)
+		local lastscore = self.score
+
+		oldAddScore(self, ...)
+
+		local client = self:GetClient()
+		if client and lastscore < achScore and self.score >= achScore then
+			Server.SetAchievement(client, "Season_0_1")
+		end
+	end
 end

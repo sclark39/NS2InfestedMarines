@@ -10,7 +10,6 @@
 Script.Load("lua/IMModBlacklist.lua")
 
 ModLoader.SetupFileHook("lua/NS2Gamerules.lua", "lua/IMNS2Gamerules.lua", "post")
-ModLoader.SetupFileHook("lua/Gamerules.lua", "lua/IMGamerules.lua", "post")
 ModLoader.SetupFileHook("lua/Marine_Server.lua", "lua/IMMarine_Server.lua", "post")
 ModLoader.SetupFileHook("lua/Marine_Client.lua", "lua/IMMarine_Client.lua", "post")
 ModLoader.SetupFileHook("lua/TeamDeathMessageMixin.lua", "lua/IMTeamDeathMessageMixin.lua", "post")

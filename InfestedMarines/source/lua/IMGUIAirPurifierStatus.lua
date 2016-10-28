@@ -14,32 +14,6 @@ Script.Load("lua/Hud/Marine/GUIMarineHUDStyle.lua") -- we use color constants fr
 class 'IMGUIAirPurifierStatus' (GUIScript)
 
 -- pixels @ 1080p
--- old constants
---[[
-IMGUIAirPurifierStatus.kIconSpaceSize = Vector(128, 108, 0)
-IMGUIAirPurifierStatus.kTextHeight = 20
-IMGUIAirPurifierStatus.kShadowOffset = Vector(2,2,0)
-IMGUIAirPurifierStatus.kWrenchVerticalOffset = 18
-
-IMGUIAirPurifierStatus.kIconSize = Vector(256, 256, 0)
-IMGUIAirPurifierStatus.kWrenchSize = Vector(64, 64, 0)
-
-IMGUIAirPurifierStatus.kFont = Fonts.kAgencyFB_Medium
-
-IMGUIAirPurifierStatus.iconNormal = PrecacheAsset("ui/infested_marines/air_purifier_icon_normal.dds")
-IMGUIAirPurifierStatus.iconDestroyed = PrecacheAsset("ui/infested_marines/air_purifier_icon_destroyed.dds")
-IMGUIAirPurifierStatus.iconShader = "shaders/infested_marines/GUIAirPurifierIcon.surface_shader"
-
-IMGUIAirPurifierStatus.flashColor = Color(1,0,0,0.9)
-IMGUIAirPurifierStatus.kDefaultPulseRampupTime = 20.0
-
-IMGUIAirPurifierStatus.textColor = kBrightColor
-IMGUIAirPurifierStatus.destroyedTextColor = Color(121/255, 41/255, 41/255, 1)
-
-IMGUIAirPurifierStatus.iconScaleFactor = 0.8287
-IMGUIAirPurifierStatus.textScaleFactor = 1.5
-
---]]
 IMGUIAirPurifierStatus.iconShader = "shaders/infested_marines/GUIAirPurifierIcon.surface_shader"
 IMGUIAirPurifierStatus.kPurNormalTexture = PrecacheAsset("ui/infested_marines/air_purifier_icon_normal.dds")
 IMGUIAirPurifierStatus.kPurDamagedTexture = PrecacheAsset("ui/infested_marines/air_purifier_icon_damaged.dds")
@@ -48,7 +22,6 @@ IMGUIAirPurifierStatus.kPurDestroyedTexture = PrecacheAsset("ui/infested_marines
 IMGUIAirPurifierStatus.kPurNormalSourceSize = Vector(679, 704, 0)
 IMGUIAirPurifierStatus.kPurDamagedSourceSize = Vector(647, 735, 0)
 IMGUIAirPurifierStatus.kPurDestroyedSourceSize = Vector(834, 705, 0)
-
 
 IMGUIAirPurifierStatus.kSourceToTargetScaleFactor = 0.254
 

@@ -450,7 +450,7 @@ function IMGameMaster:OnRoundEnd(winner)
         if #marines == 1 then
             local client = marines[1]:GetClient()
             if client then
-                Server.SetAchievement(client, "Season_0_3", true)
+                Server.SetAchievement(client, "Season_0_3")
             end
         end
     else
@@ -458,7 +458,7 @@ function IMGameMaster:OnRoundEnd(winner)
             for i = 1, #infested do
                 if self.initialInfected[infested[i]:GetSteamId()] then
                     local client = infested[i]:GetClient()
-                    Server.SetAchievement(client, "Season_0_2", true)
+                    Server.SetAchievement(client, "Season_0_2")
                 end
             end
         end

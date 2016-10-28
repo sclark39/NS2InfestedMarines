@@ -19,9 +19,9 @@ Script.Load("lua/IMGUIInfestedOverlay.lua")
 --map of achievements that are available in this gamemode
 local allowedAchievements =
 {
-    "Season_0_1",
-    "Season_0_2",
-    "Season_0_3"
+    [Season_0_1] = true,
+    [Season_0_2] = true,
+    [Season_0_3] = true,
 }
 
 local oldSetAchievement = Client.SetAchievement

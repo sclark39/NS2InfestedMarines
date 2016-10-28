@@ -18,33 +18,6 @@ if Server then
         return true
     end
     
-    local function SetupPowerNodes()
-        local rezNodes = EntityListToTable(Shared.GetEntitiesWithClassname("Extractor"))
-        local roomsWithRezNodes = {}
-        for i=1, #rezNodes do
-            if rezNodes[i] then
-                roomsWithRezNodes[Shared.GetString(rezNodes[i]:GetLocationId())] = true
-            end
-        end
-        local powerNodes = EntityListToTable(Shared.GetEntitiesWithClassname("PowerPoint"))
-        for i=1, #powerNodes do
-            if powerNodes[i] then
-                if not powerNodes[i]:GetIsSocketed() then
-                    powerNodes[i]:SocketPowerNode()
-                end
-                if not powerNodes[i]:GetIsBuilt() then
-                    powerNodes[i]:SetConstructionComplete()
-                end
-                if not roomsWithRezNodes[Shared.GetString(powerNodes[i]:GetLocationId())] then
-                    -- power is permanently destroyed in all other rooms
-                    powerNodes[i]:SetInternalPowerState(PowerPoint.kPowerState.destroyed)
-                    powerNodes[i]:SetLightMode(kLightMode.NoPower)
-                    powerNodes[i]:Kill()
-                end
-            end
-        end
-    end
-    
     -- let them try to join any team at any time.
     function NS2Gamerules:GetCanJoinTeamNumber()
         return true
@@ -326,7 +299,7 @@ if Server then
         CreateLiveMapEntities()
         
         -- Make rooms with extractors bright, rooms without dark
-        SetupPowerNodes()
+        self:DestroyUnusedPowerNodes()
         
         self.forceGameStart = false
         self.preventGameEnd = nil

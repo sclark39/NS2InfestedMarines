@@ -113,7 +113,7 @@ local function SharedUpdate(self, deltaTime)
     local interpVal = 1.0 - math.pow( kBarMoveSpeedFactor , deltaTime )
     self.displayedBarFraction = self.displayedBarFraction * (1.0 - interpVal) + self.barFraction * interpVal
     
-    local displayScaleFactor = 1.0--GUIScaleHeight(1)
+    local displayScaleFactor = GUIScaleHeight(1)
    -- local toxicFrac = 1.0 - self.displayedBarFraction -- used to be the opposite -- "air quality"
     local toxicFrac = self.displayedBarFraction 
     

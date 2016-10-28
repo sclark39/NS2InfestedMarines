@@ -435,7 +435,7 @@ function IMGameMaster:OnRoundEnd(winner)
     local marines = {}
     local infested = {}
     local function sortPlayer(player)
-        if player:GetIsAlive() then
+        if player and player.GetIsAlive and player:GetIsAlive() then
             if player:GetIsInfected() then
                 infested[#infested+1] = player
             else

@@ -22,7 +22,7 @@ local kEndIconHeight = 600
 local kEndIconPosition = Vector(-kEndIconWidth / 2, -kEndIconHeight / 2, 0)
 
 local kMessageFontName = { marine = Fonts.kAgencyFB_Huge, alien = Fonts.kStamp_Huge }
-local kMessageText = { [kEndStates.AlienPlayerWin] = "INFESTED WIN",
+local kMessageText = { [kEndStates.AlienPlayerWin] = "INFESTED WIN!",
                        [kEndStates.MarinePlayerWin] = "MARINE_VICTORY",
                        [kEndStates.AlienPlayerLose] = "INFESTED LOSE",
                        [kEndStates.MarinePlayerLose] = "MARINE_DEFEAT",

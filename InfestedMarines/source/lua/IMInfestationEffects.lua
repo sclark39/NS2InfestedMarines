@@ -34,6 +34,7 @@ kInfestedMarinesEffects =
         {
             { private_sound = "sound/NS2.fev/alien/common/res_received" },
             { private_sound = "sound/NS2.fev/alien/common/regeneration" },
+            { private_sound = "sound/NS2.fev/alien/common/swarm" },
         },
     },
     

@@ -60,6 +60,7 @@ local function OnChatReceived(client, message)
 		local playerName, playerLocationId, playerTeamNumber, playerTeamType, author = GetChatPlayerData(client)
 
 		if playerName then
+			local playerNameDead = string.format("(Dead) %s", playerName) --Todo: Localize
 			local authorIsInfected = author.GetIsInfected and author:GetIsInfected()
 			local authorIsDead = not author.GetIsAlive or not author:GetIsAlive()
 
@@ -74,12 +75,10 @@ local function OnChatReceived(client, message)
 					if player.GetIsAlive and player:GetIsAlive() and player:GetTeamNumber() == kMarineTeamType then
 						send = false
 					else
-						playerName = string.format("(Dead) %s", playerName) --Todo: Localize
+						Server.SendNetworkMessage(player, "Chat", BuildChatMessage(message.teamOnly, playerNameDead, playerLocationId, playerTeamNumber, playerTeamType, chatMessage), true)
 					end
-				end
-                
-				if send then
-					Server.SendNetworkMessage(player, "Chat", BuildChatMessage(message.teamOnly, playerName, playerLocationId, playerTeamNumber, playerTeamType, chatMessage), true)
+				else
+                    Server.SendNetworkMessage(player, "Chat", BuildChatMessage(message.teamOnly, playerName, playerLocationId, playerTeamNumber, playerTeamType, chatMessage), true)
 				end
 			end
 

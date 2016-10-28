@@ -35,7 +35,9 @@ IMGUIAirPurifierStatus.kFont = Fonts.kAgencyFB_Medium
 
 IMGUIAirPurifierStatus.kIconSpaceSize = Vector(150, 108, 0)
 IMGUIAirPurifierStatus.kTextHeight = 20
+IMGUIAirPurifierStatus.kTextCorrectionScale = 20/14 -- for some reason... even when we scale for 20... we get 14... so just... scale by this correction amount too
 IMGUIAirPurifierStatus.kTextBuffer = 3
+IMGUIAirPurifierStatus.kTextOffset = 6
 IMGUIAirPurifierStatus.textColor = kBrightColor
 IMGUIAirPurifierStatus.destroyedTextColor = Color(121/255, 41/255, 41/255, 1)
 IMGUIAirPurifierStatus.flashColor = Color(1,0,0,0.9)
@@ -65,20 +67,28 @@ local function SharedUpdate(self, deltaTime)
     do
         self.text:SetScale(Vector(1,1,1))
         local unscaledTextHeight = self.text:GetTextHeight("0")
-        local desiredHeight = (IMGUIAirPurifierStatus.kTextHeight * displayScaleFactor)
-        local scaleFactor = desiredHeight / unscaledTextHeight
+        local desiredHeight = (IMGUIAirPurifierStatus.kTextHeight * IMGUIAirPurifierStatus.kTextCorrectionScale * displayScaleFactor)
+        local scaleFactor = (desiredHeight / unscaledTextHeight) * IMGUIAirPurifierStatus.kTextCorrectionScale
         
-        self.text:SetScale(Vector(scaleFactor, scaleFactor, 0))
-        self.textShadow:SetScale(Vector(scaleFactor, scaleFactor, 0))
+        self.text:SetScale(Vector(scaleFactor, scaleFactor, scaleFactor))
+        self.textShadow:SetScale(Vector(scaleFactor, scaleFactor, scaleFactor))
         
-        local newPosition = self.displayedPosition
+        local newPosition = self.displayedPosition * 1.0 -- COPY not reference!!!
         newPosition.x = newPosition.x  + (IMGUIAirPurifierStatus.kIconSpaceSize.x / 2)
-        newPosition.y = newPosition.y + IMGUIAirPurifierStatus.kIconSpaceSize.y + IMGUIAirPurifierStatus.kTextBuffer + (IMGUIAirPurifierStatus.kTextHeight/2)
+        newPosition.y = newPosition.y + IMGUIAirPurifierStatus.kIconSpaceSize.y + IMGUIAirPurifierStatus.kTextBuffer + IMGUIAirPurifierStatus.kTextOffset
+        
+        if self.roomName then
+            local maxWidth = IMGUIAirPurifierStatus.kIconSpaceSize.x - (IMGUIAirPurifierStatus.kTextBuffer * 2 * displayScaleFactor)
+            local wrappedText = WordWrap( self.text, self.roomName, 0, maxWidth)
+            self.text:SetText(wrappedText)
+            self.textShadow:SetText(wrappedText)
+        else
+            self.text:SetText("")
+            self.textShadow:SetText("")
+        end
         
         self.text:SetPosition(newPosition * displayScaleFactor)
         self.textShadow:SetPosition((newPosition + IMGUIAirPurifierStatus.kShadowOffset) * displayScaleFactor)
-        self.text:SetText(self.roomName or "")
-        self.textShadow:SetText(self.roomName or "")
     end
     
 end
@@ -104,7 +114,7 @@ function IMGUIAirPurifierStatus:Initialize()
     self.text:SetOptionFlag(GUIItem.ManageRender)
     self.text:SetFontName(IMGUIAirPurifierStatus.kFont)
     self.text:SetTextAlignmentX(GUIItem.Align_Center)
-    self.text:SetTextAlignmentY(GUIItem.Align_Center)
+    self.text:SetTextAlignmentY(GUIItem.Align_Min)
     self.text:SetText("")
     
     self.textShadow = GUIManager:CreateGraphicItem()
@@ -115,7 +125,7 @@ function IMGUIAirPurifierStatus:Initialize()
     self.textShadow:SetOptionFlag(GUIItem.ManageRender)
     self.textShadow:SetFontName(IMGUIAirPurifierStatus.kFont)
     self.textShadow:SetTextAlignmentX(GUIItem.Align_Center)
-    self.textShadow:SetTextAlignmentY(GUIItem.Align_Center)
+    self.textShadow:SetTextAlignmentY(GUIItem.Align_Min)
     self.textShadow:SetText("")
     
     self.icon = GUIManager:CreateGraphicItem()
@@ -151,12 +161,6 @@ end
 function IMGUIAirPurifierStatus:OnResolutionChanged()
     
     SharedUpdate(self, 0)
-    
-end
-
-function IMGUIAirPurifierStatus:SetManager(manager)
-    
-    self.manager = manager
     
 end
 
@@ -214,30 +218,34 @@ function IMGUIAirPurifierStatus:SetIconState(state)
     
     self.iconState = state
     if state == IMAirPurifierBlip.kPurifierState.BeingDamaged then
-        self.icon:SetTexture(IMGUIAirPurifierStatus.kPurDamagedTexture)
+        --self.icon:SetTexture(IMGUIAirPurifierStatus.kPurDamagedTexture)
         self.icon:SetFloatParameter("pulseInfluence", 1)
         self.icon:SetColor(IMGUIAirPurifierStatus.flashColor)
         self.text:SetColor(IMGUIAirPurifierStatus.textColor)
-        self.iconOffset = IMGUIAirPurifierStatus.kPurDamagedToNormalOffset
-        self.targetSize = IMGUIAirPurifierStatus.kPurDamagedTargetSize
+        --self.iconOffset = IMGUIAirPurifierStatus.kPurDamagedToNormalOffset
+        --self.targetSize = IMGUIAirPurifierStatus.kPurDamagedTargetSize
+        Log("setting icon to kPurDamagedTexture")
     elseif state == IMAirPurifierBlip.kPurifierState.Destroyed then
-        self.icon:SetTexture(IMGUIAirPurifierStatus.kPurDestroyedTexture)
+        --self.icon:SetTexture(IMGUIAirPurifierStatus.kPurDestroyedTexture)
         self.text:SetColor(IMGUIAirPurifierStatus.destroyedTextColor)
         self.icon:SetFloatParameter("pulseInfluence", 0)
-        self.iconOffset = IMGUIAirPurifierStatus.kPurDestroyedToNormalOffset
-        self.targetSize = IMGUIAirPurifierStatus.kPurDestroyedTargetSize
+        --self.iconOffset = IMGUIAirPurifierStatus.kPurDestroyedToNormalOffset
+        --self.targetSize = IMGUIAirPurifierStatus.kPurDestroyedTargetSize
+        Log("setting icon to kPurDestroyedTexture")
     elseif state == IMAirPurifierBlip.kPurifierState.Damaged then
-        self.icon:SetTexture(IMGUIAirPurifierStatus.kPurDamagedTexture)
+        --self.icon:SetTexture(IMGUIAirPurifierStatus.kPurDamagedTexture)
         self.icon:SetFloatParameter("pulseInfluence", 0)
         self.text:SetColor(IMGUIAirPurifierStatus.textColor)
-        self.iconOffset = IMGUIAirPurifierStatus.kPurDamagedToNormalOffset
-        self.targetSize = IMGUIAirPurifierStatus.kPurDamagedTargetSize
+        --self.iconOffset = IMGUIAirPurifierStatus.kPurDamagedToNormalOffset
+        --self.targetSize = IMGUIAirPurifierStatus.kPurDamagedTargetSize
+        Log("setting icon to kPurDamagedTexture")
     else --state == IMAirPurifierBlip.kPurifierState.Fixed then
-        self.icon:SetTexture(IMGUIAirPurifierStatus.kPurNormalTexture)
+        --self.icon:SetTexture(IMGUIAirPurifierStatus.kPurNormalTexture)
         self.icon:SetFloatParameter("pulseInfluence", 0)
         self.text:SetColor(IMGUIAirPurifierStatus.textColor)
-        self.iconOffset = Vector(0,0,0)
-        self.targetSize = IMGUIAirPurifierStatus.kPurNormalTargetSize
+        --self.iconOffset = Vector(0,0,0)
+        --self.targetSize = IMGUIAirPurifierStatus.kPurNormalTargetSize
+        Log("setting icon to kPurNormalTexture")
     end
     
 end

@@ -144,82 +144,9 @@ function IMGetExtractorCountFraction()
     
 end
 
-function IWGetRandomWeightedIndex(weights)
-    
-    assert(#weights > 0)
-    
-    local tw = weights[1]
-    local pick = 1
-    for i=2, #weights do
-        tw = tw + weights[i]
-        if math.random() * tw <= weights[i] then
-            pick = i
-        end
-    end
-    
-    Log("IWGetRandomWeightedIndex returning %s", pick)
-    return pick
-    
-end
-
-local function GetDistanceBetweenEntitiesSq(e1, e2)
-    return (e1:GetOrigin() - e2:GetOrigin()):GetLengthSquared()
-end
-
--- Problem: if we make the number of extractors scale with the number of CLEAN players, people will catch on to the
--- fact that there are way more marines than there should be for the number of extractor they're getting, and they might
--- just start blasting everyone they see.  At the same time, it's a bit too brutal to make every marine count the same --
--- if all the infested just stopped helping and hid instead, they could win by default.  So from this we need two things:
--- 1) fewer extractors when there are fewer "clean" players, but not enough to be THAT noticeable, and 2) a way of giving
--- players more time when they are being assigned quite a few more extractors than they should.  This function computes the
--- "middle ground" of the number of extractors that should be damaged in a wave, and also provides a time multiplier value
--- to be used to adjust the duration of each extractor.
-function IMGetPlausibleMarineCount()
-    
-    local m = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
-    local infectedCount = 0
-    local cleanCount = 0
-    for i=1, #m do
-        if m[i] then
-            if m[i].GetIsAlive and m[i]:GetIsAlive() and m[i].GetIsInfected and not m[i]:GetIsInfected() then
-                cleanCount = cleanCount + 1
-            end
-            
-            if m[i].GetIsAlive and m[i]:GetIsAlive() and m[i].GetIsInfected and m[i]:GetIsInfected() then
-                infectedCount = infectedCount + 1
-            end
-        end
-    end
-    
-    -- make each infected count for half, so even if EVERYONE except you is infected, you'll probably still be seeing more than
-    -- one purifier being damaged, and might still hesitate to go full IronHorse on the enemy.
-    local count = cleanCount + (infectedCount * 0.5)
-    local fullCount = cleanCount + infectedCount
-    local factor = fullCount / count -- essentially would give double time if everyone was infected.
-    
-    return count, factor
-    
-end
-
-function IMGetInfestedMarineCount()
-    
-    local m = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
-    local count = 0
-    for i=1, #m do
-        if m[i] then
-            if m[i].GetIsAlive and m[i]:GetIsAlive() and m[i].GetIsInfected and m[i]:GetIsInfected() then
-                count = count + 1
-            end
-        end
-    end
-    
-    return count
-    
-end
-
 function IMGetCleanMarineCount()
     
-    local m = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+    local m = self:GetTeam1():GetPlayers()
     local count = 0
     for i=1, #m do
         if m[i] then
@@ -230,48 +157,6 @@ function IMGetCleanMarineCount()
     end
     
     return count
-    
-end
-
-local function DistBetweenEntAndPointSq(ent, pt)
-    return (ent:GetOrigin()-pt):GetLengthSquared()
-end
-
-local function GetPurifierFurthestFromPoint(purifiers, pt)
-    
-    local furthestDistSq = DistBetweenEntAndPointSq(purifiers[1], pt)
-    local furthest = 1
-    for i=2, #purifiers do
-        local distSq = DistBetweenEntAndPointSq(purifiers[i], pt)
-        if distSq > furthestDistSq then
-            furthestDistSq = distSq
-            furthest = i
-        end
-    end
-    
-    return purifiers[furthest], furthestDistSq
-    
-end
-
-local function ComputeSumSquaredDistance(picked, pos)
-    
-    local sum = 0.0
-    for i=1, #picked do
-        sum = sum + (picked[i]:GetOrigin() - pos):GetLengthSquared()
-    end
-    
-    return sum
-    
-end
-
-local function ComputeDistanceBias(picked, pool)
-    
-    local poolBias = {}
-    for i=1, #pool do
-        table.insert(poolBias, math.sqrt(ComputeSumSquaredDistance(picked, pool[i]:GetOrigin())))
-    end
-    
-    return poolBias
     
 end
 
@@ -295,45 +180,6 @@ local function PickRandomWithWeight(poolBias)
     end
     
     return pickedIndex
-    
-end
-
--- randomly choose X starting infested nodes with a bias towards nodes
--- that are further from the starting area, and with each subsequent
--- choice -- further from the other starting infested nodes.
-function IMComputeStartingInfestedNodes(infestCount, pool, homeNode)
-    
-    local picked = {}
-    table.insert(picked, homeNode) -- so we avoid this node.  Remember to remove later
-    
-    while (#picked < infestCount + 1) do
-        
-        local poolBias = ComputeDistanceBias(picked, pool)
-        local index = PickRandomWithWeight(poolBias)
-        assert(index > 0)
-        table.insert(picked, pool[index])
-        table.remove(pool, index)
-        
-    end
-    
-    table.remove(picked, 1) -- remove home node from picked list.
-    return picked
-    
-end
-
-function IMGetClosestIndexToPoint(pool, pt)
-    
-    local closest = 1
-    local closestDistSq = (pool[1]:GetOrigin()-pt):GetLengthSquared()
-    for i=2, #pool do
-        local distSq = (pool[i]:GetOrigin()-pt):GetLengthSquared()
-        if distSq < closestDistSq then
-            closest = i
-            closestDistSq = distSq
-        end
-    end
-    
-    return closest
     
 end
 
@@ -455,7 +301,7 @@ end
 
 function IMGetInfestedMarines()
     
-    local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+    local marines = self:GetTeam1():GetPlayers()
     local vettedMarines = {}
     
     for i=1, #marines do
@@ -470,7 +316,7 @@ end
 
 function IMGetCleanMarines()
     
-    local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+    local marines = self:GetTeam1():GetPlayers()
     local vettedMarines = {}
     
     for i=1, #marines do
@@ -485,7 +331,7 @@ end
 
 function IMGetRandomMarine()
     
-    local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+    local marines = self:GetTeam1():GetPlayers()
     local vettedMarines = {}
     
     for i=1, #marines do

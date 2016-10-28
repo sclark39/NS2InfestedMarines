@@ -323,7 +323,6 @@ function IMCystManager:CreateCyst(position)
     end
     
     local coords = AlignCyst(Coords.GetTranslation(groundTrace.endPoint), groundTrace.normal)
-    --coords.origin = groundTrace.endPoint - ((Cyst.kExtents.y + Cyst.kBoxTraceExtents.y) * coords.yAxis)
     coords.origin = groundTrace.endPoint - (Cyst.kBoxTraceExtents.y * coords.yAxis * 10)
     local newCyst = CreateEntity( Cyst.kMapName, coords.origin, kAlienTeamType )
     newCyst:SetCoords(coords)

@@ -14,8 +14,3 @@ AddClientUIScriptForTeam(kTeam1Index, "IMGUIObjectivesMarine")
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIObjectivesAlien")
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIInfestedFeedTimer")
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIInfestedOverlay")
-
-local function LoadScripts()
-	Script.Load("lua/IMGUIMarineHUD.lua")
-end
-Event.Hook("LoadComplete", LoadScripts)

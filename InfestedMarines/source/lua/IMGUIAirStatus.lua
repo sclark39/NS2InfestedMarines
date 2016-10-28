@@ -27,7 +27,7 @@ IMGUIAirStatus.kTopEdgeMargin = 96 -- from top edge of screen to center of text
 IMGUIAirStatus.kTextHeight = 40
 IMGUIAirStatus.kShadowOffset = Vector(2, 2, 0)
 
-IMGUIAirStatus.kBarScale = 0.65
+IMGUIAirStatus.kBarScale = 0.6
 
 IMGUIAirStatus.kBarBlueSourceSize = Vector( 1081, 61, 0 )
 IMGUIAirStatus.kBarBackSourceSize = Vector( 1136, 120, 0)
@@ -129,8 +129,9 @@ local function SharedUpdate(self, deltaTime)
     self.barBlue2:SetPosition(bluePosition * displayScaleFactor)
 	
 	local toxicColor = Clamp( ( toxicFrac - 0.2 ) / 0.8, 0, 1 ) -- make it yellow at 20%, starting the transition at 80%
+    local toxicOpacity = 0.3 + 0.5 * Clamp( ( toxicFrac - 0.1 ) / 0.5, 0, 1 )
 	self.barBlue:SetColor( Color( 1, 1, toxicColor, 1 ) )
-	self.barBlue2:SetColor( Color( 1, 1, toxicColor, IMGUIAirStatus.kTopBlueOpacity ) )
+	self.barBlue2:SetColor( Color( 1, 1, toxicColor, toxicOpacity ) )
 	
     -- bar back
     local backSize = IMGUIAirStatus.kBarBackTargetSize

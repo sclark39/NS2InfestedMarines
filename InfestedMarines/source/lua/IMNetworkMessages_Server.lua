@@ -78,20 +78,12 @@ local function OnChatReceived(client, message)
 					end
 				end
 
-				--Make Infested able to talk with Infested only via team chat
-				if message.teamOnly then
-					if authorIsInfected and playerIsInfected then
-						playerName = string.format("(Infested) %s", playerName) --Todo: Localize
-					elseif authorIsInfected and not playerIsInfected then
-						send = false
-					end
+				--Mark Infested players for the other infested players
+				if authorIsInfected and playerIsInfected then
+					playerName = string.format("(Infested) %s", playerName) --Todo: Localize
 				end
 
 				if send then
-					if playerTeamNumber == kMarineTeamType then
-						message.teamOnly = false --otherwise make chat messages all the same for marines
-					end
-
 					Server.SendNetworkMessage(player, "Chat", BuildChatMessage(message.teamOnly, playerName, playerLocationId, playerTeamNumber, playerTeamType, chatMessage), true)
 				end
 			end

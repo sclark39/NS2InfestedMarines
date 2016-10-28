@@ -11,8 +11,14 @@
 local old_CanEntityDoDamageTo = CanEntityDoDamageTo
 function CanEntityDoDamageTo(attacker, target, cheats, devMode, friendlyFire, damageType)
     
+    -- prevent infested from killing the one who turned them for a short time immediately after they were
+    -- turned.
+    if attacker and attacker:isa("Marine") and target and target:isa("Marine") and attacker:GetIsInfected() and attacker:GetWasRecentlyInfested() then
+        return false
+    end
+    
+    -- don't allow players to damage each other before infected has been chosen.
     if attacker and attacker:isa("Marine") and target and target:isa("Marine") then
-        -- don't allow players to damage each other before infected has been chosen.
         if Server then
             return GetGameMaster():GetHasInfectedBeenChosenYet()
         else
@@ -22,12 +28,6 @@ function CanEntityDoDamageTo(attacker, target, cheats, devMode, friendlyFire, da
     
     -- extra protection for extractors
     if attacker and attacker:isa("Marine") and target and target:isa("Extractor") then
-        return false
-    end
-    
-    -- prevent infested from killing the one who turned them for a short time immediately after they were
-    -- turned.
-    if attacker and attacker:isa("Marine") and target and target:isa("Marine") and attacker:GetIsInfected() and attacker:GetWasRecentlyInfested() then
         return false
     end
     

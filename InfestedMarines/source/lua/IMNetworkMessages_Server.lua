@@ -77,12 +77,7 @@ local function OnChatReceived(client, message)
 						playerName = string.format("(Dead) %s", playerName) --Todo: Localize
 					end
 				end
-
-				--Mark Infested players for the other infested players
-				if authorIsInfected and playerIsInfected then
-					playerName = string.format("(Infested) %s", playerName) --Todo: Localize
-				end
-
+                
 				if send then
 					Server.SendNetworkMessage(player, "Chat", BuildChatMessage(message.teamOnly, playerName, playerLocationId, playerTeamNumber, playerTeamType, chatMessage), true)
 				end

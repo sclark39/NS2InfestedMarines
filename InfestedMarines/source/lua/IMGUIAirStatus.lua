@@ -27,23 +27,26 @@ IMGUIAirStatus.kTopEdgeMargin = 96 -- from top edge of screen to center of text
 IMGUIAirStatus.kTextHeight = 40
 IMGUIAirStatus.kShadowOffset = Vector(2, 2, 0)
 
+IMGUIAirStatus.kBarScale = 0.65
+
 IMGUIAirStatus.kBarBlueSourceSize = Vector( 1081, 61, 0 )
-IMGUIAirStatus.kBarBackSourceSize = Vector( 1136, 116, 0)
-IMGUIAirStatus.kBarInfestedSourceSize = Vector( 1109, 120, 0)
+IMGUIAirStatus.kBarBackSourceSize = Vector( 1136, 120, 0)
+IMGUIAirStatus.kBarInfestedSourceSize = Vector( 1136, 120, 0)
 IMGUIAirStatus.kBarArrowRedSourceSize = Vector( 45, 59, 0 )
 IMGUIAirStatus.kBarArrowGreenSourceSize = Vector( 44, 59, 0 )
-IMGUIAirStatus.kBarBackToBlueOffset = Vector(-26, 20, 0)
-IMGUIAirStatus.kBarInfestedToBackOffset = Vector(18, -12, 0)
-IMGUIAirStatus.kGreenArrowInitialOffset = Vector(-9, 2, 0)
-IMGUIAirStatus.kRedArrowInitialOffset = Vector(3, 2, 0)
-IMGUIAirStatus.kArrowSpacing = 40
-IMGUIAirStatus.kTopBlueOpacity = 0.35
+IMGUIAirStatus.kBarBackToBlueOffset = Vector(-21, -32, 0)  * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kBarInfestedToBackOffset = Vector(0, 0, 0) * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kGreenArrowInitialOffset = Vector(-9, 2, 0) * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kRedArrowInitialOffset = Vector(3, 2, 0) * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kArrowSpacing = 40 * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kTopBlueOpacity = 0.9
 
-IMGUIAirStatus.kBarBlueTargetSize = IMGUIAirStatus.kBarBlueSourceSize
-IMGUIAirStatus.kBarBackTargetSize = IMGUIAirStatus.kBarBackSourceSize
-IMGUIAirStatus.kBarInfestedTargetSize = IMGUIAirStatus.kBarInfestedSourceSize
-IMGUIAirStatus.kBarArrowRedTargetSize = IMGUIAirStatus.kBarArrowRedSourceSize
-IMGUIAirStatus.kBarArrowGreenTargetSize = IMGUIAirStatus.kBarArrowGreenSourceSize
+IMGUIAirStatus.kBarBlueTargetSize = IMGUIAirStatus.kBarBlueSourceSize * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kBarBackTargetSize = IMGUIAirStatus.kBarBackSourceSize * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kBarInfestedTargetSize = IMGUIAirStatus.kBarInfestedSourceSize * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kBarArrowRedTargetSize = IMGUIAirStatus.kBarArrowRedSourceSize * IMGUIAirStatus.kBarScale
+IMGUIAirStatus.kBarArrowGreenTargetSize = IMGUIAirStatus.kBarArrowGreenSourceSize * IMGUIAirStatus.kBarScale
+
 
 IMGUIAirStatus.kGlobalOffset = Vector(0,0,0) -- I'm anticipating having to move this.
 IMGUIAirStatus.kTopToBarMargin = 144 -- from top edge of screen to top of bar, not bar back
@@ -110,11 +113,12 @@ local function SharedUpdate(self, deltaTime)
     local interpVal = 1.0 - math.pow( kBarMoveSpeedFactor , deltaTime )
     self.displayedBarFraction = self.displayedBarFraction * (1.0 - interpVal) + self.barFraction * interpVal
     
-    local displayScaleFactor = GUIScaleHeight(1)
-    local toxicFrac = 1.0 - self.displayedBarFraction -- used to be the opposite -- "air quality"
+    local displayScaleFactor = 1.0--GUIScaleHeight(1)
+   -- local toxicFrac = 1.0 - self.displayedBarFraction -- used to be the opposite -- "air quality"
+    local toxicFrac = self.displayedBarFraction 
     
     -- bar blue
-    local newBlueWidth = toxicFrac * IMGUIAirStatus.kBarBlueTargetSize.x
+    local newBlueWidth = math.floor( toxicFrac * IMGUIAirStatus.kBarBlueTargetSize.x )
     local blueSize = Vector(newBlueWidth, IMGUIAirStatus.kBarBlueTargetSize.y, 0)
     local bluePosition = Vector(-IMGUIAirStatus.kBarBlueTargetSize.x/2, IMGUIAirStatus.kTopToBarMargin, 0) + IMGUIAirStatus.kGlobalOffset
     self.barBlue:SetTextureCoordinates(0,0,toxicFrac,1)
@@ -123,13 +127,17 @@ local function SharedUpdate(self, deltaTime)
     self.barBlue2:SetSize(blueSize * displayScaleFactor)
     self.barBlue:SetPosition(bluePosition * displayScaleFactor)
     self.barBlue2:SetPosition(bluePosition * displayScaleFactor)
-    
+	
+	local toxicColor = Clamp( ( toxicFrac - 0.2 ) / 0.8, 0, 1 ) -- make it yellow at 20%, starting the transition at 80%
+	self.barBlue:SetColor( Color( 1, 1, toxicColor, 1 ) )
+	self.barBlue2:SetColor( Color( 1, 1, toxicColor, IMGUIAirStatus.kTopBlueOpacity ) )
+	
     -- bar back
     local backSize = IMGUIAirStatus.kBarBackTargetSize
     local backPosition = bluePosition + IMGUIAirStatus.kBarBackToBlueOffset
     self.barBack:SetSize(backSize * displayScaleFactor)
     self.barBack:SetPosition(backPosition * displayScaleFactor)
-    
+	
     -- infested bar
     local barInfestedSize = IMGUIAirStatus.kBarInfestedTargetSize
     local barInfestedPosition = backPosition + IMGUIAirStatus.kBarInfestedToBackOffset
@@ -150,24 +158,24 @@ local function SharedUpdate(self, deltaTime)
     -- green arrows
     do
         local startX = bluePosition.x + newBlueWidth -- right edge of the bar
-        startX = startX + IMGUIAirStatus.kGreenArrowInitialOffset.x - IMGUIAirStatus.kArrowSpacing
+        startX = startX + IMGUIAirStatus.kGreenArrowInitialOffset.x
         local startY = bluePosition.y + IMGUIAirStatus.kGreenArrowInitialOffset.y
         local offsetX = -IMGUIAirStatus.kArrowSpacing
         for i=1, 3 do
-            self.greenArrows[i]:SetScale(IMGUIAirStatus.kBarArrowGreenTargetSize * displayScaleFactor)
-            self.greenArrows[i]:SetPosition(Vector(startX + (offsetX * i), startY, 0) * displayScaleFactor)
+            self.redArrows[i]:SetSize(IMGUIAirStatus.kBarArrowGreenTargetSize * displayScaleFactor)
+            self.redArrows[i]:SetPosition(Vector(startX + (offsetX * i), startY, 0) * displayScaleFactor)
         end
     end
     
     -- red arrows
     do
         local startX = bluePosition.x + newBlueWidth -- right edge of the bar
-        startX = startX + IMGUIAirStatus.kRedArrowInitialOffset.x - IMGUIAirStatus.kArrowSpacing
+        startX = startX + IMGUIAirStatus.kRedArrowInitialOffset.x
         local startY = bluePosition.y + IMGUIAirStatus.kRedArrowInitialOffset.y
         local offsetX = IMGUIAirStatus.kArrowSpacing
         for i=1, 3 do
-            self.redArrows[i]:SetScale(IMGUIAirStatus.kBarArrowRedTargetSize * displayScaleFactor)
-            self.redArrows[i]:SetPosition(Vector(startX + (offsetX * (i-1)), startY, 0) * displayScaleFactor)
+            self.greenArrows[i]:SetSize(IMGUIAirStatus.kBarArrowRedTargetSize * displayScaleFactor)
+            self.greenArrows[i]:SetPosition(Vector(startX + (offsetX * (i-1)), startY, 0) * displayScaleFactor)
         end
     end
     

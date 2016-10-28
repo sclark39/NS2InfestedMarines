@@ -106,6 +106,10 @@ local function UpdateCoughing(self, timePassed)
     -- Cough less often if air quality is bad but not terrible.
     -- Keep checking without coughing if air quality is good.
     
+    if self:GetIsInfected() then
+        return false -- infested shouldn't cough, and there is no way to become un-infested
+    end
+    
     local airQuality = GetGameMaster():GetAirQuality()
     if airQuality <= 0.25 then
         DoCoughing(self)
@@ -247,7 +251,6 @@ local function TriggerThingoutEffects(self, timePassed, attacker)
         coords.origin = coords.origin + Marine.kInfestationCinematicOffset
         self:TriggerEffects("marine_infestation_victim", {effecthostcoords = coords})
     end
-    
     
     return false -- don't repeat
     

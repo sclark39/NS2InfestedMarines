@@ -78,8 +78,6 @@ function IMGameMaster:OnCreate()
     self.airQFraction = 1.0
     GetAirStatusBlip():SetFraction(self.airQFraction)
     
-    self.damagedPurifiers = {}
-    
     self.cooldownPeriod = 0.0 -- used to delay the next round of purifiers being damaged.
     self.timeBuffer = 5.0 -- extra five seconds by default.  This can be adjusted based on team performance to adjust difficulty
     self.fastCysts = {} -- table to be filled with { vector location, number } pairs.
@@ -471,50 +469,29 @@ end
 
 function IMGameMaster:ReportRepairedExtractor(extractor)
     
-    self:EnsureExtractorHasBlip(extractor)
-    
-    local index = self:GetDamagedPurifierIndexByEntity(extractor)
-    if index then
-        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
-        blip:SetState(IMAirPurifierBlip.kPurifierState.Fixed)
-        blip:DestroyAfterRepairWait()
-    end
+    local blip = self:GetOrCreateBlipForExtractor(extractor)
+    blip:SetState(IMAirPurifierBlip.kPurifierState.Fixed)
+    blip:DestroyAfterRepairWait()
     
 end
 
 function IMGameMaster:ReportDestroyedExtractor(extractor)
     
-    local blipId = extractor.purifierBlipId
-    if not blipId then
-        return
-    end
-    
-    local blip = Shared.GetEntity(blipId)
-    if blip then
-        blip:SetState(IMAirPurifierBlip.kPurifierState.Destroyed)
-        local index = self:GetDamagedPurifierIndexByEntity(blip)
-        table.remove(self.damagedPurifiers, index)
-    end
+    local blip = extractor:GetPurifierBlip()
+    blip:SetState(IMAirPurifierBlip.kPurifierState.Destroyed)
     
 end
 
 -- saved, but not repaired.  Ie no longer taking damage, but still damaged.
 function IMGameMaster:ReportSavedExtractor(extractor)
     
-    self:EnsureExtractorHasBlip(extractor)
-    
-    local index = self:GetDamagedPurifierIndexByEntity(extractor)
-    if index then
-        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
-        blip:SetState(IMAirPurifierBlip.kPurifierState.Damaged)
-    end
+    local blip = self:GetOrCreateBlipForExtractor(extractor)
+    blip:SetState(IMAirPurifierBlip.kPurifierState.Damaged)
     
 end
 
 -- taking damage!
 function IMGameMaster:ReportExtractorBeingDamaged(extractor)
-    
-    self:EnsureExtractorHasBlip(extractor)
     
     -- setup how much time the extractor has before it dies.
     local duration = IMComputeTimeRequiredToSave(extractor)
@@ -522,21 +499,33 @@ function IMGameMaster:ReportExtractorBeingDamaged(extractor)
         extractor:SetCorrosionDamageFactorByTTK(duration)
     end
     
-    local index = self:GetDamagedPurifierIndexByEntity(extractor)
-    if index then
-        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
-        blip:SetState(IMAirPurifierBlip.kPurifierState.BeingDamaged)
-    end
+    local blip = self:GetOrCreateBlipForExtractor(extractor)
+    blip:SetState(IMAirPurifierBlip.kPurifierState.BeingDamaged)
     
 end
 
-
-function IMGameMaster:EnsureExtractorHasBlip(extractor)
+-- creates a new extractor blip.  Should use GetBlipForExtractor if you just want to get one.  This
+-- could potentially orphan blips.
+function IMGameMaster:CreateBlipForExtractor(extractor)
     
-    local index = self:GetDamagedPurifierIndexByEntity(extractor)
-    if not index then
-        self:AddDamagedPurifier(extractor)
+    local newBlip = CreateEntity(IMAirPurifierBlip.kMapName, extractor:GetOrigin(), kMarineTeamType)
+    newBlip:SetEntityId(extractor:GetId())
+    
+    return newBlip
+    
+end
+
+-- gets an extractor's blip, or creates a new one if they do not have one.
+function IMGameMaster:GetOrCreateBlipForExtractor(extractor)
+    
+    assert(extractor)
+    local blip = extractor:GetPurifierBlip()
+    
+    if not blip then
+        blip = self:CreateBlipForExtractor(extractor)
     end
+    
+    return blip
     
 end
 
@@ -603,19 +592,6 @@ function IMGameMaster:QueuePurifierDamage(purifier)
     
 end
 
-function IMGameMaster:GetDamagedPurifierIndexByEntity(ent)
-    
-    local id = ent:GetId()
-    for i=1, #self.damagedPurifiers do
-        if id == self.damagedPurifiers[i].purId or id == self.damagedPurifiers[i].blipId then
-            return i
-        end
-    end
-    
-    return nil
-    
-end
-
 local function GetIsDamaged(self)
     return (self:GetHealth() < self:GetMaxHealth() - 0.01) and (self:GetArmor() < self:GetMaxArmor() - 0.01)
 end
@@ -646,54 +622,6 @@ function IMGameMaster:UpdateExtractor(purifier)
             end
         end
     end
-    
-end
-
-function IMGameMaster:AddDamagedPurifier(purifier)
-    
-    local newBlip = CreateEntity(IMAirPurifierBlip.kMapName, purifier:GetOrigin(), kMarineTeamType)
-    newBlip:SetEntityId(purifier:GetId())
-    
-    local purId = purifier:GetId()
-    local blipId = newBlip:GetId()
-    
-    self.damagedPurifiers = self.damagedPurifiers or {}
-    for i=#self.damagedPurifiers,1,-1 do
-        if self.damagedPurifiers[i].purId == purId then
-            local oldBlip = Shared.GetEntity(self.damagedPurifiers[i].blipId)
-            if oldBlip then
-                DestroyEntity(oldBlip)
-            end
-            self.damagedPurifiers[i].blipId = blipId
-            return
-        end
-    end
-    
-    table.insert(self.damagedPurifiers,
-    {
-        purId = purId,
-        blipId = blipId,
-    })
-    
-end
-
-function IMGameMaster:RemoveDamagedPurifier(purifier)
-    
-    local purId = purifier:GetId()
-    
-    self.damagedPurifiers = self.damagedPurifiers or {}
-    for i=1, #self.damagedPurifiers do
-        local iterPurId = self.damagedPurifiers[i].purId
-        if iterPurId == purId then
-            local blip = Shared.GetEntity(self.damagedPurifiers[i].blipId)
-            assert(blip)
-            DestroyEntity(blip)
-            table.remove(self.damagedPurifiers, i)
-            return
-        end
-    end
-    
-    Log("Attempted to remove purifier from damaged purifiers table that didn't exist! (%s)", purifier)
     
 end
 

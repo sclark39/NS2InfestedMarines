@@ -83,6 +83,17 @@ function Extractor:ExtractorBlipUpdate(deltaTime)
     
 end
 
+function Extractor:GetPurifierBlip()
+    
+    if self.purifierBlipId then
+        local blip = Shared.GetEntity(self.purifierBlipId)
+        return blip
+    end
+    
+    return nil
+    
+end
+
 function Extractor:OnKill(attacker, doer, point, direction)
     
     ScriptActor.OnKill(self, attacker, doer, point, direction)

@@ -52,3 +52,6 @@ ModLoader.SetupFileHook("lua/GUIDeathScreen.lua", "lua/IMGUIDeathScreen.lua", "r
 
 -- New GUI elements
 ModLoader.SetupFileHook("lua/ClientUI.lua", "lua/IMClientUI.lua", "post")
+
+--Chat adjustments
+ModLoader.SetupFileHook("lua/NetworkMessages_Server.lua", "lua/IMNetworkMessages_Server.lua", "post")

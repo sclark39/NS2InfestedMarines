@@ -9,7 +9,7 @@
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 Script.Load("lua/IMModBlacklist.lua")
 
-ModLoader.SetupFileHook( "lua/DeathMessageClient.lua", "lua/IMDeathMessageClient.lua", "replace" )
+ModLoader.SetupFileHook( "lua/DeathMessage_Client.lua", "lua/IMDeathMessage_Client.lua", "replace" )
 
 ModLoader.SetupFileHook("lua/NS2Gamerules.lua", "lua/IMNS2Gamerules.lua", "post")
 ModLoader.SetupFileHook("lua/Marine_Server.lua", "lua/IMMarine_Server.lua", "post")

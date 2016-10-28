@@ -112,9 +112,9 @@ if Server then
                 local foundInfected = false
                 local foundUninfected = false
                 
-                local marines = EntityListToTable(Shared.GetEntitiesWithClassname("Marine"))
+                local marines = self:GetTeam1():GetPlayers()
                 for i=1, #marines do
-                    if marines[i] and marines[i].GetIsInfected and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
+                    if marines[i] and marines[i]:isa("Marine") and marines[i].GetIsInfected and marines[i].GetIsAlive and marines[i]:GetIsAlive() then
                         if marines[i]:GetIsInfected() then
                             foundInfected = true
                         else
@@ -124,19 +124,15 @@ if Server then
                 end
                 
                 if foundInfected and not foundUninfected then
-                    Log("Found infected, but no uninfected.  Ending with a win for team2.")
                     self:EndGame( self.team2 )
                 elseif (not foundInfected) and foundUninfected then
-                    Log("Found uninfected, but no infected.  Ending with a win for team1.")
                     self:EndGame( self.team1 )
                 elseif (not foundInfected) and (not foundUninfected) then
-                    Log("Didn't find infected or uninfected marines.  Ending with a draw.")
                     self:DrawGame()
                 end
                 
                 -- check for if uninfected have toxic air quality
                 if GetGameMaster():GetAirQuality() <= 0.00001 then
-                    Log("Air quality is toxic.  Ending with a win for team2.")
                     self:EndGame( self.team2 )
                 end
             else
@@ -149,7 +145,6 @@ if Server then
                     end
                 end
                 if not foundAlive then
-                    Log("All marines dead before first infected even chosen.  Ending with a win for team2.")
                     self:EndGame( self.team2 )
                 end
             end

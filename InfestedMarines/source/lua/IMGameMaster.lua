@@ -295,7 +295,6 @@ end
 
 local function PickInfected(self)
     
-    -- TODO pick X players, X scales with player count.
     local players = GetGamerules().team1:GetPlayers()
     local numPicks = GetInfestedPickCount()
     local infectedPlayers = {}

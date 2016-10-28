@@ -173,7 +173,6 @@ function DeathMsgUI_AddResRecovered(amount)
 
 end
 
-RawPrint( "test") 
 local function AddDeathMessage(killerIsPlayer, killerIndex, killerTeamNumber, iconIndex, targetIsPlayer, targetIndex, targetTeamNumber)
 
     local player = Client.GetLocalPlayer()
@@ -184,7 +183,6 @@ local function AddDeathMessage(killerIsPlayer, killerIndex, killerTeamNumber, ic
         or player.GetIsInfected and player:GetIsInfected() -- or infected
         or not Client.GetIsControllingPlayer() -- or spectating
     then
-        RawPrint( "passed test 1" ) 
         shouldAddMessage = true -- show
     end
     
@@ -193,13 +191,11 @@ local function AddDeathMessage(killerIsPlayer, killerIndex, killerTeamNumber, ic
     local playerName = player:GetName()
     
     if playerName == targetName then
-        RawPrint( "passed test 2" ) 
         shouldAddMessage = true
         gKillerName = killedSelf and "" or killerName
         gKillerWeaponIconIndex = iconIndex
     end
     if playerName == killerName then
-        RawPrint( "passed test 3" ) 
         shouldAddMessage = true
     end
     

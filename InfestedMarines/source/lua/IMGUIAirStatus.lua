@@ -17,28 +17,40 @@ class 'IMGUIAirStatus' (GUIScript)
 
 -- the following measurements are assuming a 1080px vertical size.  They will scale to fill
 -- any size screen as a final step.
+IMGUIAirStatus.kBarBlueTexture = PrecacheAsset("ui/infested_marines/air_quality_bar_blue.dds")
+IMGUIAirStatus.kBarBackTexture = PrecacheAsset("ui/infested_marines/air_quality_bar_background.dds")
+IMGUIAirStatus.kBarInfestedTexture = PrecacheAsset("ui/infested_marines/air_quality_bar_infestation.dds")
+IMGUIAirStatus.kRedArrowTexture = PrecacheAsset("ui/infested_marines/air_quality_red_arrow.dds")
+IMGUIAirStatus.kGreenArrowTexture = PrecacheAsset("ui/infested_marines/air_quality_green_arrow.dds")
+
 IMGUIAirStatus.kTopEdgeMargin = 96 -- from top edge of screen to center of text
 IMGUIAirStatus.kTextHeight = 40
-IMGUIAirStatus.kTopToBarMargin = 128 -- from top edge of screen to top of bar
-IMGUIAirStatus.kBarTotalWidth = 640
-IMGUIAirStatus.kBarHeight = 32
 IMGUIAirStatus.kShadowOffset = Vector(2, 2, 0)
 
-IMGUIAirStatus.kBarColorGood = Color(0,1,0,1)
-IMGUIAirStatus.kBarColorOkay = Color(1,1,0,1)
-IMGUIAirStatus.kBarColorBad = Color(1,0,0,1)
-IMGUIAirStatus.kBarColorDepleted = Color(0.1,0.1,0.1,1)
+IMGUIAirStatus.kBarBlueSourceSize = Vector( 1081, 61, 0 )
+IMGUIAirStatus.kBarBackSourceSize = Vector( 1136, 116, 0)
+IMGUIAirStatus.kBarInfestedSourceSize = Vector( 1109, 120, 0)
+IMGUIAirStatus.kBarArrowRedSourceSize = Vector( 45, 59, 0 )
+IMGUIAirStatus.kBarArrowGreenSourceSize = Vector( 44, 59, 0 )
+IMGUIAirStatus.kBarBackToBlueOffset = Vector(-26, 20, 0)
+IMGUIAirStatus.kBarInfestedToBackOffset = Vector(18, -12, 0)
+IMGUIAirStatus.kGreenArrowInitialOffset = Vector(-9, 2, 0)
+IMGUIAirStatus.kRedArrowInitialOffset = Vector(3, 2, 0)
+IMGUIAirStatus.kArrowSpacing = 40
+IMGUIAirStatus.kTopBlueOpacity = 0.35
 
-IMGUIAirStatus.kIconSize = Vector(32, 32, 0)
-IMGUIAirStatus.kIconTexture = PrecacheAsset("ui/minimap_largeplayerarrow.dds")
-IMGUIAirStatus.kIconGoodColor = Color(0,0.8,0,1)
-IMGUIAirStatus.kIconBadColor = Color(0.8,0,0,1)
+IMGUIAirStatus.kBarBlueTargetSize = IMGUIAirStatus.kBarBlueSourceSize
+IMGUIAirStatus.kBarBackTargetSize = IMGUIAirStatus.kBarBackSourceSize
+IMGUIAirStatus.kBarInfestedTargetSize = IMGUIAirStatus.kBarInfestedSourceSize
+IMGUIAirStatus.kBarArrowRedTargetSize = IMGUIAirStatus.kBarArrowRedSourceSize
+IMGUIAirStatus.kBarArrowGreenTargetSize = IMGUIAirStatus.kBarArrowGreenSourceSize
 
-IMGUIAirStatus.kFont = Fonts.kAgencyFB_Medium
-
-IMGUIAirStatus.kBarSegmentTexture = PrecacheAsset("ui/infested_marines/air_quality_bar_segment.dds")
+IMGUIAirStatus.kGlobalOffset = Vector(0,0,0) -- I'm anticipating having to move this.
+IMGUIAirStatus.kTopToBarMargin = 144 -- from top edge of screen to top of bar, not bar back
 
 IMGUIAirStatus.kDataUpdateRate = 0.25
+
+IMGUIAirStatus.kFont = Fonts.kAgencyFB_Medium
 
 local kBarGoodThreshold = 0.8
 local kBarOkayThreshold = 0.4
@@ -57,32 +69,33 @@ end
 
 local function UpdateArrowVisibilities(self)
     
-    for i=1, 6 do
-        self.arrowIcons[i]:SetIsVisible(false)
+    for i=1, 3 do
+        self.greenArrows[i]:SetIsVisible(false)
+        self.redArrows[i]:SetIsVisible(false)
     end
         
     if self.changeRate > 0 then
         
         if self.changeRate >= 1 then
-            self.arrowIcons[4]:SetIsVisible(true)
+            self.greenArrows[1]:SetIsVisible(true)
         end
         if self.changeRate >= 2 then
-            self.arrowIcons[5]:SetIsVisible(true)
+            self.greenArrows[2]:SetIsVisible(true)
         end
         if self.changeRate >= 3 then
-            self.arrowIcons[6]:SetIsVisible(true)
+            self.greenArrows[3]:SetIsVisible(true)
         end
         
     elseif self.changeRate < 0 then
         
         if self.changeRate <= -1 then
-            self.arrowIcons[3]:SetIsVisible(true)
+            self.redArrows[1]:SetIsVisible(true)
         end
         if self.changeRate <= -2 then
-            self.arrowIcons[2]:SetIsVisible(true)
+            self.redArrows[2]:SetIsVisible(true)
         end
         if self.changeRate <= -3 then
-            self.arrowIcons[1]:SetIsVisible(true)
+            self.redArrows[3]:SetIsVisible(true)
         end
         
     end
@@ -97,19 +110,31 @@ local function SharedUpdate(self, deltaTime)
     local interpVal = 1.0 - math.pow( kBarMoveSpeedFactor , deltaTime )
     self.displayedBarFraction = self.displayedBarFraction * (1.0 - interpVal) + self.barFraction * interpVal
     
-    local newWidth = IMGUIAirStatus.kBarTotalWidth * self.displayedBarFraction
-    self.barLeft:SetSize(GUIScaleHeight(Vector(newWidth, IMGUIAirStatus.kBarHeight, 0)))
-    self.barLeft:SetPosition(GUIScaleHeight(Vector(-IMGUIAirStatus.kBarTotalWidth/2, IMGUIAirStatus.kTopToBarMargin, 0)))
-    self.barLeft:SetColor(GetColorByFraction(self.displayedBarFraction))
-    if self.displayedBarFraction < 1.0 then
-        self.barRight:SetIsVisible(true)
-        self.barRight:SetSize(GUIScaleHeight(Vector(IMGUIAirStatus.kBarTotalWidth - newWidth, IMGUIAirStatus.kBarHeight, 0)))
-        self.barRight:SetPosition(GUIScaleHeight(Vector( -IMGUIAirStatus.kBarTotalWidth/2 + newWidth, IMGUIAirStatus.kTopToBarMargin, 0)))
-    else
-        self.barRight:SetIsVisible(false)
-    end
-    self.barShadow:SetSize(GUIScaleHeight(Vector(IMGUIAirStatus.kBarTotalWidth, IMGUIAirStatus.kBarHeight, 0)))
-    self.barShadow:SetPosition(GUIScaleHeight(Vector(-IMGUIAirStatus.kBarTotalWidth/2, IMGUIAirStatus.kTopToBarMargin, 0) + IMGUIAirStatus.kShadowOffset))
+    local displayScaleFactor = GUIScaleHeight(1)
+    local toxicFrac = 1.0 - self.displayedBarFraction -- used to be the opposite -- "air quality"
+    
+    -- bar blue
+    local newBlueWidth = toxicFrac * IMGUIAirStatus.kBarBlueTargetSize.x
+    local blueSize = Vector(newBlueWidth, IMGUIAirStatus.kBarBlueTargetSize.y, 0)
+    local bluePosition = Vector(-IMGUIAirStatus.kBarBlueTargetSize.x/2, IMGUIAirStatus.kTopToBarMargin, 0) + IMGUIAirStatus.kGlobalOffset
+    self.barBlue:SetTextureCoordinates(0,0,toxicFrac,1)
+    self.barBlue2:SetTextureCoordinates(0,0,toxicFrac,1)
+    self.barBlue:SetSize(blueSize * displayScaleFactor)
+    self.barBlue2:SetSize(blueSize * displayScaleFactor)
+    self.barBlue:SetPosition(bluePosition * displayScaleFactor)
+    self.barBlue2:SetPosition(bluePosition * displayScaleFactor)
+    
+    -- bar back
+    local backSize = IMGUIAirStatus.kBarBackTargetSize
+    local backPosition = bluePosition + IMGUIAirStatus.kBarBackToBlueOffset
+    self.barBack:SetSize(backSize * displayScaleFactor)
+    self.barBack:SetPosition(backPosition * displayScaleFactor)
+    
+    -- infested bar
+    local barInfestedSize = IMGUIAirStatus.kBarInfestedTargetSize
+    local barInfestedPosition = backPosition + IMGUIAirStatus.kBarInfestedToBackOffset
+    self.barInfested:SetSize(barInfestedSize * displayScaleFactor)
+    self.barInfested:SetPosition(barInfestedPosition * displayScaleFactor)
     
     -- text
     self.text:SetScale(Vector(1,1,1))
@@ -117,29 +142,33 @@ local function SharedUpdate(self, deltaTime)
     local scaleFactor = GUIScaleHeight(IMGUIAirStatus.kTextHeight) / unscaledHeight
     self.text:SetScale(Vector(scaleFactor, scaleFactor, 1))
     self.textShadow:SetScale(Vector(scaleFactor, scaleFactor, 1))
-    local textPos = GUIScaleHeight(Vector(0, IMGUIAirStatus.kTopEdgeMargin, 0))
+    local textPos = GUIScaleHeight(Vector(0, IMGUIAirStatus.kTopEdgeMargin, 0) + IMGUIAirStatus.kGlobalOffset)
     local textShadowPos = textPos + GUIScaleHeight(IMGUIAirStatus.kShadowOffset)
     self.text:SetPosition(textPos)
     self.textShadow:SetPosition(textShadowPos)
     
-    -- arrows
-    local arrowLeftX = -IMGUIAirStatus.kBarTotalWidth/2 + newWidth - IMGUIAirStatus.kIconSize.x * 3
-    local arrowLeftY = IMGUIAirStatus.kTopToBarMargin + ((IMGUIAirStatus.kIconSize.y - IMGUIAirStatus.kBarHeight) / 2)
-    local offsetX = 0
-    local scaleFact = GUIScaleHeight(1)
-    for i=1, 3 do
-        self.arrowIcons[i]:SetRotation(Vector(0,0,math.pi))
-        local newPosition = Vector(arrowLeftX + offsetX, arrowLeftY, 0)
-        self.arrowIcons[i]:SetPosition(scaleFact * newPosition)
-        self.arrowIcons[i]:SetSize(scaleFact * IMGUIAirStatus.kIconSize)
-        offsetX = offsetX + IMGUIAirStatus.kIconSize.x
+    -- green arrows
+    do
+        local startX = bluePosition.x + newBlueWidth -- right edge of the bar
+        startX = startX + IMGUIAirStatus.kGreenArrowInitialOffset.x - IMGUIAirStatus.kArrowSpacing
+        local startY = bluePosition.y + IMGUIAirStatus.kGreenArrowInitialOffset.y
+        local offsetX = -IMGUIAirStatus.kArrowSpacing
+        for i=1, 3 do
+            self.greenArrows[i]:SetScale(IMGUIAirStatus.kBarArrowGreenTargetSize * displayScaleFactor)
+            self.greenArrows[i]:SetPosition(Vector(startX + (offsetX * i), startY, 0) * displayScaleFactor)
+        end
     end
     
-    for i=4, 6 do
-        local newPosition = Vector(arrowLeftX + offsetX, arrowLeftY, 0)
-        self.arrowIcons[i]:SetPosition(scaleFact * newPosition)
-        self.arrowIcons[i]:SetSize(scaleFact * IMGUIAirStatus.kIconSize)
-        offsetX = offsetX + IMGUIAirStatus.kIconSize.x
+    -- red arrows
+    do
+        local startX = bluePosition.x + newBlueWidth -- right edge of the bar
+        startX = startX + IMGUIAirStatus.kRedArrowInitialOffset.x - IMGUIAirStatus.kArrowSpacing
+        local startY = bluePosition.y + IMGUIAirStatus.kRedArrowInitialOffset.y
+        local offsetX = IMGUIAirStatus.kArrowSpacing
+        for i=1, 3 do
+            self.redArrows[i]:SetScale(IMGUIAirStatus.kBarArrowRedTargetSize * displayScaleFactor)
+            self.redArrows[i]:SetPosition(Vector(startX + (offsetX * (i-1)), startY, 0) * displayScaleFactor)
+        end
     end
     
 end
@@ -168,39 +197,51 @@ function IMGUIAirStatus:Initialize()
     self.textShadow:SetFontName(IMGUIAirStatus.kFont)
     self.textShadow:SetTextAlignmentX(GUIItem.Align_Center)
     self.textShadow:SetTextAlignmentY(GUIItem.Align_Center)
-    self.textShadow:SetText("AIR QUALITY")
+    self.textShadow:SetText("AIR TOXICITY")
     
-    self.barLeft = GUIManager:CreateGraphicItem()
-    self.barLeft:SetAnchor(GUIItem.Middle, GUIItem.Top)
-    self.barLeft:SetIsVisible(true)
-    self.barLeft:SetColor(IMGUIAirStatus.kBarColorGood)
-    self.barLeft:SetLayer(kGUILayerPlayerHUDForeground1)
-    self.barLeft:SetTexture(IMGUIAirStatus.kBarSegmentTexture)
+    self.barBack = GUIManager:CreateGraphicItem()
+    self.barBack:SetAnchor(GUIItem.Middle, GUIItem.Top)
+    self.barBack:SetIsVisible(true)
+    self.barBack:SetLayer(kGUILayerPlayerHUDBackground)
+    self.barBack:SetTexture(IMGUIAirStatus.kBarBackTexture)
     
-    -- the "empty" side of the bar, if not completely full
-    self.barRight = GUIManager:CreateGraphicItem()
-    self.barRight:SetAnchor(GUIItem.Middle, GUIItem.Top)
-    self.barRight:SetIsVisible(false)
-    self.barRight:SetColor(IMGUIAirStatus.kBarColorDepleted)
-    self.barRight:SetLayer(kGUILayerPlayerHUDForeground1)
-    self.barRight:SetTexture(IMGUIAirStatus.kBarSegmentTexture)
+    self.barBlue = GUIManager:CreateGraphicItem()
+    self.barBlue:SetAnchor(GUIItem.Middle, GUIItem.Top)
+    self.barBlue:SetIsVisible(true)
+    self.barBlue:SetLayer(kGUILayerPlayerHUDForeground1)
+    self.barBlue:SetTexture(IMGUIAirStatus.kBarBlueTexture)
     
-    self.barShadow = GUIManager:CreateGraphicItem()
-    self.barShadow:SetAnchor(GUIItem.Middle, GUIItem.Top)
-    self.barShadow:SetIsVisible(true)
-    self.barShadow:SetColor(Color(0,0,0,1))
-    self.barShadow:SetLayer(kGUILayerPlayerHUDBackground)
-    self.barShadow:SetTexture(IMGUIAirStatus.kBarSegmentTexture)
+    self.barInfested = GUIManager:CreateGraphicItem()
+    self.barInfested:SetAnchor(GUIItem.Middle, GUIItem.Top)
+    self.barInfested:SetIsVisible(true)
+    self.barInfested:SetLayer(kGUILayerPlayerHUDForeground2)
+    self.barInfested:SetTexture(IMGUIAirStatus.kBarInfestedTexture)
     
-    self.arrowIcons = {}
-    for i=1, 6 do
+    self.barBlue2 = GUIManager:CreateGraphicItem()
+    self.barBlue2:SetAnchor(GUIItem.Middle, GUIItem.Top)
+    self.barBlue2:SetIsVisible(true)
+    self.barBlue2:SetLayer(kGUILayerPlayerHUDForeground3)
+    self.barBlue2:SetColor(Color(1,1,1,IMGUIAirStatus.kTopBlueOpacity))
+    self.barBlue2:SetTexture(IMGUIAirStatus.kBarBlueTexture)
+    
+    self.greenArrows = {}
+    for i=1, 3 do
         local newArrowIcon = GUIManager:CreateGraphicItem()
         newArrowIcon:SetAnchor(GUIItem.Middle, GUIItem.Top)
         newArrowIcon:SetIsVisible(false)
-        newArrowIcon:SetColor((i >= 4) and IMGUIAirStatus.kIconGoodColor or IMGUIAirStatus.kIconBadColor)
-        newArrowIcon:SetLayer(kGUILayerPlayerHUDForeground2)
-        newArrowIcon:SetTexture(IMGUIAirStatus.kIconTexture)
-        table.insert(self.arrowIcons, newArrowIcon)
+        newArrowIcon:SetLayer(kGUILayerPlayerHUDForeground4)
+        newArrowIcon:SetTexture(IMGUIAirStatus.kGreenArrowTexture)
+        table.insert(self.greenArrows, newArrowIcon)
+    end
+    
+    self.redArrows = {}
+    for i=1, 3 do
+        local newArrowIcon = GUIManager:CreateGraphicItem()
+        newArrowIcon:SetAnchor(GUIItem.Middle, GUIItem.Top)
+        newArrowIcon:SetIsVisible(false)
+        newArrowIcon:SetLayer(kGUILayerPlayerHUDForeground4)
+        newArrowIcon:SetTexture(IMGUIAirStatus.kRedArrowTexture)
+        table.insert(self.redArrows, newArrowIcon)
     end
     
     self.changeRate = 0
@@ -213,23 +254,33 @@ function IMGUIAirStatus:Uninitialize()
     
     GUI.DestroyItem(self.text)
     GUI.DestroyItem(self.textShadow)
-    GUI.DestroyItem(self.barLeft)
-    GUI.DestroyItem(self.barRight)
-    GUI.DestroyItem(self.barShadow)
-    if self.arrowIcons then
-        for i=1, 6 do
-            if self.arrowIcons[i] then
-                GUI.DestroyItem(self.arrowIcons[i])
+    GUI.DestroyItem(self.barBack)
+    GUI.DestroyItem(self.barBlue)
+    GUI.DestroyItem(self.barInfested)
+    GUI.DestroyItem(self.barBlue2)
+    if self.greenArrows then
+        for i=1, 3 do
+            if self.greenArrows[i] then
+                GUI.DestroyItem(self.greenArrows[i])
+            end
+        end
+    end
+    if self.redArrows then
+        for i=1, 3 do
+            if self.redArrows[i] then
+                GUI.DestroyItem(self.redArrows[i])
             end
         end
     end
     
     self.text = nil
     self.textShadow = nil
-    self.barLeft = nil
-    self.barRight = nil
-    self.barShadow = nil
-    self.arrowIcons = nil
+    self.barBack = nil
+    self.barBlue = nil
+    self.barInfested = nil
+    self.barBlue2 = nil
+    self.greenArrows = nil
+    self.redArrows = nil
     
 end
 

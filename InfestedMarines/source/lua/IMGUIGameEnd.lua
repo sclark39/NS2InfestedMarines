@@ -48,6 +48,7 @@ function GUIGameEnd:SetGameEnded(playerWon, playerDraw, playerTeamType )
     
     if player.GetIsInfected and player:GetIsInfected() then
         playerTeamType = kAlienTeamType
+        playerWon = not playerWon
     end
     
     local playerIsMarine = playerTeamType == kMarineTeamType

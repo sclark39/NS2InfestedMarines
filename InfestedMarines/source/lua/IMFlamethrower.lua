@@ -44,6 +44,18 @@ local networkVars =
 
 AddMixinNetworkVars(LiveMixin, networkVars)
 
+local function CheckForDestroyedEffects(self)
+    if self.trailCinematic and not IsValid(self.trailCinematic) then
+        self.trailCinematic = nil
+    end
+    if self.pilotCinematic and not IsValid(self.pilotCinematic) then
+        self.pilotCinematic = nil
+    end
+    if self.loopingFireSound and not IsValid(self.loopingFireSound) then
+        self.loopingFireSound = nil
+    end
+end
+
 function Flamethrower:OnCreate()
 
     ClipWeapon.OnCreate(self)
@@ -79,7 +91,9 @@ function Flamethrower:GetMaxClips()
 end
 
 function Flamethrower:OnDestroy()
-
+    
+    CheckForDestroyedEffects(self)
+    
     ClipWeapon.OnDestroy(self)
     
     -- The loopingFireSound was already destroyed at this point, clear the reference.
@@ -110,7 +124,7 @@ function Flamethrower:GetWeight()
 end
 
 function Flamethrower:OnHolster(player)
-
+    
     ClipWeapon.OnHolster(self, player)
     
     self.createParticleEffects = false
@@ -381,6 +395,8 @@ end
 
 function Flamethrower:OnPrimaryAttack(player)
     
+    CheckForDestroyedEffects(self)
+    
     self.ammo = self:GetMaxAmmo()
     
     if not self:GetIsReloading() then
@@ -425,7 +441,9 @@ function Flamethrower:OnPrimaryAttack(player)
 end
 
 function Flamethrower:OnPrimaryAttackEnd(player)
-
+    
+    CheckForDestroyedEffects(self)
+    
     ClipWeapon.OnPrimaryAttackEnd(self, player)
 
     self.createParticleEffects = false
@@ -437,7 +455,9 @@ function Flamethrower:OnPrimaryAttackEnd(player)
 end
 
 function Flamethrower:OnReload(player)
-
+    
+    CheckForDestroyedEffects(self)
+    
     if self:CanReload() then
     
         if Server then
@@ -471,7 +491,9 @@ function Flamethrower:GetSwingSensitivity()
 end
 
 function Flamethrower:Dropped(prevOwner)
-
+    
+    CheckForDestroyedEffects(self)
+    
     ClipWeapon.Dropped(self, prevOwner)
     
     if Server then

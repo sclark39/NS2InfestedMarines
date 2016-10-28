@@ -471,7 +471,14 @@ end
 
 function IMGameMaster:ReportRepairedExtractor(extractor)
     
-    self:RemoveDamagedPurifier(extractor)
+    self:EnsureExtractorHasBlip(extractor)
+    
+    local index = self:GetDamagedPurifierIndexByEntity(extractor)
+    if index then
+        local blip = Shared.GetEntity(self.damagedPurifiers[index].blipId)
+        blip:SetState(IMAirPurifierBlip.kPurifierState.Fixed)
+        blip:DestroyAfterRepairWait()
+    end
     
 end
 

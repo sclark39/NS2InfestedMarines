@@ -13,6 +13,8 @@ class 'IMAirStatusBlip' (Entity)
 
 IMAirStatusBlip.kMapName = "airstatusblip"
 
+IMAirStatusBlip.kRepairRemoveDelay = 3.0
+
 local networkVars = 
 {
     fraction = "float",

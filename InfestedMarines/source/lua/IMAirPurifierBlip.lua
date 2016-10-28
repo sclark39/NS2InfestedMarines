@@ -40,6 +40,19 @@ end
 
 if Server then
 
+    local function OnRepairWaitFinished(self, timePassed)
+        
+        DestroyEntity(self)
+        return false
+        
+    end
+
+    function IMAirPurifierBlip:DestroyAfterRepairWait()
+        
+        self:AddTimedCallback(OnRepairWaitFinished, IMAirStatusBlip.kRepairRemoveDelay)
+        
+    end
+
     function IMAirPurifierBlip:SetEntityId(entityId)
         
         self.entId = entityId

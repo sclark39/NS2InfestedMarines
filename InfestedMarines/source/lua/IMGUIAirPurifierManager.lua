@@ -17,7 +17,7 @@ end
 
 class 'IMGUIAirPurifierManager' (GUIScript)
 
-IMGUIAirPurifierManager.kTopMargin = 160 -- from top edge of screen to top of icon boxes
+IMGUIAirPurifierManager.kTopMargin = 184 -- from top edge of screen to top of icon boxes
 
 local function GetAssociatedBlip(node)
     

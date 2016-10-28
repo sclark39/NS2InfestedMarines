@@ -152,7 +152,7 @@ function LiveMixin:TakeDamage(damage, attacker, doer, point, direction, armorUse
             if damageReflected then
                 -- player friendly-fired a friendly player to death.  They die, player they attacked
                 -- gets their health/armor back.
-                attacker:Kill(attacker, doer, point, direction)
+                attacker:Kill(nil, nil, point, direction)
             end
             
             if (not damageReflected) or (not attacker.GetWillReflectedDamageHitVictim) or attacker:GetWillReflectedDamageHitVictim(self, doer) then

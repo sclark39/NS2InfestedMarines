@@ -27,7 +27,7 @@ ModLoader.SetupFileHook("lua/MinimapMappableMixin.lua", "lua/IMMinimapMappableMi
 ModLoader.SetupFileHook("lua/LiveMixin.lua", "lua/IMLiveMixin.lua", "post")
 ModLoader.SetupFileHook("lua/Weapons/Marine/Flame.lua", "lua/IMFlame.lua", "post")
 ModLoader.SetupFileHook("lua/TeamMessageMixin.lua", "lua/IMTeamMessageMixin.lua", "post")
-ModLoader.SetupFileHook("lua/Weapons/Marine/Flamethrower.lua", "lua/IMFlamethrower.lua", "post")
+ModLoader.SetupFileHook("lua/Weapons/Marine/Flamethrower.lua", "lua/IMFlamethrower.lua", "replace")
 ModLoader.SetupFileHook("lua/Weapons/Marine/Welder.lua", "lua/IMWelder.lua", "post")
 ModLoader.SetupFileHook("lua/Cyst.lua", "lua/IMCyst.lua", "post")
 ModLoader.SetupFileHook("lua/Cyst_Server.lua", "lua/IMCyst_Server.lua", "post")

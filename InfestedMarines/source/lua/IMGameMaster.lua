@@ -314,6 +314,7 @@ local function PickInfected(self)
     
     for i=1, #infectedPlayers do
         infectedPlayers[i]:SetIsInfected(true)
+        infectedPlayers[i]:TriggerEffects( "initial_infestation_pick_sound" )
     end
     
     local numPlayers = GetGamerules().team1:GetNumPlayers()

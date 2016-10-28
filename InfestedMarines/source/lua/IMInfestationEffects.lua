@@ -29,6 +29,14 @@ kInfestedMarinesEffects =
         },
     },
     
+    initial_infestation_pick_sound =
+    {
+        {
+            { private_sound = "sound/NS2.fev/alien/common/res_received" },
+            { private_sound = "sound/NS2.fev/alien/common/regeneration" },
+        },
+    },
+    
     initial_infestation_sound = 
     {
         {

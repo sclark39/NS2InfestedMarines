@@ -42,6 +42,12 @@ if Server then
 
     local function OnRepairWaitFinished(self, timePassed)
         
+        if self.entId then
+            local extractor = Shared.GetEntity(self.entId)
+            if extractor then
+                extractor.purifierBlipId = nil
+            end
+        end
         DestroyEntity(self)
         return false
         

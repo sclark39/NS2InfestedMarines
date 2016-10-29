@@ -27,9 +27,10 @@ local allowedAchievements =
 local oldSetAchievement = Client.SetAchievement
 function Client.SetAchievement( name )
     if allowedAchievements[name] then
+		local alreadyHas = Client.GetAchievement(name)
         oldSetAchievement( name )
 
-        if name == "Season_0_1" then
+        if not alreadyHas and name == "Season_0_1" then
             Client.GrantPromoItems()
             InventoryNewItemNotifyPush( kHalloween16ShoulderPatchItemId )
         end

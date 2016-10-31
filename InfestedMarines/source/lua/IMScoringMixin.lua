@@ -78,4 +78,12 @@ if Server then
 			Server.SetAchievement(client, "Season_0_1")
 		end
 	end
+
+	--Stop Infested getting points for welding
+	local oldAddContinuousScore = ScoringMixin.AddContinuousScore
+	function ScoringMixin:AddContinuousScore(...)
+		if not self.GetIsInfested or not self:GetIsInfested() then
+			return oldAddContinuousScore(self, ...)
+		end
+	end
 end

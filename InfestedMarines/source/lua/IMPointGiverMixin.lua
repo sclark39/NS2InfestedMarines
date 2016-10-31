@@ -12,25 +12,30 @@ local kPointsForTeamKill = -40
 local kPointsForInfestedKill = 40
 local kPointsForCystKill = 1
 
-local oldPreOnKill = PointGiverMixin.PreOnKill
 function PointGiverMixin:PreOnKill(attacker, doer, point, direction)
 
-	--save attacker for giving the right amount of points
-	if attacker and attacker.GetIsInfected then
-		self.attacker = attacker
+	if not attacker or self.isHallucination then
+		return
 	end
 
-	return oldPreOnKill(self, attacker, doer, point, direction)
+	local points = self:GetPointValue(attacker)
+
+	attacker:AddScore(points, 0, true)
+
+	if self:isa("Player") and attacker and attacker:isa("Player") then
+		if self:GetIsInfected() and not attacker:IsInfected() then
+			attacker:AddKill()
+		end
+	end
 end
 
 local oldGetPointValue = PointGiverMixin.GetPointValue
-function PointGiverMixin:GetPointValue()
-	if not self.attacker then
+function PointGiverMixin:GetPointValue(attacker)
+	if not attacker then
 		return oldGetPointValue(self)
 	end
-    
-    local attackerIsInfested = self.attacker.GetIsInfected and self.attacker:GetIsInfected()
-    self.attacker = nil
+
+    local attackerIsInfested = attacker.GetIsInfected and attacker:GetIsInfected()
     
     if self:isa("Marine") then
         return self:GetIsInfected() == attackerIsInfested and kPointsForTeamKill or kPointsForInfestedKill

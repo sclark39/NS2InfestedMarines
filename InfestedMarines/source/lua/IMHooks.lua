@@ -43,6 +43,7 @@ ModLoader.SetupFileHook("lua/Scoreboard.lua", "lua/IMScoreboard.lua", "replace")
 
 ModLoader.SetupFileHook("lua/ScoringMixin.lua", "lua/IMScoringMixin.lua", "post")
 ModLoader.SetupFileHook("lua/PointGiverMixin.lua", "lua/IMPointGiverMixin.lua", "post")
+ModLoader.SetupFileHook("lua/NetworkMessages.lua", "lua/IMNetworkMessages.lua", "post")
 
 --Change GUI
 ModLoader.SetupFileHook( "lua/GUIMinimapFrame.lua", "lua/IMGUIMinimapFrame.lua", "post" )

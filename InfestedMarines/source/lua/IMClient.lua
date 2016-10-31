@@ -22,6 +22,8 @@ local allowedAchievements =
     ["Season_0_1"] = true,
     ["Season_0_2"] = true,
     ["Season_0_3"] = true,
+    ["Short_2_5"] = true, -- Quality Assurance
+    ["Long_0_2"] = true, -- Arcade Champion
 }
 
 local oldSetAchievement = Client.SetAchievement

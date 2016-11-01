@@ -8,7 +8,7 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-Script.Load("lua/IMObjectiveStrings.lua")
+Script.Load("lua/IMStrings.lua")
 
 Marine.kInfectionRange = 3.0
 Marine.kInfectionRangeSq = Marine.kInfectionRange * Marine.kInfectionRange
@@ -319,6 +319,13 @@ local function AttemptInfection(self)
         
         -- unfreeze player once infestation process has ended.
         self:AddTimedCallback(UnfreezeInfestation, Marine.kInfectionFreezeTime)
+    end
+    
+    if Client then
+        
+        -- hide the keybind telling them how to infest a human
+        GetKeybindDisplayManager():DestroyBinding("SecondaryAttack")
+        
     end
     
 end

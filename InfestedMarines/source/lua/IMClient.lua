@@ -15,6 +15,7 @@ Script.Load("lua/IMGUIObjectivesMarine.lua")
 Script.Load("lua/IMGUIObjectivesAlien.lua")
 Script.Load("lua/IMGUIInfestedFeedTimer.lua")
 Script.Load("lua/IMGUIInfestedOverlay.lua")
+Script.Load("lua/KeybindDisplayManager.lua") -- activate the built-in keybind display functionality.
 
 --map of achievements that are available in this gamemode
 local allowedAchievements =

@@ -23,7 +23,7 @@ function PointGiverMixin:PreOnKill(attacker, doer, point, direction)
 	attacker:AddScore(points, 0, true)
 
 	if self:isa("Player") and attacker and attacker:isa("Player") then
-		if self:GetIsInfected() and not attacker:IsInfected() then
+		if self:GetIsInfected() and not attacker:GetIsInfected() then
 			attacker:AddKill()
 		end
 	end

@@ -71,6 +71,8 @@ function IMGUIInfestedFeedTimer:Uninitialize()
         self.monsterIcon = nil
     end
     
+    -- keybind stuff
+    GetKeybindDisplayManager():DestroyBinding("SecondaryAttack")
 end
 
 function IMGUIInfestedFeedTimer:SetVisibility(state)
@@ -88,9 +90,25 @@ function IMGUIInfestedFeedTimer:OnResolutionChanged()
 
 end
 
+local function UpdateKeybindDisplay()
+    
+    local player = Client.GetLocalPlayer()
+    local shouldBeDisplayed = player.secondaryKeybindShown and not player.secondaryKeybindHidden
+    shouldBeDisplayed = shouldBeDisplayed and player.GetIsAlive and player:GetIsAlive()
+    
+    if player.secondaryKeybindShown and not player.secondaryKeybindHidden then
+        if not GetKeybindDisplayManager():GetIsBindingDisplayed("SecondaryAttack") then
+            GetKeybindDisplayManager():DisplayBinding("SecondaryAttack", IMStringGetRightClickTipMessage())
+        end
+    else
+        GetKeybindDisplayManager():DestroyBinding("SecondaryAttack")
+    end
+end
+
 function IMGUIInfestedFeedTimer:Update(deltaTime)
     
     SharedUpdate(self, deltaTime)
+    UpdateKeybindDisplay()
     
     -- convenient to do this visibility check here.
     local player = Client.GetLocalPlayer()

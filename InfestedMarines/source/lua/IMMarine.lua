@@ -324,7 +324,7 @@ local function AttemptInfection(self)
     if Client then
         
         -- hide the keybind telling them how to infest a human
-        GetKeybindDisplayManager():DestroyBinding("SecondaryAttack")
+        self.secondaryKeybindHidden = true
         
     end
     

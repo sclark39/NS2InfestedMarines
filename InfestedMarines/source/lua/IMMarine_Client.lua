@@ -24,9 +24,8 @@ function Marine:UpdateMisc(input)
     end
     
     -- update the keybind displayed on the marine's screen.
-    if self:GetWasRecentlyInfested() and not self.infestHintDisplayed then
-        self.infestHintDisplayed = true
-        GetKeybindDisplayManager():DisplayBinding("SecondaryAttack", IMStringGetRightClickTipMessage())
+    if self:GetWasRecentlyInfested() and not self.secondaryKeybindShown then
+        self.secondaryKeybindShown = true
     end
     
     old_Marine_UpdateMisc(self, input)

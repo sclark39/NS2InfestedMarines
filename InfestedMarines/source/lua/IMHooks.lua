@@ -8,6 +8,7 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 Script.Load("lua/IMModBlacklist.lua")
+Script.Load("lua/IMMapCycle.lua")
 
 ModLoader.SetupFileHook( "lua/DeathMessage_Client.lua", "lua/IMDeathMessage_Client.lua", "replace" )
 

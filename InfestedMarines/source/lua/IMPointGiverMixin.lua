@@ -14,26 +14,30 @@ local kPointsForCystKill = 1
 
 function PointGiverMixin:PreOnKill(attacker, doer, point, direction)
 
-	if not attacker or self.isHallucination then
-		return
-	end
+    if not attacker or self.isHallucination then
+        return
+    end
+    
+    if attacker:isa("DeathTrigger") then
+        return
+    end
 
-	local points = self:GetPointValue(attacker)
+    local points = self:GetPointValue(attacker)
 
-	attacker:AddScore(points, 0, true)
+    attacker:AddScore(points, 0, true)
 
-	if self:isa("Player") and attacker and attacker:isa("Player") then
-		if self:GetIsInfected() and not attacker:GetIsInfected() then
-			attacker:AddKill()
-		end
-	end
+    if self:isa("Player") and attacker and attacker:isa("Player") then
+        if self:GetIsInfected() and not attacker:GetIsInfected() then
+            attacker:AddKill()
+        end
+    end
 end
 
 local oldGetPointValue = PointGiverMixin.GetPointValue
 function PointGiverMixin:GetPointValue(attacker)
-	if not attacker then
-		return oldGetPointValue(self)
-	end
+    if not attacker then
+        return oldGetPointValue(self)
+    end
 
     local attackerIsInfested = attacker.GetIsInfected and attacker:GetIsInfected()
     

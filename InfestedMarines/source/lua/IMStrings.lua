@@ -16,6 +16,10 @@ local kNobodyInfestedMessage = "Infestation is taking over the facility; the air
 
 local kRightClickTipMessage = "Infest (get close)"
 
+local kDoNotWeldPurifiersMessage = "You are helping the enemy!  Do not repair Air Purifiers except to avoid suspicion."
+
+local kDoNotKillCystsMessage = "You are helping the enemy!  Do not kill cysts except to avoid suspicion."
+
 function IMStringGetBlankMessage()
     return ""
 end
@@ -38,4 +42,14 @@ end
 -- will overwrite later with locale
 function IMStringGetRightClickTipMessage()
     return kRightClickTipMessage
+end
+
+-- will overwrite later with locale
+function IMStringGetDoNotWeldPurifiersMessage()
+    return kDoNotWeldPurifiersMessage
+end
+
+-- will overwrite later with locale
+function IMStringGetDoNotKillCystsMessage()
+    return kDoNotKillCystsMessage
 end

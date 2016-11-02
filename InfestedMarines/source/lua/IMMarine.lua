@@ -148,6 +148,10 @@ function Marine:GetObjective()
     return self.objective or Marine.kObjective.NoObjective
 end
 
+function Marine:GetTipMessage()
+    return self.tipMessage or Marine.kTipMessage.Blank
+end
+
 function Marine:AddInfestedEnergy(amount)
     
     self.infestedEnergy = math.min(self.infestedEnergy + amount, Marine.kInfestedEnergyMax)

@@ -14,3 +14,7 @@ AddClientUIScriptForTeam(kTeam1Index, "IMGUIObjectivesMarine")
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIObjectivesAlien")
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIInfestedFeedTimer")
 AddClientUIScriptForTeam(kTeam1Index, "IMGUIInfestedOverlay")
+
+-- we show it for all teams b/c we don't want tips to disappear if someone switches to ready room immediately after dying,
+-- for example.  We want the tips to linger.
+AddClientUIScriptForTeam("all", "IMGUIPlayerTips")

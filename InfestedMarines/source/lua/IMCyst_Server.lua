@@ -29,6 +29,8 @@ function Cyst:OnKill(attacker, doer, point, direction)
     
     GetCystManager():CreateAreaOfDenial(self:GetOrigin())
     
+    TipHandler_ReportCystKilled(attacker)
+    
     old_Cyst_OnKill(self, attacker, doer, point, direction)
     
 end

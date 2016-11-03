@@ -8,6 +8,10 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
+function GetPlayerTipScript()
+    return ClientUI.GetScript("IMGUIPlayerTips")
+end
+
 class 'IMGUIPlayerTips' (GUIScript)
 
 -- text scale
@@ -15,24 +19,19 @@ IMGUIPlayerTips.kTextFont = Fonts.kAgencyFB_Medium
 IMGUIPlayerTips.kTextSample = "D"
 IMGUIPlayerTips.kTextHeight = 26
 IMGUIPlayerTips.kTextScreenCenterOffset = 50
+IMGUIPlayerTips.kTextFontScaleCompensationFactor = 26/18 -- for some reason this font doesn't scale properly
 
 IMGUIPlayerTips.kTextBoxHalfWidth = 400
 IMGUIPlayerTips.kLineOffset = 41 -- translation from line x to line x+1 (NOT space BETWEEN them)
 
-IMGUIPlayerTips.kTextColor = enum({ "MarineTextColor", "AlienTextColor"})
-IMGUIPlayerTips.kTextColorTable = 
-{
-    [IMGUIPlayerTips.kTextColor.MarineTextColor] = Color(201/255, 231/255, 1, 1),
-    [IMGUIPlayerTips.kTextColor.AlienTextColor] = Color(0.901, 0.623, 0.215, 1), --kAlienFontColor
-}
+IMGUIPlayerTips.kMarineTextColor = Color(201/255, 231/255, 1, 1)
+IMGUIPlayerTips.kAlienTextColor = Color(0.901, 0.623, 0.215, 1) --kAlienFontColor
 
 IMGUIPlayerTips.kShadowOffset = Vector(2,2,0)
 
 IMGUIPlayerTips.kTextFadeInTime = 0.25
 IMGUIPlayerTips.kTextFadeOutTime = 1.5
 IMGUIPlayerTips.kTextDisplayTime = 10.0
-
-IMGUIPlayerTips.kTipMessageType = enum({"Blank", "DoNotWeldPurifiers", "DoNotKillCysts"})
 
 local function EvaluateColor()
     
@@ -43,9 +42,9 @@ local function EvaluateColor()
     
     if player.GetIsInfected then
         if player:GetIsInfected() then
-            return IMGUIPlayerTips.kTextColorTable.AlienTextColor
+            return IMGUIPlayerTips.kAlienTextColor
         else
-            return IMGUIPlayerTips.kTextColorTable.MarineTextColor
+            return IMGUIPlayerTips.kMarineTextColor
         end
     end
     
@@ -55,9 +54,9 @@ end
 
 local function GetStringForTipType(type)
     
-    if type == IMGUIPlayerTips.kTipMessageType.DoNotWeldPurifiers then
+    if type == kIMTipMessageType.DoNotWeldPurifiers then
         return IMStringGetDoNotWeldPurifiersMessage()
-    elseif type == IMGUIPlayerTips.kTipMessageType.DoNotKillCysts then
+    elseif type == kIMTipMessageType.DoNotKillCysts then
         return IMStringGetDoNotKillCystsMessage()
     end
     
@@ -67,8 +66,8 @@ end
 
 local function DeleteText(self, index)
     
-    if self.texts and self.texts[i] then
-        local text = self.texts[i]
+    if self.texts and self.texts[index] then
+        local text = self.texts[index]
         if text.lines then
             for i=#text.lines, 1, -1 do
                 if text.lines[i] then
@@ -85,17 +84,31 @@ local function DeleteText(self, index)
                 text.shadowLines[i] = nil
             end
         end
-        table.remove(self.texts, i)
+        table.remove(self.texts, index)
     end
     
 end
 
+local logThrottle1 = 0.0
 local function SharedUpdate(self, deltaTime)
+    logThrottle1 = deltaTime + logThrottle1
+    if logThrottle1 > 0.5 then
+        logThrottle1 = 0.0
+    end
+    
+    local beginFadeOut = false
     
     -- Fade in text #1...
     if self.texts and self.texts[1] and not self.texts[1].empty then
         self.texts[1].opacity = self.texts[1].opacity or 0.0
+        self.texts[1].timeDisplayed = self.texts[1].timeDisplayed or 0.0
         self.texts[1].opacity = math.min(self.texts[1].opacity + deltaTime / IMGUIPlayerTips.kTextFadeInTime, 1.0)
+        self.texts[1].timeDisplayed = self.texts[1].timeDisplayed + deltaTime
+        
+        if self.texts[1].timeDisplayed >= IMGUIPlayerTips.kTextDisplayTime then
+            beginFadeOut = true
+        end
+        
     end
     
     -- ...fade out all others, deleting those that hit 0.0 opacity.
@@ -103,7 +116,7 @@ local function SharedUpdate(self, deltaTime)
         for i=#self.texts, 2, -1 do
             self.texts[i].opacity = self.texts[i].opacity or 0.0
             self.texts[i].opacity = math.max(self.texts[i].opacity - deltaTime / IMGUIPlayerTips.kTextFadeOutTime, 0.0)
-            if self.texts[i].opacity <= 0.0 then
+            if self.texts[i].opacity <= 0.0001 then
                 DeleteText(self, i)
             end
         end
@@ -119,20 +132,30 @@ local function SharedUpdate(self, deltaTime)
                 local shadowColor = Color(0,0,0,self.texts[i].opacity)
                 if self.texts[i].lines then
                     for j=1, #self.texts[i].lines do
-                        self.tests[i].lines[j]:SetColor(color)
+                        self.texts[i].lines[j]:SetColor(color)
                         local newPos = Vector(0, IMGUIPlayerTips.kTextScreenCenterOffset + IMGUIPlayerTips.kLineOffset * (j - 0.5), 0)
-                        self.tests[i].lines[j]:SetPosition(displayScale * newPos)
+                        --Log("position = %s", newPos * displayScale)
+                        self.texts[i].lines[j]:SetPosition(displayScale * newPos)
                     end
                 end
-                if self.texts[i].shadowLines do
+                if self.texts[i].shadowLines then
                     for j=1, #self.texts[i].shadowLines do
-                        self.tests[i].shadowLines[j]:SetColor(shadowColor)
+                        self.texts[i].shadowLines[j]:SetColor(shadowColor)
                         local newPos = Vector(0, IMGUIPlayerTips.kTextScreenCenterOffset + IMGUIPlayerTips.kLineOffset * (j - 0.5), 0)
-                        self.tests[i].shadowLines[j]:SetPosition(displayScale * newPos)
+                        self.texts[i].shadowLines[j]:SetPosition(displayScale * (newPos + IMGUIPlayerTips.kShadowOffset))
                     end
                 end
             end
         end
+    end
+    
+    if beginFadeOut then
+        self:DoPlayerTip(kIMTipMessageType.Blank)
+    end
+    
+    -- cleanup when all are gone.
+    if #self.texts == 1 and self.texts[1].empty then
+        self.texts = {}
     end
     
 end
@@ -146,16 +169,14 @@ local function AddTipText(self, newString, newType)
     tempTextObject:SetFontName(IMGUIPlayerTips.kTextFont)
     tempTextObject:SetOptionFlag(GUIItem.ManageRender)
     tempTextObject:SetIsVisible(false)
-    local scaleFactor = IMGUIPlayerTips.kTextHeight / tempTextObject:GetTextHeight(IMGUIPlayerTips.kTextSample)
+    local scaleFactor = (IMGUIPlayerTips.kTextHeight / tempTextObject:GetTextHeight(IMGUIPlayerTips.kTextSample)) * IMGUIPlayerTips.kTextFontScaleCompensationFactor
     local displayScaleFactor = GUIScaleHeight(1)
     tempTextObject:SetScale(Vector(scaleFactor,scaleFactor,1))
+    
     local boxWidth = IMGUIPlayerTips.kTextBoxHalfWidth * 2 * displayScaleFactor
     
     local wrappedText = WordWrap( tempTextObject, newString, 0, boxWidth)
-    local lines = StringExplode(wrappedText, "\n")
-    
-    -- debug to see if we need to filter lines further
-    Log("lines = %s", lines)
+    local lines = string.Explode(wrappedText, "\n")
     
     GUI.DestroyItem(tempTextObject)
     
@@ -164,6 +185,7 @@ local function AddTipText(self, newString, newType)
     newText.lines = {}
     newText.shadowLines = {}
     newText.opacity = 0.0
+    newText.timeDisplayed = 0.0
     for i=1, #lines do
         local newLine = GUIManager:CreateGraphicItem()
         newLine:SetFontName(IMGUIPlayerTips.kTextFont)
@@ -174,6 +196,7 @@ local function AddTipText(self, newString, newType)
         newLine:SetColor(Color(1,1,1,0))
         newLine:SetTextAlignmentX(GUIItem.Align_Center)
         newLine:SetTextAlignmentY(GUIItem.Align_Center)
+        newLine:SetAnchor(GUIItem.Middle, GUIItem.Center)
         newLine:SetText(lines[i])
         
         local newShadowLine = GUIManager:CreateGraphicItem()
@@ -185,6 +208,7 @@ local function AddTipText(self, newString, newType)
         newShadowLine:SetColor(Color(0,0,0,0))
         newShadowLine:SetTextAlignmentX(GUIItem.Align_Center)
         newShadowLine:SetTextAlignmentY(GUIItem.Align_Center)
+        newShadowLine:SetAnchor(GUIItem.Middle, GUIItem.Center)
         newShadowLine:SetText(lines[i])
         
         table.insert(newText.lines, newLine)
@@ -207,9 +231,8 @@ end
 local function UpdateText(self)
     
     if self.currentTipType ~= self.prevTipType then
-        
         self.prevTipType = self.currentTipType
-        local newString = GetStringForTipType()
+        local newString = GetStringForTipType(self.currentTipType)
         if newString then
             AddTipText(self, newString, self.currentTipType)
         else

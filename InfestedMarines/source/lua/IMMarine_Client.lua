@@ -1,3 +1,12 @@
+-- ======= Copyright (c) 2003-2010, Unknown Worlds Entertainment, Inc. All rights reserved. =======
+--
+-- lua\IMMarine_Client.lua
+--
+--    Created by:   Trevor Harris (trevor@naturalselection2.com)
+--
+--    Handles client-only functionality for the marine, including targeting for infested, and the keybind display.
+--
+-- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
 local old_Marine_UpdateMisc = Marine.UpdateMisc
 function Marine:UpdateMisc(input)

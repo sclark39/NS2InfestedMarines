@@ -18,6 +18,16 @@ if Server then
         return true
     end
     
+    local old_NS2Gamerules_OnEntityChange = NS2Gamerules.OnEntityChange
+    function NS2Gamerules:OnEntityChange(oldId, newId)
+        
+        -- notify the game master of changed entity ids.
+        GetGameMaster():OnEntityChange(oldId, newId)
+        
+        old_NS2Gamerules_OnEntityChange(self, oldId, newId)
+        
+    end
+    
     -- let them try to join any team at any time.
     function NS2Gamerules:GetCanJoinTeamNumber()
         return true

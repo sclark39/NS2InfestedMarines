@@ -30,7 +30,7 @@ IMGUIPlayerTips.kAlienTextColor = Color(0.901, 0.623, 0.215, 1) --kAlienFontColo
 IMGUIPlayerTips.kShadowOffset = Vector(2,2,0)
 
 IMGUIPlayerTips.kTextFadeInTime = 0.25
-IMGUIPlayerTips.kTextFadeOutTime = 1.5
+IMGUIPlayerTips.kTextFadeOutTime = 0.5
 IMGUIPlayerTips.kTextDisplayTime = 10.0
 
 local function EvaluateColor()
@@ -58,6 +58,18 @@ local function GetStringForTipType(type)
         return IMStringGetDoNotWeldPurifiersMessage()
     elseif type == kIMTipMessageType.DoNotKillCysts then
         return IMStringGetDoNotKillCystsMessage()
+    elseif type == kIMTipMessageType.KillCysts then
+        return IMStringGetKillCystsMessage()
+    elseif type == kIMTipMessageType.WeldPurifiers then
+        return IMStringGetWeldPurifiersMessage()
+    elseif type == kIMTipMessageType.FriendlyFireVictim then
+        return IMStringGetFriendlyFireVictimMessage()
+    elseif type == kIMTipMessageType.FriendlyFireAttacker then
+        return IMStringGetFriendlyFireAttackerMessage()
+    elseif type == kIMTipMessageType.InfestedSuicideByFlamethrower then
+        return IMStringGetInfestedSuicideByFlamethrowerMessage()
+    elseif type == kIMTipMessageType.InfestedFriendlyFire then
+        return IMStringGetInfestedFriendlyFireMessage()
     end
     
     return nil
@@ -127,7 +139,8 @@ local function SharedUpdate(self, deltaTime)
     if self.texts then
         for i=1, #self.texts do
             if not self.texts[i].empty then
-                local color = EvaluateColor()
+                local color = self.texts[i].color or EvaluateColor()
+                self.texts[i].color = self.texts[i].color or color
                 color.a = self.texts[i].opacity
                 local shadowColor = Color(0,0,0,self.texts[i].opacity)
                 if self.texts[i].lines then
@@ -186,6 +199,7 @@ local function AddTipText(self, newString, newType)
     newText.shadowLines = {}
     newText.opacity = 0.0
     newText.timeDisplayed = 0.0
+    newText.color = EvaluateColor()
     for i=1, #lines do
         local newLine = GUIManager:CreateGraphicItem()
         newLine:SetFontName(IMGUIPlayerTips.kTextFont)

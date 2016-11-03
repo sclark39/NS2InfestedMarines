@@ -18,6 +18,7 @@ function GetGameMaster()
     
     if not gameMaster then
         gameMaster = CreateGameMaster()
+        gameMaster:OnCreate()
     end
     
     return gameMaster
@@ -27,7 +28,6 @@ end
 function CreateGameMaster()
     
     local newGM = IMGameMaster()
-    newGM:OnCreate()
     return newGM
     
 end
@@ -162,6 +162,8 @@ function IMGameMaster:DoGameStart()
     self.pickedInfected = false
     self.infectedChooseDelay = IMGameMaster.kTimeBeforeInfectedChosen
     self:SetPhase(IMGameMaster.kPhase.Scatter)
+    
+    TipHandler_ResetQueuedTips()
     
 end
 
@@ -559,6 +561,12 @@ local function UpdatePlayerObjectives(self)
     
 end
 
+function IMGameMaster:OnEntityChange(oldId, newId)
+    
+    TipHandler_OnEntityChange(oldId, newId)
+    
+end
+
 function IMGameMaster:OnUpdate(deltaTime)
     
     UpdatePlayerObjectives(self)
@@ -581,6 +589,8 @@ function IMGameMaster:OnUpdate(deltaTime)
     UpdateAirQuality(self)
     UpdateInfestedFeed(self)
     UpdateGameMasterDuties(self, IMGameMaster.kUpdatePeriod)
+    
+    TipHandler_Update(IMGameMaster.kUpdatePeriod)
     
 end
 

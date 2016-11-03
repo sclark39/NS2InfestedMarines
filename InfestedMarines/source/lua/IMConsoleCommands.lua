@@ -10,6 +10,7 @@
 
 Shared.RegisterNetworkMessage("IMInfectPlayer", {})
 Shared.RegisterNetworkMessage("IMCystRatio", { ratio = "float"})
+Shared.RegisterNetworkMessage("IMPickInfested", {})
 
 if Client then
     
@@ -39,6 +40,16 @@ if Client then
     end
     Event.Hook("Console_icystratio", OnConsoleCystRatio)
     
+    local function OnConsolePickInfested()
+        if not (Shared.GetCheatsEnabled() or Shared.GetTestsEnabled()) then
+            Log("Cheats or debug testing must be enabled to use this command")
+            return
+        end
+        
+        Client.SendNetworkMessage("IMPickInfested", {}, true)
+    end
+    Event.Hook("Console_ipickinfested", OnConsolePickInfested)
+    
 end
 
 if Server then
@@ -56,4 +67,8 @@ if Server then
     end
     Server.HookNetworkMessage("IMCystRatio", OnCystRatio)
     
+    local function OnPickInfested(client, message)
+        GetGameMaster().infectedChooseDelay = 0
+    end
+    Server.HookNetworkMessage("IMPickInfested", OnPickInfested)
 end

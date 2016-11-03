@@ -49,7 +49,7 @@ function Welder:PerformWeld(player)
                     -- weld owner as well
                     player:SetArmor(player:GetArmor() + kWelderFireDelay * kSelfWeldAmount)
                     
-                    if Server then
+                    if Server and target:isa("Extractor") then
                         TipHandler_ReportWelding(player)
                     end
                     

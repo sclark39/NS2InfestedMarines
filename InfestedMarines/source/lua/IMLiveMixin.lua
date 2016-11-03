@@ -151,12 +151,26 @@ function LiveMixin:TakeDamage(damage, attacker, doer, point, direction, armorUse
             
             if (not damageReflected) or (not attacker.GetWillReflectedDamageHitVictim) or attacker:GetWillReflectedDamageHitVictim(self, doer) then
                 self:Kill(attacker, doer, point, direction)
+                if self:isa("Marine") and attacker and attacker:isa("Marine") then
+                    if not self:GetIsInfected() and not attacker:GetIsInfected() then
+                        TipHandler_ReportFriendlyFireDeathVictim(self)
+                    end
+                end
             end
             
             if damageReflected then
                 -- player friendly-fired a friendly player to death.  They die, player they attacked
                 -- gets their health/armor back.
                 attacker:Kill(nil, doer, point, direction)
+                if self:isa("Marine") and attacker and attacker:isa("Marine") then
+                    if not self:GetIsInfected() and not attacker:GetIsInfected() then
+                        TipHandler_ReportFriendlyFireDeathAttacker(attacker)
+                    elseif not self:GetIsInfected() and attacker:GetIsInfected() then
+                        TipHandler_ReportInfestedSuicideByUsingFlamethrower(attacker)
+                    elseif self:GetIsInfected() and attacker:GetIsInfected() then
+                        TipHandler_ReportInfestedFriendlyFire(attacker)
+                    end
+                end
             end
             
         end

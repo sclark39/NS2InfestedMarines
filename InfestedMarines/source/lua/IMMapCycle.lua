@@ -10,10 +10,24 @@
 
 local oldGetMapName = Shared.GetMapName
 local cachedMapName --cache the changed mapname to avoid extra string operations
-function Shared.GetMapName()
+local heighMapLoaded
+function Shared.GetMapName(returnOld)
+    local oldMapName = oldGetMapName()
+
+    -- for minimap background
+    if returnOld then
+        return oldMapName
+    end
+
+    -- for heightmap
+    if gHeightMap and not heighMapLoaded then
+        heighMapLoaded = true
+        return oldMapName
+    end
+
     if cachedMapName then return cachedMapName end
 
-    local mapName = string.gsub(oldGetMapName(), "ns2_", "infest_")
+    local mapName = string.gsub(oldMapName, "ns2_", "infest_")
 
     --Check for map in mapcycle if this is the server VM
     if Server then
@@ -25,7 +39,7 @@ function Shared.GetMapName()
             mapName = string.gsub(mapName, "infest_", "infect_")
             if not MapCycle_GetMapIsInCycle(mapName) then
                 --also the mod could be loaded without the prefix method
-                mapName = oldGetMapName()
+                mapName = oldMapName
             end
         end
     end
@@ -33,3 +47,4 @@ function Shared.GetMapName()
     cachedMapName = mapName
     return mapName
 end
+

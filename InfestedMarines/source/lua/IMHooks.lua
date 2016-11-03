@@ -47,7 +47,7 @@ ModLoader.SetupFileHook("lua/PointGiverMixin.lua", "lua/IMPointGiverMixin.lua", 
 ModLoader.SetupFileHook("lua/NetworkMessages.lua", "lua/IMNetworkMessages.lua", "post")
 
 --Change GUI
-ModLoader.SetupFileHook( "lua/GUIMinimapFrame.lua", "lua/IMGUIMinimapFrame.lua", "post" )
+ModLoader.SetupFileHook( "lua/GUIMinimap.lua", "lua/IMGUIMinimap.lua", "post" )
 ModLoader.SetupFileHook("lua/Hud/Marine/GUIMarineHUD.lua", "lua/IMGUIMarineHUD.lua", "post" )
 ModLoader.SetupFileHook("lua/GUIGameEnd.lua", "lua/IMGUIGameEnd.lua", "post" )
 ModLoader.SetupFileHook("lua/GUIDeathMessages.lua", "lua/IMGUIDeathMessages.lua", "post" )

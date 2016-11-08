@@ -5,6 +5,7 @@
 --    Created by:   Trevor Harris (trevor@naturalselection2.com)
 --
 --    Add a field to the blip to tell if a player is infested or not.
+--    Make cysts change color depending on if the player is infested or not.
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
@@ -40,6 +41,23 @@ if Client then
         end
         self.currentMapBlipColor = blipColor
 
+    end
+    
+    function MapBlip:GetMapBlipColor(minimap, item)
+        
+        if self.mapBlipType == kMinimapBlipType.InfestationDying or self.mapBlipType == kMinimapBlipType.Infestation then
+            local player = Client.GetLocalPlayer()
+            if player and player.GetIsInfected then
+                if player:GetIsInfected() then
+                    return Color(0.2, 0.7, 0.2, .25) -- from GUIMinimap.lua, kInfestationColor
+                else
+                    return Color(1, 0.2, 0, .25) -- also from GUIMinimap.lua, kInfestationDyingColor
+                end
+            end
+        end
+        
+        return self.currentMapBlipColor or Color()
+        
     end
     
 end

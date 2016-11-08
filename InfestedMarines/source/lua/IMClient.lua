@@ -39,3 +39,31 @@ function Client.SetAchievement( name )
         end
     end
 end
+
+Event.Hook("LoadComplete", function()
+    local deadStatus = Locale.ResolveString("STATUS_DEAD")
+    local originalGUIVoiceChatUpdate
+    originalGUIVoiceChatUpdate = Class_ReplaceMethod("GUIVoiceChat", "Update", function(guivoicechatself, deltaTime)
+        originalGUIVoiceChatUpdate(guivoicechatself, deltaTime)
+        local statuses = {}
+        local allScores = ScoreboardUI_GetAllScores()
+        for i = 1, #allScores do
+            local s = allScores[i]
+            statuses[s.Name] = s.Status
+        end
+        for _, bar in pairs(guivoicechatself.chatBars) do
+            if bar.Background:GetIsVisible() then
+                local chatBarPlayerName = bar.Name:GetText()
+                local chatBarPlayerStatus = statuses[chatBarPlayerName]
+                local newColor
+                if chatBarPlayerStatus == deadStatus then
+                    newColor = Color(1, 0, 0, 1)
+                end
+                if newColor ~= nil then
+                    bar.Name:SetColor(newColor)
+                    bar.Icon:SetColor(newColor)
+                end
+            end
+        end
+    end)
+end)

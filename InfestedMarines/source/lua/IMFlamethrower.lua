@@ -34,6 +34,13 @@ local kUpgradedRange = kFlamethrowerUpgradedRange
 
 local kConeWidth = 0.34
 
+-- The flamethrower's current firing rate is 14/90, we're doubling it here to make it feel more
+-- responsive. (the 90 = 30fps * 3x animation speed)
+Flamethrower.kOldEffectiveDamageRate = 14/90
+Flamethrower.kDamageRate = 7/90
+
+local kDamageRateChange = Flamethrower.kOldEffectiveDamageRate / Flamethrower.kDamageRate
+
 local networkVars =
 { 
     createParticleEffects = "boolean",
@@ -316,14 +323,7 @@ local function ApplyConeDamage(self, player)
             local toEnemy = GetNormalizedVector(ent:GetModelOrigin() - eyePos)
             local health = ent:GetHealth()
             
-            local attackDamage = kFlamethrowerDamage
-            
-            if HasMixin( ent, "Fire" ) then
-                local time = Shared.GetTime()
-                if ( ent:isa("AlienStructure") or HasMixin( ent, "Maturity" ) ) and ent:GetIsOnFire() and (ent.timeBurnInit + time) >= (ent.timeBurnInit + kCompoundFireDamageDelay) then
-                    attackDamage = kFlamethrowerDamage + ( kFlamethrowerDamage * kCompundFireDamageScalar )
-                end
-            end
+            local attackDamage = kFlamethrowerDamage / kDamageRateChange
             
             self:DoDamage( attackDamage, ent, ent:GetModelOrigin(), toEnemy )
             
@@ -378,7 +378,10 @@ local function ShootFlame(self, player)
 end
 
 function Flamethrower:FirePrimary(player, bullets, range, penetration)
-    ShootFlame(self, player)
+    -- FirePrimary is activated when the animation tag fires, which restricts our capability to 
+    -- increase the firing rate.
+    -- Disabling this for now, and moving it to OnPrimaryAttack, so we can double the firing rate.
+    --ShootFlame(self, player)
 end
 
 function Flamethrower:GetDeathIconIndex()
@@ -436,6 +439,16 @@ function Flamethrower:OnPrimaryAttack(player)
 
         end
         
+    end
+    
+    -- handle dealing damage here.  The tag system was too restrictive for the flamethrower.
+    if Server then
+        local now = Shared.GetTime()
+        self.nextDamageTime = self.nextDamageTime or 0
+        if now > self.nextDamageTime then
+            self.nextDamageTime = now + Flamethrower.kDamageRate
+            ShootFlame(self, player)
+        end
     end
     
 end

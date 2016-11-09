@@ -1,7 +1,7 @@
 name        = "Infested Marines Beta"
-source_dir  = "source/"
-output_dir  = "output/"
-description = [=[Testing build for the Infested Marines mod.
+source_dir  = "source"
+output_dir  = "output"
+description = [=[Testing build for the Infested Marines mod.
 ModId = 2f73672f]=]
 image       = "preview.jpg"
 tag_modtype = "Custom Game Mode"

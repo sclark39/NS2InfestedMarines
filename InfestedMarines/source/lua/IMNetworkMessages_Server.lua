@@ -72,7 +72,7 @@ local function OnChatReceived(client, message)
 
 				--Mark Dead and stop them from chatting with the living
 				if authorIsDead then
-					if player.GetIsAlive and player:GetIsAlive() and player:GetTeamNumber() == kMarineTeamType then
+					if player.GetIsAlive and player:GetIsAlive() and player:GetTeamNumber() == kMarineTeamType and GetGamerules():GetGameState() == kGameState.Started then
 						send = false
 					else
 						Server.SendNetworkMessage(player, "Chat", BuildChatMessage(message.teamOnly, playerNameDead, playerLocationId, playerTeamNumber, playerTeamType, chatMessage), true)

@@ -37,6 +37,10 @@ local kInfestedSuicideByFlamethrowerMessage = "You attempted to burn a perfectly
 
 local kInfestedFriendlyFireMessage = "You cannot kill other infested."
 
+local kFeedSoonMessage = "You are close to starvation!  Infest another player soon!"
+
+local kFeedDeathMessage = "You starved to death!  Infest marines to keep yourself from starving."
+
 ------------------------
 -- ACCESSOR FUNCTIONS --
 ------------------------
@@ -95,11 +99,13 @@ function IMStringGetInfestedFriendlyFireMessage()
     return kInfestedFriendlyFireMessage
 end
 
+function IMStringGetFeedSoonMessage()
+    return kFeedSoonMessage
+end
 
-
-
-
-
+function IMStringGetFeedDeathMessage()
+    return kFeedDeathMessage
+end
 
 
 

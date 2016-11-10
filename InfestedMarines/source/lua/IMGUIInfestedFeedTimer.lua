@@ -78,7 +78,6 @@ end
 function IMGUIInfestedFeedTimer:SetVisibility(state)
     
     if self.monsterIcon then
-        
         self.monsterIcon:SetIsVisible(state)
     end
     
@@ -120,6 +119,23 @@ function IMGUIInfestedFeedTimer:Update(deltaTime)
             local immediate = player:GetId() ~= self.lastSpectateId
             self:SetFeedFraction(player.infestedEnergy / Marine.kInfestedEnergyMax, immediate)
             self.lastSpectateId = player:GetId()
+            
+            if player:GetWasRecentlyInfested() then
+                self.monsterIcon:SetColor(Color(1,1,152/255, 1))
+                self.monsterIcon:SetFloatParameter("pulseInfluence", 1)
+                self.pulseStartTime = self.pulseStartTime or Shared.GetTime()
+                self.monsterIcon:SetFloatParameter("pulseStartTime", self.pulseStartTime)
+            else
+                if self.fraction <= Marine.kInfestedStarvationWarningThreshold then
+                    self.monsterIcon:SetColor(Color(1,0, 0, 1))
+                    self.monsterIcon:SetFloatParameter("pulseInfluence", 0.5)
+                    self.pulseStartTime = self.pulseStartTime or Shared.GetTime()
+                    self.monsterIcon:SetFloatParameter("pulseStartTime", self.pulseStartTime)
+                else
+                    self.monsterIcon:SetFloatParameter("pulseInfluence", 0)
+                    self.pulseStartTime = nil
+                end
+            end
         else
             shouldBeVisible = false
         end

@@ -24,6 +24,7 @@ Marine.kInfestedDurationMax = 120.0 -- two minutes without feeding before infest
 Marine.kInfestedFeedLossRate = Marine.kInfestedEnergyMax / Marine.kInfestedDurationMax
 
 Marine.kInfestedRecentTimeThreshold = 3.0
+Marine.kInfestedStarvationWarningThreshold = 0.33333
 
 Marine.kInfestationCinematicOffset = Vector(0, 1.32, 0)
 
@@ -158,12 +159,23 @@ function Marine:AddInfestedEnergy(amount)
     
 end
 
+function Marine:GetIsNearStarvation()
+    
+    if (self.infestedEnergy / Marine.kInfestedEnergyMax) > Marine.kInfestedStarvationWarningThreshold then
+        return false
+    end
+    
+    return true
+    
+end
+
 function Marine:DeductInfestedEnergy(amount)
     
     self.infestedEnergy = self.infestedEnergy - amount
     
     if self.infestedEnergy <= 0 then
         self:Kill()
+        TipHandler_ReportInfestedStarvation(self)
     end
     
 end
@@ -312,13 +324,16 @@ local function AttemptInfection(self)
     if Server then
         self:AddScore(self.kPointsForInfest)
         target:Infect()
+        
+        -- must be called before the infested energy is added.
+        TipHandler_ReportSuccessfulInfestation(self)
+        
         self:AddInfestedEnergy(Marine.kInfestedEnergyMax)
         
         local team = self:GetTeam()
         local deathMessageTable = team:GetDeathMessage(self, kDeathMessageIcon.Consumed, target)
         team:ForEachPlayer(function(player) if player:GetClient() then Server.SendNetworkMessage(player:GetClient(), "DeathMessage", deathMessageTable, true) end end)
-            
-            
+        
         TriggerThingoutEffects(self, 0.0, true)
         
         -- unfreeze player once infestation process has ended.

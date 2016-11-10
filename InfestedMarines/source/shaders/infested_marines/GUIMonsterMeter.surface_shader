@@ -1,20 +1,54 @@
 <shader>
     
     <inputs>
-        <input name="baseTexture"   type="texture" address="wrap" />
-        <input name="full"          type="texture" address="wrap" />
-        <input name="fillFraction"  type="float">1</input>
+        <input name="baseTexture"       type="texture" address="wrap" />
+        <input name="full"              type="texture" address="wrap" />
+        <input name="fillFraction"      type="float">1</input>
+        <input name="pulseInfluence"    type="float">1</input>
+        <input name="pulseStartTime"    type="float">0</input>
     </inputs> 
     
     <code>
 
         void MaterialShader(bool textured, float2 texCoord, float4 color, inout Material material)
         {
-            const float width = 0.95f;
+            const float width = 0.975f;
+            const float pi = 3.14159265359f;
+            const float pulseOpacity = 0.75f;
+            const float whitePulseFreq = 2.0f;
+            const float redPulseFreq = 4.0f;
+            
+            float tempAlpha;
             
             float val = saturate(((1.0-fillFraction) - (width * texCoord.y)) / (1.0f - width));
             float4 monsterEmpty = tex2D(baseTexture, texCoord);
             float4 monsterFull = tex2D(full, texCoord);
+            if (pulseInfluence == 0.0f)
+            {
+                /* have to use == or else the xml parser sees the greater than sign and trips up */
+            }
+            else if (pulseInfluence == 0.5f)
+            {
+                /* make top half pulse red */
+                float time2 = time - pulseStartTime;
+                float pulse = sin(time2 * 2.0f * pi * redPulseFreq) * 0.5f + 0.5f;
+                pulse = pulse * pulseOpacity;
+                
+                tempAlpha = monsterEmpty.a;
+                monsterEmpty = monsterEmpty * (1.0f - pulse) + color * pulse;
+                monsterEmpty.a = tempAlpha;
+            }
+            else
+            {
+                /* make top half pulse white */
+                float time2 = time - pulseStartTime;
+                float pulse = sin(time2 * 2.0f * pi * whitePulseFreq) * 0.5f + 0.5f;
+                pulse = pulse * pulseOpacity;
+                
+                tempAlpha = monsterFull.a;
+                monsterFull = monsterFull * (1.0f - pulse) + color * pulse;
+                monsterFull.a = tempAlpha;
+            }
             
             float4 result = monsterFull * (1.0f - val) + monsterEmpty * val;
             

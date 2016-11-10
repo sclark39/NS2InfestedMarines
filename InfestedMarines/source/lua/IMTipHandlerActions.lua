@@ -158,6 +158,30 @@ RegisterVerificationFunction(kIMTipMessageType.FriendlyFireVictim, TipHandler_Ve
 RegisterVerificationFunction(kIMTipMessageType.FriendlyFireAttacker, TipHandler_Verify_AlwaysTrue)
 RegisterVerificationFunction(kIMTipMessageType.InfestedSuicideByFlamethrower, TipHandler_Verify_AlwaysTrue)
 RegisterVerificationFunction(kIMTipMessageType.InfestedFriendlyFire, TipHandler_Verify_AlwaysTrue)
+RegisterVerificationFunction(kIMTipMessageType.InfestedStarvation, TipHandler_Verify_AlwaysTrue)
+
+function TipHandler_Verify_NearStarvation(player)
+    
+    if not player then
+        return false
+    end
+    
+    if not GetIsPlayerAlive(player) then
+        return false
+    end
+    
+    if not GetIsPlayerInfested(player) then
+        return false
+    end
+    
+    if not player:GetIsNearStarvation() then
+        return false
+    end
+    
+    return true
+    
+end
+RegisterVerificationFunction(kIMTipMessageType.InfestedNearStarvation, TipHandler_Verify_NearStarvation)
 
 function TipHandler_GetIsTipTypeValid(player, tipType)
     
@@ -258,6 +282,22 @@ function TipHandler_ReportInfestedFriendlyFire(attacker)
     
 end
 
+function TipHandler_ReportInfestedStarvation(infested)
+    
+    EnqueueTipForPlayer(infested, kIMTipMessageType.InfestedStarvation, true)
+    DoTipASAP(infested)
+    
+end
+
+function TipHandler_ReportSuccessfulInfestation(infestor)
+    
+    if infestor:GetIsNearStarvation() then
+        EnqueueTipForPlayer(infestor, kIMTipMessageType.Blank, true)
+        DoTipASAP(infestor)
+    end
+    
+end
+
 -- uninfested players should be killing cysts.  If they're near cysts and not killing them,
 -- we should encourage them to.
 function TipHandler_KillCystUpdateCheck(player, deltaTime)
@@ -302,10 +342,19 @@ function TipHandler_WeldPurifiersUpdateCheck(player, deltaTime)
     
 end
 
+function TipHandler_NearStarvationUpdateCheck(player, deltaTime)
+    
+    if TipHandler_Verify_NearStarvation(player) then
+        EnqueueTipForPlayer(player, kIMTipMessageType.InfestedNearStarvation)
+    end
+    
+end
+
 function TipHandler_UpdatePlayerActions(player, deltaTime)
     
     TipHandler_KillCystUpdateCheck(player, deltaTime)
     TipHandler_WeldPurifiersUpdateCheck(player, deltaTime)
+    TipHandler_NearStarvationUpdateCheck(player, deltaTime)
     
 end
 

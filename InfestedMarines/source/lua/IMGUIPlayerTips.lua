@@ -70,6 +70,10 @@ local function GetStringForTipType(type)
         return IMStringGetInfestedSuicideByFlamethrowerMessage()
     elseif type == kIMTipMessageType.InfestedFriendlyFire then
         return IMStringGetInfestedFriendlyFireMessage()
+    elseif type == kIMTipMessageType.InfestedStarvation then
+        return IMStringGetFeedDeathMessage()
+    elseif type == kIMTipMessageType.InfestedNearStarvation then
+        return IMStringGetFeedSoonMessage()
     end
     
     return nil

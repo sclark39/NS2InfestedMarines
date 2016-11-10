@@ -571,6 +571,8 @@ function IMGameMaster:OnUpdate(deltaTime)
     
     UpdatePlayerObjectives(self)
     
+    TipHandler_Update(IMGameMaster.kUpdatePeriod)
+    
     if not GetGamerules():GetGameStarted() then
         return
     end
@@ -589,8 +591,6 @@ function IMGameMaster:OnUpdate(deltaTime)
     UpdateAirQuality(self)
     UpdateInfestedFeed(self)
     UpdateGameMasterDuties(self, IMGameMaster.kUpdatePeriod)
-    
-    TipHandler_Update(IMGameMaster.kUpdatePeriod)
     
 end
 

@@ -8,7 +8,7 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-kIMTipMessageType = enum({"Blank", "DoNotWeldPurifiers", "DoNotKillCysts", "KillCysts", "WeldPurifiers", "FriendlyFireVictim", "FriendlyFireAttacker", "InfestedSuicideByFlamethrower", "InfestedFriendlyFire"})
+kIMTipMessageType = enum({"Blank", "DoNotWeldPurifiers", "DoNotKillCysts", "KillCysts", "WeldPurifiers", "FriendlyFireVictim", "FriendlyFireAttacker", "InfestedSuicideByFlamethrower", "InfestedFriendlyFire", "InfestedStarvation", "InfestedNearStarvation"})
 
 local kTipDisplayCooldown = 8 -- seconds before another tip can be displayed.
 
@@ -121,7 +121,6 @@ if Server then
                         -- we potentially have tips to display.  Starting at the oldest, find a tip
                         -- that is still relevant.  After sitting in the queue for some time, there
                         -- may be tips waiting that no longer apply, so we'll ignore them.
-                        
                         while #playerTipQueues[playerId].queue > 0 do
                             if TipHandler_GetIsTipTypeValid(players[i], playerTipQueues[playerId].queue[1]) then
                                 -- display a new tip, reset the countdown.

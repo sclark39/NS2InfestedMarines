@@ -431,7 +431,8 @@ local function UpdateInfestedFeed(self)
     
 end
 
-function IMGameMaster:OnRoundEnd(winner)
+local function AwardRoundEndAchievements(self, winner)
+    
     local marines = {}
     local infested = {}
     local function sortPlayer(player)
@@ -463,10 +464,36 @@ function IMGameMaster:OnRoundEnd(winner)
             end
         end
     end
+    
+end
+
+-- causes all living marines to suffocate and die due to the air quality.
+local function CheckForSuffocate(self)
+    
+    if self:GetIsAirQualityToxic() then
+        local marines = IMGetCleanMarines()
+        for i=1, #marines do
+            TipHandler_ReportSuffocatedPlayer(marines[i])
+            marines[i]:Kill()
+        end
+    end
+    
+end
+
+function IMGameMaster:OnRoundEnd(winner)
+    
+    AwardRoundEndAchievements(self, winner)
+    
+    CheckForSuffocate(self)
+    
 end
 
 function IMGameMaster:GetAirQuality()
     return self.airQFraction
+end
+
+function IMGameMaster:GetIsAirQualityToxic()
+    return self:GetAirQuality() <= 0.00001
 end
 
 function IMGameMaster:ReportRepairedExtractor(extractor)

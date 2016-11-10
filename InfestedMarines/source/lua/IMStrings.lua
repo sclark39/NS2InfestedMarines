@@ -41,6 +41,8 @@ local kFeedSoonMessage = "You are close to starvation!  Infest another player so
 
 local kFeedDeathMessage = "You starved to death!  Infest marines to keep yourself from starving."
 
+local kSuffocatedDeathMessage = "You suffocated on the toxic air!  Weld Air Purifiers and kill Cysts to keep the air clean!"
+
 ------------------------
 -- ACCESSOR FUNCTIONS --
 ------------------------
@@ -107,7 +109,9 @@ function IMStringGetFeedDeathMessage()
     return kFeedDeathMessage
 end
 
-
+function IMStringGetSuffocatedMessage()
+    return kSuffocatedDeathMessage
+end
 
 
 

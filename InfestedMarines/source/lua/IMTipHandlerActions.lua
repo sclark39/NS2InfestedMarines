@@ -159,6 +159,7 @@ RegisterVerificationFunction(kIMTipMessageType.FriendlyFireAttacker, TipHandler_
 RegisterVerificationFunction(kIMTipMessageType.InfestedSuicideByFlamethrower, TipHandler_Verify_AlwaysTrue)
 RegisterVerificationFunction(kIMTipMessageType.InfestedFriendlyFire, TipHandler_Verify_AlwaysTrue)
 RegisterVerificationFunction(kIMTipMessageType.InfestedStarvation, TipHandler_Verify_AlwaysTrue)
+RegisterVerificationFunction(kIMTipMessageType.Suffocated, TipHandler_Verify_AlwaysTrue)
 
 function TipHandler_Verify_NearStarvation(player)
     
@@ -295,6 +296,13 @@ function TipHandler_ReportSuccessfulInfestation(infestor)
         EnqueueTipForPlayer(infestor, kIMTipMessageType.Blank, true)
         DoTipASAP(infestor)
     end
+    
+end
+
+function TipHandler_ReportSuffocatedPlayer(player)
+    
+    EnqueueTipForPlayer(player, kIMTipMessageType.Suffocated, true)
+    DoTipASAP(player)
     
 end
 

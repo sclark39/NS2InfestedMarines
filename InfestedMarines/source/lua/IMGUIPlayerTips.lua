@@ -74,6 +74,8 @@ local function GetStringForTipType(type)
         return IMStringGetFeedDeathMessage()
     elseif type == kIMTipMessageType.InfestedNearStarvation then
         return IMStringGetFeedSoonMessage()
+    elseif type == kIMTipMessageType.Suffocated then
+        return IMStringGetSuffocatedMessage()
     end
     
     return nil

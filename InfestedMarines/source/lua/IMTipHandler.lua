@@ -8,7 +8,7 @@
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================
 
-kIMTipMessageType = enum({"Blank", "DoNotWeldPurifiers", "DoNotKillCysts", "KillCysts", "WeldPurifiers", "FriendlyFireVictim", "FriendlyFireAttacker", "InfestedSuicideByFlamethrower", "InfestedFriendlyFire", "InfestedStarvation", "InfestedNearStarvation"})
+kIMTipMessageType = enum({"Blank", "DoNotWeldPurifiers", "DoNotKillCysts", "KillCysts", "WeldPurifiers", "FriendlyFireVictim", "FriendlyFireAttacker", "InfestedSuicideByFlamethrower", "InfestedFriendlyFire", "InfestedStarvation", "InfestedNearStarvation", "Suffocated"})
 
 local kTipDisplayCooldown = 8 -- seconds before another tip can be displayed.
 

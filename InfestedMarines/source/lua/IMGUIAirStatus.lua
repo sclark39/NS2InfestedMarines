@@ -206,7 +206,7 @@ function IMGUIAirStatus:Initialize()
     self.textShadow:SetFontName(IMGUIAirStatus.kFont)
     self.textShadow:SetTextAlignmentX(GUIItem.Align_Center)
     self.textShadow:SetTextAlignmentY(GUIItem.Align_Center)
-    self.textShadow:SetText("AIR TOXICITY")
+    self.textShadow:SetText(self.text:GetText())
     
     self.barBack = GUIManager:CreateGraphicItem()
     self.barBack:SetAnchor(GUIItem.Middle, GUIItem.Top)

@@ -596,19 +596,19 @@ end
 
 function IMGameMaster:OnUpdate(deltaTime)
     
-    UpdatePlayerObjectives(self)
-    
-    TipHandler_Update(IMGameMaster.kUpdatePeriod)
-    
-    if not GetGamerules():GetGameStarted() then
-        return
-    end
-    
+    -- should only update every 0.25 seconds.
     self.throttle = self.throttle or 0
     self.throttle = self.throttle + deltaTime
     if self.throttle >= IMGameMaster.kUpdatePeriod then
         self.throttle = 0
     else
+        return
+    end
+    
+    UpdatePlayerObjectives(self)
+    TipHandler_Update(IMGameMaster.kUpdatePeriod)
+    
+    if not GetGamerules():GetGameStarted() then
         return
     end
     

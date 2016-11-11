@@ -4,7 +4,7 @@
 --
 --    Created by:   Trevor Harris (trevor@naturalselection2.com)
 --
---    Makes infected marines see other marines as green (infected) or orange (not infected) through
+--    Makes infected marines see other marines as green (infected) or blue (not infected) through
 --    walls.
 --
 -- ========= For more information, visit us at http://www.unknownworlds.com =====================

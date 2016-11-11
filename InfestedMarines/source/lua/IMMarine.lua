@@ -406,6 +406,17 @@ function Marine:OnProcessMove(input)
         input.commands = 0
     end
     
+    -- clear the red outline from the infested target... if applicable.
+    if Client then
+        if self.currentInfectionTarget then
+            local target = Shared.GetEntity(self.currentInfectionTarget)
+            if target then
+                target.targetedForInfection = nil
+            end
+            self.currentInfectionTarget = nil
+        end
+    end
+    
     old_Marine_OnProcessMove(self, input)
     
 end

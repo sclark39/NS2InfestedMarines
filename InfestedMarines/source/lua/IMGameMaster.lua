@@ -322,7 +322,7 @@ local function PickInfected(self)
     local numPlayers = GetGamerules().team1:GetNumPlayers()
     for i=1, numPlayers do
         local player = GetGamerules().team1:GetPlayer(i)
-        if player and not player:GetIsInfected() then
+        if player and not (player.GetIsInfected and player:GetIsInfected()) then
             player:TriggerEffects("initial_infestation_sound")
         end
     end

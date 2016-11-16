@@ -180,10 +180,6 @@ local function SharedUpdate(self, deltaTime)
         end
     end
     
-    -- update text, just in case they changed locales.
-    self.text:SetText(IMStringGetAirQualityMessage())
-    self.textShadow:SetText(self.text:GetText())
-    
 end
 
 function IMGUIAirStatus:Initialize()
@@ -199,7 +195,7 @@ function IMGUIAirStatus:Initialize()
     self.text:SetFontName(IMGUIAirStatus.kFont)
     self.text:SetTextAlignmentX(GUIItem.Align_Center)
     self.text:SetTextAlignmentY(GUIItem.Align_Center)
-    self.text:SetText(IMStringGetAirQualityMessage())
+    self.text:SetText("AIR QUALITY")
     
     self.textShadow = GUIManager:CreateGraphicItem()
     self.textShadow:SetAnchor(GUIItem.Middle, GUIItem.Top)

@@ -3,6 +3,7 @@
     <inputs>
         <input name="baseTexture"       type="texture" address="wrap" />
         <input name="full"              type="texture" address="wrap" />
+        <input name="mask"              type="texture" address="wrap" />
         <input name="fillFraction"      type="float">1</input>
         <input name="pulseInfluence"    type="float">1</input>
         <input name="pulseStartTime"    type="float">0</input>
@@ -16,7 +17,7 @@
             const float pi = 3.14159265359f;
             const float pulseOpacity = 0.75f;
             const float whitePulseFreq = 2.0f;
-            const float redPulseFreq = 4.0f;
+            const float redPulseFreq = 1.0f;
             
             float tempAlpha;
             
@@ -32,7 +33,7 @@
                 /* make top half pulse red */
                 float time2 = time - pulseStartTime;
                 float pulse = sin(time2 * 2.0f * pi * redPulseFreq) * 0.5f + 0.5f;
-                pulse = pulse * pulseOpacity;
+                pulse = pulse * pulseOpacity * tex2D(mask, texCoord).r;
                 
                 tempAlpha = monsterEmpty.a;
                 monsterEmpty = monsterEmpty * (1.0f - pulse) + color * pulse;

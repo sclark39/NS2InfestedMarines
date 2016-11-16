@@ -19,6 +19,7 @@ class 'IMGUIInfestedFeedTimer' (GUIScript)
 IMGUIInfestedFeedTimer.kRightEdgeMargin = 64-- right edge of monster is 64 pixels from right edge of screen
 IMGUIInfestedFeedTimer.kMonsterTextureEmpty = PrecacheAsset("ui/infested_marines/feed_meter_empty.dds")
 IMGUIInfestedFeedTimer.kMonsterTextureFull = PrecacheAsset("ui/infested_marines/feed_meter_full.dds")
+IMGUIInfestedFeedTimer.kMonsterTextureMask = PrecacheAsset("ui/infested_marines/feed_meter_mask.dds")
 -- cannot precache gui shaders, causes compile errors :/
 IMGUIInfestedFeedTimer.kMonsterShader = "shaders/infested_marines/GUIMonsterMeter.surface_shader"
 IMGUIInfestedFeedTimer.kSourceSize = Vector( 1068, 964, 0)
@@ -57,6 +58,7 @@ function IMGUIInfestedFeedTimer:Initialize()
     self.monsterIcon:SetShader(IMGUIInfestedFeedTimer.kMonsterShader)
     self.monsterIcon:SetTexture(IMGUIInfestedFeedTimer.kMonsterTextureEmpty)
     self.monsterIcon:SetAdditionalTexture("full", IMGUIInfestedFeedTimer.kMonsterTextureFull)
+    self.monsterIcon:SetAdditionalTexture("mask", IMGUIInfestedFeedTimer.kMonsterTextureMask)
     self.monsterIcon:SetIsVisible(false)
     
     self.fraction = 1.0 -- actual value

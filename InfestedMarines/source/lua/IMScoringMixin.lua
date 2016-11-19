@@ -34,23 +34,18 @@ function ScoringMixin:ResetScores()
 	self.lastroundassistkills = self.assistkills
 	self.lastrounddeaths = self.deaths
 
-	self.commanderTime = 0
-	self.playTime = 0
-	self.marineTime = 0
-	self.alienTime = 0
-
-	self.weightedEntranceTimes = {}
-	self.weightedEntranceTimes[kTeam1Index] = {}
-	self.weightedEntranceTimes[kTeam2Index] = {}
-
-	local teamNum = self:GetTeamNumber()
-	if teamNum ~= nil and teamNum == kTeam1Index or teamNum == kTeam2Index then
-		table.insert( self.weightedEntranceTimes[teamNum], self:GetRelativeRoundTime() )
-	end
-
-	self.weightedExitTimes = {}
-	self.weightedExitTimes[kTeam1Index] = {}
-	self.weightedExitTimes[kTeam2Index] = {}
+    self.commanderTime = 0
+    self.playTime = 0
+    self.marineTime = 0
+    self.alienTime = 0
+    
+    self.weightedEntranceTimes = {}
+    self.weightedEntranceTimes[kTeam1Index] = {}
+    self.weightedEntranceTimes[kTeam2Index] = {}
+    
+    self.weightedExitTimes = {}
+    self.weightedExitTimes[kTeam1Index] = {}
+    self.weightedExitTimes[kTeam2Index] = {}
 
 end
 
